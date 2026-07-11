@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PartnerService } from '../../../services/partner.service';
 
+import { Router } from '@angular/router';
+
 @Component({ 
   selector: 'app-partner-support',
   standalone: true, 
@@ -25,7 +27,8 @@ export class PartnerSupportComponent implements OnInit, OnDestroy, AfterViewChec
 
   constructor(
     private partnerService: PartnerService,
-    private cdr: ChangeDetectorRef 
+    private cdr: ChangeDetectorRef ,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -129,5 +132,10 @@ export class PartnerSupportComponent implements OnInit, OnDestroy, AfterViewChec
 
   ngAfterViewChecked() {
     this.scrollToBottom();
+  }
+  goToBooking(bookingId: number) {
+    if (bookingId) {
+      this.router.navigate(['/dashboard/bookings', bookingId]);
+    }
   }
 }

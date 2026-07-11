@@ -4,7 +4,7 @@
             <h2>Bảng Giá Đền Bù Tài Sản / Vật Tư</h2>
             <p>Thiết lập danh mục các tài sản, vật tư và mức phí phạt áp dụng khi khách làm hỏng/mất.</p>
         </div>
-        <button class="btn btn-primary" (click)="openModal()">+ Thêm Tài Sản</button>
+        <button class="btn btn-primary" (click)="openModal()"> Thêm Vật tư</button>
     </div>
 
     <div *ngIf="isLoading" class="loading">Đang tải danh sách...</div>
@@ -34,7 +34,9 @@
 
                 <td>
                     <div class="action-buttons">
-                        <button class="btn btn-warning" (click)="openModal(item)">Sửa giá</button>
+                        <button class="btn btn-warning" (click)="openModal(item)">Cập nhật
+
+                        </button>
                         <button class="btn btn-danger" *ngIf="item.status == 1"
                             (click)="toggleStatus(item, 0)">Ngừng</button>
                         <button class="btn btn-success" *ngIf="item.status == 0" (click)="toggleStatus(item, 1)">Mở
@@ -55,7 +57,7 @@
         <h3>{{ isEditMode ? 'Cập Nhật Phí Đền Bù' : 'Thêm Tài Sản Vào Bảng Giá' }}</h3>
 
         <div class="form-group">
-            <label>Tên tài sản/vật tư (*):</label>
+            <label>Tên vật tư (*):</label>
             <input type="text" class="form-control" [(ngModel)]="currentItem.name"
                 placeholder="VD: Khăn tắm lớn, Smart TV...">
         </div>

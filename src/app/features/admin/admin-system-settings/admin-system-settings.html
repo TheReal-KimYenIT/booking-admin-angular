@@ -1,0 +1,73 @@
+<div class="container-fluid p-4 fade-in-up">
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark mb-1">⚙️ Cấu Hình Hệ Thống</h2>
+        <p class="text-muted mb-0">Thiết lập các thông số tài chính, thuế và mức phí cốt lõi của sàn StayBook.</p>
+    </div>
+
+    <div *ngIf="isLoading" class="text-center p-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <h5 class="text-muted mt-3">Đang tải dữ liệu...</h5>
+    </div>
+
+    <div class="row" *ngIf="!isLoading">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="fw-bold text-primary mb-0">💰 Cấu hình Tài Chính & Thuế</h5>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark">Thuế Giá trị gia tăng (VAT %)</label>
+                        <div class="input-group mb-1">
+                            <input type="number" [(ngModel)]="settings.vat_rate"
+                                class="form-control form-control-lg fw-bold text-end" min="0" max="100">
+                            <span class="input-group-text bg-light fw-bold">%</span>
+                        </div>
+                        <small class="text-muted fst-italic">Mức thuế này sẽ được tự động cộng vào tổng tiền khi khách
+                            hàng đặt phòng.</small>
+                    </div>
+
+                    <hr class="text-muted opacity-25 my-4">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark">Tỉ lệ hoa hồng mặc định (Commission Rate)</label>
+                        <div class="input-group mb-1">
+                            <input type="number" [(ngModel)]="settings.default_commission_rate"
+                                class="form-control form-control-lg fw-bold text-end" min="0" max="100">
+                            <span class="input-group-text bg-light fw-bold">%</span>
+                        </div>
+                        <small class="text-muted fst-italic">Phí phần trăm Sàn sẽ thu từ Khách sạn trên mỗi đơn hàng
+                            thành công (Có thể cấu hình riêng cho từng Khách sạn sau).</small>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button (click)="saveSettings()" [disabled]="isSaving"
+                            class="btn btn-primary btn-lg fw-bold px-5 shadow-sm d-flex align-items-center gap-2">
+                            <span *ngIf="!isSaving">💾 Lưu Cấu Hình</span>
+                            <span *ngIf="isSaving" class="spinner-border spinner-border-sm"></span>
+                            <span *ngIf="isSaving">Đang lưu...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-3 bg-light h-100">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle text-info"></i> Hướng dẫn & Lưu ý
+                    </h6>
+                    <ul class="text-muted small lh-lg mb-0" style="padding-left: 1.2rem;">
+                        <li><strong>Thuế VAT:</strong> Mức thuế được quy định bởi Nhà nước. Bạn chỉ nên thay đổi khi có
+                            nghị định giảm thuế (Ví dụ: Từ 10% xuống 8%).</li>
+                        <li>Sự thay đổi về Thuế sẽ <strong>áp dụng ngay lập tức</strong> cho các đơn đặt phòng mới. Các
+                            đơn cũ không bị ảnh hưởng.</li>
+                        <li><strong>Tỉ lệ hoa hồng:</strong> Mức 15% là tiêu chuẩn ngành OTA. Con số này dùng làm cơ sở
+                            để đối soát doanh thu cuối tháng ở bảng <em>Quản lý dòng tiền</em>.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

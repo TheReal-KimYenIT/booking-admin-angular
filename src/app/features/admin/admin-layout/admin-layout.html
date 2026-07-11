@@ -10,7 +10,6 @@
             <a routerLink="/admin/pending-partners" routerLinkActive="active" class="menu-item">
                 <span class="icon">🏨</span> Đối tác chờ duyệt
             </a>
-
             <a routerLink="/admin/partners" routerLinkActive="active" class="menu-item">
                 <span class="icon">👥</span> Quản lý đối tác
             </a>
@@ -18,7 +17,7 @@
                 <span class="icon">👤</span> Quản lý khách hàng
             </a>
 
-            <p class="menu-label" style="margin-top: 20px;">DỮ LIỆU MASTER</p>
+            <p class="menu-label group-spacing">DỮ LIỆU MASTER</p>
             <a routerLink="/admin/amenities" routerLinkActive="active" class="menu-item">
                 <span class="icon">✨</span> Tiện ích chung
             </a>
@@ -29,17 +28,25 @@
                 <span class="icon">🛏️</span> Các loại giường
             </a>
 
-            <p class="menu-label" style="margin-top: 20px;">HỆ THỐNG</p>
-
+            <p class="menu-label group-spacing">HỆ THỐNG</p>
             <a routerLink="/admin/contacts" routerLinkActive="active" class="menu-item">
                 <span class="icon">📬</span> Tin nhắn hỗ trợ
             </a>
             <a routerLink="/admin/promotions" routerLinkActive="active" class="menu-item">
-                <span class="icon">📬</span> Khuyến mãi
+                <span class="icon">🎁</span> Khuyến mãi
             </a>
-
-            <a routerLink="/admin/ui-settings" routerLinkActive="active" class="menu-item">
+            <!-- <a routerLink="/admin/ui-settings" routerLinkActive="active" class="menu-item">
                 <span class="icon">⚙️</span> Cấu hình giao diện
+            </a> -->
+            <!-- Đã chuẩn hóa class cho 3 mục cuối để đồng bộ giao diện -->
+            <a routerLink="/admin/transactions" routerLinkActive="active" class="menu-item">
+                <span class="icon">📊</span> Quản lý dòng tiền VNPAY
+            </a>
+            <a routerLink="/admin/settlements" routerLinkActive="active" class="menu-item">
+                <span class="icon">📑</span> Chốt công nợ tháng
+            </a>
+            <a routerLink="/admin/system-settings" routerLinkActive="active" class="menu-item">
+                <span class="icon">🛠️</span> Quản lý Cấu hình Hệ thống
             </a>
         </nav>
     </aside>

@@ -1,0 +1,139 @@
+<div class="container-fluid p-4">
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark mb-1">💼 Đối Soát Doanh Thu</h2>
+        <p class="text-muted mb-0">Theo dõi dòng tiền giao dịch, chiết khấu hoa hồng Sàn và số tiền thực nhận</p>
+    </div>
+
+    <!-- KHỐI BỘ LỌC -->
+    <div class="bg-white p-3 border rounded shadow-sm mb-4 d-flex flex-wrap gap-3 align-items-end">
+        <div style="flex-grow: 1; min-width: 250px;">
+            <label class="small fw-bold text-muted mb-1">Mã đơn:</label>
+            <input type="text" [(ngModel)]="keyword" (keyup.enter)="onFilterChange()"
+                placeholder="VD: SB-NWEUOSSJ (Nhấn Enter)" class="form-control form-control-sm">
+        </div>
+        <div style="width: 150px;">
+            <label class="small fw-bold text-muted mb-1">Từ ngày:</label>
+            <input type="date" [(ngModel)]="startDate" (change)="onFilterChange()" class="form-control form-control-sm">
+        </div>
+        <div style="width: 150px;">
+            <label class="small fw-bold text-muted mb-1">Đến ngày:</label>
+            <input type="date" [(ngModel)]="endDate" (change)="onFilterChange()" class="form-control form-control-sm">
+        </div>
+        <div style="width: 180px;">
+            <label class="small fw-bold text-muted mb-1">Hình thức:</label>
+            <select [(ngModel)]="selectedMethod" (change)="onFilterChange()" class="form-select form-select-sm">
+                <option value="all">-- Tất cả --</option>
+                <option value="4">🌐 Cổng VNPAY</option>
+                <option value="1">💵 Tiền mặt quầy</option>
+                <option value="2">💳 Quẹt thẻ POS</option>
+            </select>
+        </div>
+        <div style="width: 150px;">
+            <label class="small fw-bold text-muted mb-1">Trạng thái:</label>
+            <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="form-select form-select-sm">
+                <option value="all">-- Tất cả --</option>
+                <option value="1">✅ Thành công</option>
+                <option value="0">⏳ Đang chờ</option>
+                <option value="2">❌ Thất bại</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- KHỐI THỐNG KÊ DOANH THU -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-primary text-white h-100">
+                <div class="card-body py-3">
+                    <h6 class="text-white-50 fw-bold small text-uppercase mb-1">Tiền vào qua VNPAY (Sàn đang giữ)</h6>
+                    <h3 class="fw-black my-1">{{ stats.vnpay_total | number }} đ</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-success text-white h-100">
+                <div class="card-body py-3">
+                    <h6 class="text-white-50 fw-bold small text-uppercase mb-1">Tiền quầy tự thu (Khách sạn giữ)</h6>
+                    <h3 class="fw-black my-1">{{ (stats.cash_total + stats.pos_total) | number }} đ</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-dark text-white h-100">
+                <div class="card-body py-3">
+                    <h6 class="text-white-50 fw-bold small text-uppercase mb-1">Giao dịch thời gian này</h6>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span>🟢 Thành công: <strong class="fs-5">{{ stats.success_count }}</strong></span>
+                        <span>🔴 Thất bại: <strong class="fs-5">{{ stats.failed_count }}</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BẢNG LỊCH SỬ ĐỐI SOÁT -->
+    <div class="card border-0 shadow-sm bg-white rounded-3">
+        <div class="card-body p-0">
+            <div *ngIf="isLoading" class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <h5 class="text-muted mt-3">Đang truy xuất dữ liệu...</h5>
+            </div>
+
+            <div *ngIf="!isLoading && transactions.length === 0" class="text-center p-5 text-muted fst-italic">
+                Không phát sinh dữ liệu giao dịch nào thỏa mãn bộ lọc hiện tại.
+            </div>
+
+            <div *ngIf="!isLoading && transactions.length > 0" class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted small uppercase">
+                        <tr>
+                            <th class="ps-4">Mã Đơn / Thời gian</th>
+                            <th>Khách hàng</th>
+                            <th class="text-center">Hình thức / Trạng thái</th>
+                            <th class="text-end text-dark">Tổng khách thanh toán</th>
+                            <th class="text-center">Chiết khấu</th>
+                            <th class="text-end text-danger">Phí Sàn thu (-)</th>
+                            <th class="text-end text-success pe-4">Tiền thực nhận</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of transactions">
+                            <td class="ps-4">
+                                <span class="d-block fw-bold text-primary">{{ item.booking_code || '---' }}</span>
+                                <span class="small text-muted">{{ item.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ item.guest_name }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border d-block mb-1">{{
+                                    getMethodName(item.payment_method) }}</span>
+                                <span *ngIf="item.payment_status === 1" class="text-success small fw-bold">✅ Thành
+                                    công</span>
+                                <span *ngIf="item.payment_status !== 1" class="text-warning small fw-bold">⏳ Xử
+                                    lý</span>
+                            </td>
+                            <td class="text-end fw-bold text-dark fs-6">{{ item.amount | number }} đ</td>
+                            <td class="text-center fw-bold text-muted">{{ item.applied_rate }}%</td>
+                            <td class="text-end fw-bold text-danger">- {{ item.commission_fee | number }} đ</td>
+                            <td class="text-end fw-bold text-success pe-4 fs-6">{{ item.payout_amount | number }} đ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PHÂN TRANG -->
+            <div *ngIf="!isLoading && totalRecords > 0"
+                class="d-flex justify-content-between align-items-center p-3 border-top bg-light rounded-bottom-3">
+                <span class="text-muted small">Hiển thị trang <strong>{{ currentPage }}</strong> / {{ lastPage }}</span>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" [class.disabled]="currentPage === 1"><button class="page-link"
+                            (click)="goToPage(currentPage - 1)">« Trước</button></li>
+                    <li class="page-item disabled"><span class="page-link text-dark fw-bold">{{ currentPage }}</span>
+                    </li>
+                    <li class="page-item" [class.disabled]="currentPage === lastPage"><button class="page-link"
+                            (click)="goToPage(currentPage + 1)">Sau »</button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

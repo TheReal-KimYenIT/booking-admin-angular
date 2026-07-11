@@ -4,7 +4,7 @@
             <h2>Quản Lý Mã Khuyến Mãi (Voucher)</h2>
             <p>Tạo các chương trình giảm giá để kích thích khách hàng đặt phòng.</p>
         </div>
-        <button class="btn btn-primary" (click)="openModal()">+ Tạo Mã Mới</button>
+        <button class="btn btn-primary" (click)="openModal()">Tạo Mã Mới</button>
     </div>
 
     <div *ngIf="isLoading" class="loading">Đang tải danh sách...</div>
@@ -56,11 +56,12 @@
 
                 <td>
                     <div class="action-buttons">
-                        <button class="btn btn-warning" (click)="openModal(item)">Sửa</button>
-                        <button class="btn btn-secondary" *ngIf="item.status == 1"
-                            (click)="toggleStatus(item, 0)">Khóa</button>
-                        <button class="btn btn-success" *ngIf="item.status == 0" (click)="toggleStatus(item, 1)">Mở
-                            Khóa</button>
+                        <button class="btn btn-warning" (click)="openModal(item)">Cập nhật</button>
+                        <button class="btn btn-secondary" *ngIf="item.status == 1" (click)="toggleStatus(item, 0)">Thay
+                            đổi trạng thái</button>
+                        <button class="btn btn-success" *ngIf="item.status == 0" (click)="toggleStatus(item, 1)">
+                            Thay đổi trạng thái
+                        </button>
                     </div>
                 </td>
             </tr>
@@ -127,7 +128,7 @@
             </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" (click)="closeModal()">Hủy</button>
-                <button class="btn btn-primary" (click)="saveItem()">Lưu Lại</button>
+                <button class="btn btn-primary" (click)="saveItem()">Lưu</button>
             </div>
         </div>
     </div>

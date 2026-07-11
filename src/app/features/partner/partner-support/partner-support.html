@@ -32,8 +32,10 @@
             <div class="chat-header">
                 <div class="chat-title">
                     <h4>Đang chat với: {{ selectedContact?.full_name || 'Khách hàng' }}</h4>
-                    <span class="booking-tag" *ngIf="selectedContact?.booking_id">
-                        Mã đơn: #{{ selectedContact?.booking_id }}
+                    <span class="booking-tag clickable-tag" *ngIf="selectedContact?.booking_id"
+                        (click)="goToBooking(selectedContact.booking_id)" title="Nhấp vào để đi đến hóa đơn chi tiết">
+                        Mã đơn: {{ selectedContact?.booking_code || '#' + selectedContact?.booking_id }} <span
+                            class="icon-link">🔗</span>
                     </span>
                 </div>
                 <button class="btn-close-chat" (click)="selectedContact = null">✕</button>

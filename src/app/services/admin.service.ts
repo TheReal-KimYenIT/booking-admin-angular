@@ -119,4 +119,8 @@ export class AdminService {
   updateGlobalPromotion(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/admin/promotions/${id}`, data);
   }
+
+  getTransactions(date: string, method: string) {
+  return this.http.get(`${this.apiUrl}/admin/transactions?date=${date}&method=${method}`);
+}
 }

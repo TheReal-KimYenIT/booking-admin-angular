@@ -1,0 +1,79 @@
+<div class="container-fluid p-4">
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">📋 Đối Soát Công Nợ Tháng</h2>
+            <p class="text-muted mb-0">Xem chi tiết doanh thu và công nợ giữa khách sạn và hệ thống Sàn.</p>
+            <div class="alert mt-3"
+                [ngClass]="settlementData?.status === 1 ? 'alert-success' : (settlementData?.status === 2 ? 'alert-info' : 'alert-warning')">
+                <strong>Trạng thái:</strong>
+                <span *ngIf="settlementData?.status === 1">Đã hoàn tất đối soát công nợ.</span>
+                <span *ngIf="settlementData?.status === 2">Sàn đã chuyển khoản. Vui lòng kiểm tra tài khoản ngân
+                    hàng.</span>
+                <span *ngIf="settlementData?.status === 0">Chưa được thanh toán.</span>
+
+                <a *ngIf="settlementData?.proof_image" [href]="'http://localhost:8000' + settlementData.proof_image"
+                    target="_blank" class="btn btn-link btn-sm">Xem Bill chuyển khoản</a>
+            </div>
+
+            <!-- Hiện nút xác nhận nhận tiền nếu Sàn đã chuyển khoản và trạng thái đang chờ khách duyệt (status = 2) -->
+            <div *ngIf="settlementData?.status === 2" class="mt-3 p-3 border rounded text-center bg-light">
+                <p class="fw-bold text-success">💰 Bạn đã nhận được tiền chưa? Hãy xác nhận để hệ thống chốt sổ:</p>
+                <button (click)="partnerConfirm()" class="btn btn-success fw-bold">Xác nhận đã nhận đủ tiền</button>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <input type="month" [(ngModel)]="selectedMonth" (change)="loadData()"
+                class="form-control border-primary fw-bold">
+            <button (click)="exportPdf()" [disabled]="isExporting || !settlementData" class="btn btn-success fw-bold">
+                <span *ngIf="!isExporting">📄 Xuất PDF</span>
+                <span *ngIf="isExporting">Đang tạo...</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sửa các dòng hiển thị dữ liệu thành dạng có dấu ? -->
+    <div class="card border-0 shadow-sm p-4" *ngIf="!isLoading && settlementData">
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="fw-bold mb-3">Thông tin tài chính</h5>
+                <ul class="list-group list-group-flush">
+                    <!-- Thêm dấu ? vào settlementData?.total_revenue -->
+                    <li class="list-group-item d-flex justify-content-between"><span>Tổng doanh thu:</span> <strong>{{
+                            settlementData?.total_revenue | number }} đ</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Sàn giữ (VNPAY):</span> <strong
+                            class="text-success">{{ settlementData?.vnpay_total | number }} đ</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Hoa hồng Sàn thu:</span> <strong
+                            class="text-danger">- {{ settlementData?.commission_total | number }} đ</strong></li>
+                </ul>
+            </div>
+            <div class="col-md-6 border-start">
+                <div class="p-3 bg-light rounded text-center">
+                    <h6 class="text-muted">CÔNG NỢ CẦN THANH TOÁN</h6>
+                    <!-- Thêm dấu ? ở đây -->
+                    <h2 class="fw-black text-primary"
+                        [ngClass]="settlementData?.payout_to_hotel < 0 ? 'text-danger' : 'text-success'">
+                        {{ settlementData?.payout_to_hotel | number }} đ
+                    </h2>
+                    <p class="small text-muted mt-2">
+                        {{ settlementData?.payout_to_hotel >= 0 ? 'Số tiền Sàn sẽ chuyển trả bạn.' : 'Số tiền bạn cần
+                        nộp lại cho Sàn.' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="settlementData?.payout_to_hotel < 0 && settlementData?.status === 0"
+            class="mt-3 p-3 border rounded">
+            <label class="fw-bold text-danger">
+                {{ settlementData?.proof_image ? '⚠️ Bạn đã gửi bill. Muốn thay đổi?' : '⚠️ Bạn đang nợ Sàn. Vui lòng
+                gửi ảnh Bill:' }}
+            </label>
+            <input type="file" (change)="onFileSelected($event)" class="form-control mt-2 mb-2" accept="image/*">
+            <button (click)="uploadProof()" class="btn btn-primary fw-bold">
+                {{ settlementData?.proof_image ? 'Cập nhật Bill' : 'Gửi Bill xác nhận' }}
+            </button>
+        </div>
+    </div>
+    <div *ngIf="isLoading" class="text-center p-5">Đang tải...</div>
+    <div *ngIf="!isLoading && !settlementData" class="text-center p-5">Không có dữ liệu công nợ tháng này.</div>
+</div>

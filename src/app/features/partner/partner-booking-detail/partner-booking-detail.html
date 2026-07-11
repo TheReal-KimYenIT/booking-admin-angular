@@ -32,17 +32,11 @@
 
     <div class="tab-container d-flex border-bottom mb-4">
         <div class="tab-item p-3 cursor-pointer" [class.active]="activeTab === 'checkin'"
-            (click)="switchTab('checkin')">
-            1. Khách & Gán Phòng
-        </div>
+            (click)="switchTab('checkin')">1. Khách & Gán Phòng</div>
         <div class="tab-item p-3 cursor-pointer" [class.active]="activeTab === 'services'"
-            (click)="switchTab('services')">
-            2. Gọi Dịch vụ / Minibar
-        </div>
+            (click)="switchTab('services')">2. Gọi Dịch vụ / Minibar</div>
         <div class="tab-item p-3 cursor-pointer" [class.active]="activeTab === 'checkout'"
-            (click)="switchTab('checkout')">
-            3. Thanh toán & Trả phòng
-        </div>
+            (click)="switchTab('checkout')">3. Thanh toán & Trả phòng</div>
     </div>
 
     <div *ngIf="activeTab === 'checkin'">
@@ -242,13 +236,20 @@
                 <p class="text-muted">Khách đặt: <strong>{{ booking?.details?.[0]?.rooms_count || 1 }} phòng</strong>
                 </p>
 
+                <div *ngIf="availableRooms.length > 0 && availableRooms.length < booking?.details?.[0]?.rooms_count"
+                    class="alert alert-danger py-2 mb-3 fw-bold">
+                    ⚠️ Khách sạn hiện chỉ có {{ availableRooms.length }} phòng trống hạng này. Không đủ {{
+                    booking?.details?.[0]?.rooms_count }} phòng để giao cho khách. Vui lòng chuyển thêm phòng sang trạng
+                    thái Trống!
+                </div>
+
                 <div class="d-flex flex-wrap gap-2 mb-4">
-                    <div *ngIf="availableRooms.length === 0" class="text-danger fw-bold">⚠️ Không có phòng trống!</div>
+                    <div *ngIf="availableRooms.length === 0" class="text-danger fw-bold">⚠️ Hiện tại không có phòng nào
+                        trống! Hãy kiểm tra lại Sơ đồ phòng.</div>
                     <label *ngFor="let rm of availableRooms" class="btn btn-outline-primary cursor-pointer"
                         [class.active]="selectedRoomIds.includes(rm.id)">
                         <input type="checkbox" [checked]="selectedRoomIds.includes(rm.id)"
-                            (change)="toggleRoomSelection(rm.id)" class="d-none">
-                        Phòng {{ rm.room_name }}
+                            (change)="toggleRoomSelection(rm.id)" class="d-none"> Phòng {{ rm.room_name }}
                     </label>
                 </div>
 
@@ -271,6 +272,12 @@
     </div>
 
     <div *ngIf="activeTab === 'services'">
+
+        <div *ngIf="booking?.status < 2" class="alert alert-info text-center fw-bold mt-2">
+            ℹ️ Khách chưa nhận phòng. Dịch vụ bạn gọi lúc này sẽ được ghi nhận là ĐẶT TRƯỚC (Ví dụ: Xe đưa đón, dọn dẹp
+            thêm).
+        </div>
+
         <div *ngIf="booking?.status >= 3" class="alert alert-danger text-center fw-bold mt-2">
             🔒 Đơn hàng này đã chốt sổ. Bạn chỉ có thể xem, không thể sửa dịch vụ!
         </div>
@@ -322,24 +329,32 @@
                             <div *ngFor="let cart of group.items"
                                 class="d-flex justify-content-between align-items-start border-bottom border-dashed pb-2 mb-3">
                                 <div class="flex-grow-1 pe-2">
-                                    <div class="fw-bold text-dark small">{{ cart.service?.name }}</div>
+                                    <div class="fw-bold text-dark small">
+                                        {{ cart.service?.name }}
+                                        <span *ngIf="isWebPurchasedItem(cart)" class="badge bg-success ms-2"
+                                            style="font-size: 10px;">Đã thanh toán Web</span>
+                                    </div>
                                     <div class="text-muted small">{{ cart.price_at_booking | number }} đ</div>
                                     <input type="text" [value]="cart.note || ''" (blur)="saveNote(cart, $event)"
-                                        (keyup.enter)="saveNote(cart, $event)" [readonly]="booking?.status >= 3"
+                                        (keyup.enter)="saveNote(cart, $event)"
+                                        [readonly]="booking?.status >= 3 || isWebPurchasedItem(cart)"
                                         class="form-control form-control-sm mt-1" placeholder="✍️ Ghi chú...">
                                 </div>
                                 <div class="d-flex flex-column align-items-end gap-1">
                                     <span class="fw-bold text-dark">{{ (cart.price_at_booking * cart.quantity) | number
                                         }} đ</span>
-                                    <div *ngIf="booking?.status < 3" class="input-group input-group-sm w-auto">
+
+                                    <div *ngIf="booking?.status < 3 && !isWebPurchasedItem(cart)"
+                                        class="input-group input-group-sm w-auto">
                                         <button class="btn btn-outline-secondary px-2 fw-bold"
                                             (click)="changeQuantity(cart, -1)">-</button>
                                         <span class="input-group-text bg-white px-2 fw-bold">{{ cart.quantity }}</span>
                                         <button class="btn btn-outline-secondary px-2 fw-bold"
                                             (click)="changeQuantity(cart, 1)">+</button>
                                     </div>
-                                    <div *ngIf="booking?.status >= 3" class="badge bg-secondary">SL: {{ cart.quantity }}
-                                    </div>
+
+                                    <div *ngIf="booking?.status >= 3 || isWebPurchasedItem(cart)"
+                                        class="badge bg-secondary">SL: {{ cart.quantity }}</div>
                                 </div>
                             </div>
                         </ng-container>
@@ -349,7 +364,7 @@
                         </div>
                     </div>
                     <div class="border-top pt-3 d-flex justify-content-between fw-bold fs-5">
-                        <span>Tổng phát sinh:</span>
+                        <span>Tổng tiền DV:</span>
                         <span class="text-danger">{{ cartTotal | number }} đ</span>
                     </div>
                 </div>
@@ -357,29 +372,31 @@
         </div>
     </div>
 
+
     <div *ngIf="activeTab === 'checkout'">
-        <div class="card shadow-sm mx-auto mt-4 p-4 border-0" style="max-width: 850px;">
+
+        <div *ngIf="booking?.status < 2" class="alert alert-danger text-center fw-bold mt-4 p-4 shadow-sm">
+            <h4 class="fw-bold text-danger mb-2">⛔ KHÔNG THỂ TIẾN HÀNH TRẢ PHÒNG</h4>
+            <p class="text-muted mb-0">Khách hàng chưa thực hiện thao tác Nhận phòng (Check-in). Vui lòng quay lại Tab 1
+                để gán phòng và xác nhận khách đến ở trước khi thanh toán trả phòng!</p>
+        </div>
+
+        <div *ngIf="booking?.status >= 2" class="card shadow-sm mx-auto mt-4 p-4 border-0 position-relative"
+            style="max-width: 850px;">
+
+            <div *ngIf="booking?.payment_status === 1" style="
+                position: absolute; top: 40px; right: 40px;
+                transform: rotate(15deg); border: 4px solid #10b981;
+                color: #10b981; padding: 5px 20px; border-radius: 10px;
+                font-size: 22px; font-weight: 900; letter-spacing: 2px;
+                opacity: 0.8; pointer-events: none; z-index: 10;">
+                ĐÃ THANH TOÁN VNPAY
+            </div>
 
             <div class="text-center border-bottom border-secondary border-dashed pb-3 mb-4">
                 <h3 class="fw-bold letter-spacing-1 mb-1">HÓA ĐƠN THANH TOÁN (FOLIO)</h3>
                 <p class="text-muted fw-bold mb-0">Mã đơn hàng: <span class="text-primary">{{ booking?.booking_code
                         }}</span></p>
-            </div>
-
-            <div class="row bg-light border rounded p-3 mb-4 g-2">
-                <div class="col-6">
-                    <div><span class="text-muted">Khách hàng:</span> <strong class="text-dark">{{ booking?.guest_name
-                            }}</strong></div>
-                    <div class="mt-1"><span class="text-muted">Điện thoại:</span> <span>{{ booking?.guest_phone || '---'
-                            }}</span></div>
-                </div>
-                <div class="col-6 text-end">
-                    <div><span class="text-muted">Ngày đến:</span> <span class="fw-bold">{{ booking?.actual_check_in_at
-                            ? (booking?.actual_check_in_at | date:'dd/MM/yyyy HH:mm') : (booking?.check_in |
-                            date:'dd/MM/yyyy') }}</span></div>
-                    <div class="mt-1"><span class="text-muted">Ngày đi:</span> <span class="fw-bold">{{
-                            booking?.check_out | date:'dd/MM/yyyy' }} 12:00</span></div>
-                </div>
             </div>
 
             <div *ngIf="booking?.status === 2"
@@ -416,12 +433,9 @@
 
                     <input type="number" [(ngModel)]="supplyForm.quantity" (ngModelChange)="calculateSuggestedPrice()"
                         min="1" placeholder="SL" class="form-control text-center" style="width: 70px;" title="Số lượng">
-
                     <input type="number" [(ngModel)]="supplyForm.actual_price" placeholder="Giá thu (VNĐ)"
                         class="form-control" style="width: 130px;" title="Giá thu thực tế">
-
                     <input type="text" [(ngModel)]="supplyForm.note" placeholder="Lý do..." class="form-control w-25">
-
                     <button (click)="addDamagedItem()" class="btn btn-danger fw-bold text-nowrap">Thêm</button>
                 </div>
                 <div class="small text-muted mt-2 fst-italic">* Hệ thống tự động tính: Giá gốc x Số lượng. Lễ tân có thể
@@ -451,10 +465,10 @@
                                 <span class="text-muted small fw-normal">x {{ numberOfNights }} đêm</span>
                             </td>
                             <td class="text-end text-muted">
-                                {{ (booking?.total_amount / (booking?.details?.[0]?.rooms_count * numberOfNights)) |
-                                number }} đ<span class="small">/đêm</span>
+                                {{ (booking?.details?.[0]?.subtotal / (booking?.details?.[0]?.rooms_count *
+                                numberOfNights)) | number }} đ<span class="small">/đêm</span>
                             </td>
-                            <td class="text-end fw-bold text-dark">{{ booking?.total_amount | number }} đ</td>
+                            <td class="text-end fw-bold text-dark">{{ booking?.details?.[0]?.subtotal | number }} đ</td>
                         </tr>
 
                         <tr *ngFor="let item of cartServices">
@@ -465,6 +479,7 @@
                             <td class="text-end text-muted">{{ item.price_at_booking | number }} đ</td>
                             <td class="text-end fw-bold">{{ (item.price_at_booking * item.quantity) | number }} đ</td>
                         </tr>
+
                         <tr *ngFor="let item of cartMinibars">
                             <td>
                                 <div class="fw-bold">🥤 {{ item.service?.name }}</div>
@@ -476,89 +491,88 @@
 
                         <tr *ngFor="let item of booking?.surcharges" class="table-warning">
                             <td>
-                                <div class="text-warning text-dark fw-bold">⚠️ {{ item.category?.name || 'Phụ thu khác'
-                                    }}</div>
-                                <div *ngIf="item.note" class="text-muted small fst-italic">Lý do: {{ item.note }}</div>
+                                <div class="text-warning text-dark fw-bold">⚠️ {{ item.category?.name || 'Phụ thu' }}
+                                </div>
                             </td>
                             <td class="text-center text-muted">1</td>
                             <td class="text-end text-muted">{{ item.amount | number }} đ</td>
-                            <td
-                                class="text-end fw-bold text-warning text-dark d-flex justify-content-end align-items-center gap-2">
-                                {{ item.amount | number }} đ
-                                <button *ngIf="booking?.status === 2" (click)="removeSurcharge(item.id)"
-                                    class="btn btn-sm btn-link text-danger p-0 fw-bold text-decoration-none"
-                                    title="Xóa">X</button>
-                            </td>
+                            <td class="text-end fw-bold text-warning text-dark">{{ item.amount | number }} đ</td>
                         </tr>
 
                         <tr *ngFor="let item of booking?.supply_incidents" class="table-danger">
                             <td>
-                                <div class="text-danger fw-bold">{{ item.incident_type === 1 ? '🛠️ Hỏng:' : '❓ Mất:' }}
-                                    {{ item.supply?.name || 'Vật tư không xác định' }}</div>
-                                <div *ngIf="item.reason" class="text-muted small fst-italic">Lý do: {{ item.reason }}
-                                </div>
+                                <div class="text-danger fw-bold">🛠️ Đền bù: {{ item.supply?.name }}</div>
                             </td>
                             <td class="text-center text-muted">{{ item.quantity }}</td>
-
                             <td class="text-end text-muted">{{ item.supply?.price_per_unit | number }} đ</td>
-
-                            <td
-                                class="text-end fw-bold text-danger d-flex justify-content-end align-items-center gap-2">
-                                {{ item.actual_price | number }} đ
-                                <button *ngIf="booking?.status === 2" (click)="removeDamagedItem(item.id)"
-                                    class="btn btn-sm btn-link text-danger p-0 fw-bold text-decoration-none"
-                                    title="Xóa">X</button>
-                            </td>
+                            <td class="text-end fw-bold text-danger">{{ item.actual_price | number }} đ</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="card bg-light border-0 ms-auto" style="width: 400px;">
+            <div class="card bg-light border-0 ms-auto" style="width: 450px;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between text-muted mb-2">
                         <span>Tổng tiền phòng, dịch vụ & phụ phí:</span>
-                        <span class="fw-bold text-dark">{{ ((booking?.total_amount * 1) + (cartTotal * 1) +
+                        <span class="fw-bold text-dark">{{ ((booking?.details?.[0]?.subtotal * 1) + (cartTotal * 1) +
                             getSurchargeTotal() + getDamagedItemsTotal()) | number }} đ</span>
                     </div>
+
                     <div class="d-flex justify-content-between text-muted mb-2">
-                        <span>Thuế VAT (10%):</span>
-                        <span class="text-dark">+ {{ calculatedVat | number }} đ</span>
+                        <span>Thuế VAT ({{ booking?.vat_rate || 10 }}%):</span>
+                        <span class="text-dark">+ {{ getCurrentVatAmount() | number }} đ</span>
                     </div>
+
                     <div *ngIf="booking?.discount_amount > 0" class="d-flex justify-content-between text-success mb-2">
-                        <span>Chiết khấu / Giảm giá:</span>
+                        <span>Chiết khấu / Giảm giá (Voucher):</span>
                         <span>- {{ booking?.discount_amount | number }} đ</span>
                     </div>
+
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-dark">
-                        <span class="fw-bold fs-6">SỐ TIỀN CẦN THU LÚC ĐI:</span>
-                        <span class="fs-4 fw-bold text-danger">
-                            {{ ( (booking?.total_amount * 1) + (cartTotal * 1) + getSurchargeTotal() +
-                            getDamagedItemsTotal() + calculatedVat - (booking?.discount_amount * 1) ) | number }} đ
-                        </span>
+                        <span class="fw-bold fs-6">TỔNG HÓA ĐƠN THỰC TẾ:</span>
+                        <span class="fs-5 fw-bold text-dark">{{ getFinalInvoiceTotal() | number }} đ</span>
+                    </div>
+
+                    <div *ngIf="booking?.payment_status === 1"
+                        class="d-flex justify-content-between align-items-center mt-2 text-success">
+                        <span class="fw-bold">Đã thanh toán (VNPAY):</span>
+                        <span class="fs-6 fw-bold">- {{ getAlreadyPaidAmount() | number }} đ</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-dashed"
+                        [ngClass]="getRemainingAmount() > 0 ? 'text-danger' : 'text-success'">
+                        <span class="fw-bold fs-5">CẦN THU LÚC ĐI:</span>
+                        <span class="fs-3 fw-bold">{{ getRemainingAmount() | number }} đ</span>
                     </div>
                 </div>
             </div>
 
             <div *ngIf="booking?.status === 2"
                 class="d-flex justify-content-end align-items-center gap-3 mt-4 pt-4 border-top">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="fw-bold text-muted mb-0 text-nowrap">Phương thức thanh toán:</label>
+                <div *ngIf="getRemainingAmount() > 0" class="d-flex align-items-center gap-2">
+                    <label class="fw-bold text-muted mb-0 text-nowrap">Hình thức thu thêm:</label>
                     <select [(ngModel)]="selectedPaymentMethod" class="form-select form-select-sm w-auto">
                         <option [ngValue]="1">💵 Tiền mặt</option>
-                        <option [ngValue]="2">🏦 Chuyển khoản</option>
+                        <option [ngValue]="2">🏦 Chuyển khoản (Mở QR)</option>
                         <option [ngValue]="3">💳 Quẹt thẻ POS</option>
                     </select>
                 </div>
-                <button (click)="printInvoice()" class="btn btn-outline-secondary fw-bold px-4">🖨️ In hóa đơn
-                    (Folio)</button>
-                <button (click)="processCheckOut()" class="btn btn-primary fw-bold px-4 shadow-sm">💳 Xác nhận Thanh
-                    toán & Trả phòng</button>
+
+                <button (click)="printInvoice()" [disabled]="isExportingInvoice"
+                    class="btn btn-outline-secondary fw-bold px-4">
+                    {{ isExportingInvoice ? '⏳ Đang tạo ...' : ' In hóa đơn ' }}
+                </button>
+
+                <button (click)="processCheckOut()" class="btn btn-primary fw-bold px-4 shadow-sm">
+                    {{ getRemainingAmount() > 0 ? '💳 Xác nhận Thu tiền & Trả phòng' : '✅ Xác nhận Trả phòng (Không thu
+                    thêm)' }}
+                </button>
             </div>
 
             <div *ngIf="booking?.status === 3" class="alert alert-success text-center fw-bold mt-4 mb-0">
-                🎉 Đơn hàng này đã thanh toán và trả phòng hoàn tất thành công.
+                🎉 Đơn hàng này đã được chốt sổ trả phòng và thanh toán thành công.
             </div>
-
         </div>
     </div>
 </div>

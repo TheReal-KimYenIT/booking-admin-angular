@@ -1,151 +1,187 @@
+/* Tổng quan bố cục */
 .admin-wrapper {
     display: flex;
     min-height: 100vh;
-    background-color: #f4f6f9;
-    font-family: sans-serif;
+    background-color: #f4f7f6;
+    /* Màu nền sáng hơn, dịu mắt hơn */
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* Thanh điều hướng bên trái */
 .admin-sidebar {
-    width: 260px;
-    background-color: #1c2930;
+    width: 280px;
+    /* Mở rộng một chút để chữ không bị chèn ép */
+    background-color: #1e293b;
+    /* Màu xanh đen hiện đại */
     color: #fff;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+    z-index: 10;
 }
 
 .brand {
-    padding: 25px 20px;
-    border-bottom: 1px solid #2d3e47;
+    padding: 30px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
 }
 
 .brand h3 {
     margin: 0;
-    font-size: 24px;
-    letter-spacing: 1px;
-    color: #fff;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #ffffff;
 }
 
 .brand h3 span {
-    color: #0194f3;
+    color: #0ea5e9;
+    /* Xanh dương sáng, nổi bật */
 }
 
 .brand small {
-    color: #8fa0a6;
-    font-size: 11px;
+    color: #94a3b8;
+    font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 5px;
+    letter-spacing: 2px;
+    margin-top: 8px;
     display: block;
+    font-weight: 500;
 }
 
 .menu {
-    padding: 20px 10px;
+    padding: 25px 15px;
     flex: 1;
+    overflow-y: auto;
+    /* Cho phép cuộn nếu menu quá dài */
+}
+
+/* Tùy chỉnh thanh cuộn cho menu đẹp hơn */
+.menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.menu::-webkit-scrollbar-thumb {
+    background-color: #475569;
+    border-radius: 10px;
 }
 
 .menu-label {
-    font-size: 11px;
-    font-weight: bold;
-    color: #5a737e;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
     padding-left: 15px;
-    margin: 20px 0 10px 0;
-    letter-spacing: 0.5px;
+    margin: 0 0 12px 0;
+    letter-spacing: 1px;
+}
+
+.group-spacing {
+    margin-top: 30px;
+    /* Thay thế inline style */
 }
 
 .menu-item {
     display: flex;
     align-items: center;
-    padding: 12px 15px;
-    color: #b8c7ce;
+    padding: 12px 16px;
+    color: #cbd5e1;
     text-decoration: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
-    margin-bottom: 4px;
-    transition: all 0.2s;
+    font-weight: 500;
+    margin-bottom: 6px;
+    transition: all 0.3s ease;
 }
 
 .menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    transform: translateX(4px);
+    /* Hiệu ứng trượt nhẹ sang phải khi hover */
 }
 
 .menu-item.active {
-    background-color: #0194f3;
-    color: #fff;
-    font-weight: bold;
-}
-
-.menu-item.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    pointer-events: none;
+    background-color: #0ea5e9;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+    /* Bóng đổ cho nút đang chọn */
 }
 
 .menu-item .icon {
-    margin-right: 12px;
-    font-size: 16px;
+    margin-right: 14px;
+    font-size: 18px;
+    width: 24px;
+    /* Cố định chiều rộng icon để chữ thẳng hàng */
+    text-align: center;
 }
 
+/* Khu vực nội dung chính */
 .admin-content-area {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-    width: calc(100% - 260px);
+    width: calc(100% - 280px);
 }
 
 .admin-header {
-    height: 70px;
-    background-color: #fff;
+    height: 75px;
+    background-color: #ffffff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 30px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    padding: 0 35px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    z-index: 5;
 }
 
 .header-left h2 {
     margin: 0;
-    font-size: 20px;
-    color: #222;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
 }
 
 .role-badge {
-    background-color: #e0f2fe;
-    color: #0384c7;
-    font-size: 12px;
-    padding: 4px 10px;
+    background-color: #f0f9ff;
+    color: #0284c7;
+    font-size: 13px;
+    padding: 6px 14px;
     border-radius: 50px;
-    font-weight: bold;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border: 1px solid #bae6fd;
 }
 
 .btn-logout {
-    background: none;
-    border: 1px solid #ccc;
-    padding: 6px 15px;
-    border-radius: 4px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 8px 18px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
-    color: #555;
-    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.3s ease;
 }
 
 .btn-logout:hover {
-    background-color: #fee2e2;
+    background-color: #fef2f2;
     color: #ef4444;
     border-color: #fca5a5;
 }
 
 .admin-main {
-    padding: 30px;
+    padding: 35px;
     flex: 1;
+    overflow-y: auto;
+    /* Cho phép cuộn nội dung chính */
 }

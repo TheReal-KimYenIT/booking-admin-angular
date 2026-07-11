@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-
+import { HttpClient } from '@angular/common/http';
 import { BookingService } from '../../../services/booking.service';
 import { PartnerService } from '../../../services/partner.service'; 
 import Swal from 'sweetalert2';
@@ -22,16 +22,15 @@ export class PartnerBookingDetailComponent implements OnInit {
   isEditingGuests: boolean = false;
   editingGuests: any[] = [];        
 
-  // Biến phục vụ Tab 1 (Check-in)
   availableRooms: any[] = [];
   selectedRoomIds: number[] = [];
   guests: any[] = [];
-
-  constructor(
+constructor(
     private route: ActivatedRoute,
     private bookingService: BookingService,
     private cdr: ChangeDetectorRef,
     private partnerService: PartnerService,
+    private http: HttpClient 
   ) {}
 
   ngOnInit() {
@@ -39,29 +38,21 @@ export class PartnerBookingDetailComponent implements OnInit {
       this.bookingId = Number(params.get('id'));
       if (this.bookingId) {
         this.loadBookingDetail();
-        this.loadSurchargeCategories(); // Tải danh mục Phụ thu
+        this.loadSurchargeCategories(); 
         this.loadSupplies();
         this.loadMenuAndCart();
       }
     });
   }
 
- loadBookingDetail() {
+  loadBookingDetail() {
     this.bookingService.getBookingDetail(this.bookingId).subscribe({
       next: (res: any) => {
         this.booking = res.booking;
         
-        // ==========================================
-        // TÁCH DỊCH VỤ ĐI KÈM & MINIBAR ĐỂ HIỂN THỊ LÊN HÓA ĐƠN
-        // Dùng '||' để phòng trường hợp Laravel trả về JSON có gạch dưới hoặc viết hoa
         const servicesList = this.booking.booking_services || this.booking.bookingServices || [];
-        
-        // Nhặt các món có type == 1 (Dịch vụ: Spa, Giặt ủi...)
         this.cartServices = servicesList.filter((item: any) => item.service?.type == 1);
-        
-        // Nhặt các món có type == 2 (Minibar: Nước, Bánh kẹo...)
         this.cartMinibars = servicesList.filter((item: any) => item.service?.type == 2);
-        // ==========================================
 
         if (this.guests.length === 0) {
           this.guests.push({ full_name: this.booking.guest_name, identity_number: '' });
@@ -71,14 +62,15 @@ export class PartnerBookingDetailComponent implements OnInit {
            this.loadAvailableRooms();
         }
 
-        this.calculateNights(); // Tính số đêm khi tải xong
-        this.calculateCartTotal(); // Tính toán lại tổng tiền (bao gồm phụ thu, dịch vụ)
+        this.calculateNights(); 
+        this.calculateCartTotal(); 
         
         this.cdr.detectChanges();
       },
       error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi tải dữ liệu đơn hàng!', confirmButtonText: 'Đóng' })
     });
   }
+
   loadAvailableRooms() {
     this.bookingService.getAvailableRooms(this.bookingId).subscribe({
       next: (res: any) => {
@@ -88,9 +80,6 @@ export class PartnerBookingDetailComponent implements OnInit {
     });
   }
 
-  // ==========================================
-  // XỬ LÝ SỬA DANH SÁCH KHÁCH Ở TAB 1
-  // ==========================================
   enableEditGuests() {
     this.isEditingGuests = true;
     this.editingGuests = JSON.parse(JSON.stringify(this.booking?.guests || []));
@@ -108,8 +97,7 @@ export class PartnerBookingDetailComponent implements OnInit {
         Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Cập nhật danh sách khách thành công!', showConfirmButton: false, timer: 1500 });
         this.isEditingGuests = false;
         this.loadBookingDetail();
-      },
-      error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi cập nhật: ' + (err.error?.message || 'Vui lòng kiểm tra lại.'), confirmButtonText: 'Đóng' })
+      }
     });
   }  
 
@@ -126,8 +114,9 @@ export class PartnerBookingDetailComponent implements OnInit {
   removeGuest(index: number) { this.guests.splice(index, 1); }
 
   processCheckIn() {
-    if (this.selectedRoomIds.length === 0) {
-      Swal.fire({ icon: 'warning', title: 'Cảnh báo', text: 'Vui lòng chọn ít nhất 1 phòng để giao cho khách!', confirmButtonText: 'Đóng' });
+    const requiredRooms = this.booking?.details?.[0]?.rooms_count || 1;
+    if (this.selectedRoomIds.length !== requiredRooms) {
+      Swal.fire({ icon: 'warning', title: 'Cảnh báo', text: `Khách đặt ${requiredRooms} phòng. Vui lòng chọn đủ số lượng!`, confirmButtonText: 'Đóng' });
       return;
     }
 
@@ -143,11 +132,10 @@ export class PartnerBookingDetailComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.submitCheckIn(this.bookingId, payload).subscribe({
-          next: (res: any) => {
+          next: () => {
             Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Check-in thành công!', showConfirmButton: false, timer: 1500 });
             this.loadBookingDetail();
-          },
-          error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi Check-in: ' + (err.error?.message || 'Không xác định'), confirmButtonText: 'Đóng' })
+          }
         });
       }
     });
@@ -161,11 +149,10 @@ export class PartnerBookingDetailComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.confirmBooking(this.bookingId).subscribe({
-          next: (res: any) => {
+          next: () => {
             Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Đã xác nhận đơn hàng!', showConfirmButton: false, timer: 1500 });
             this.loadBookingDetail();
-          },
-          error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi xác nhận: ' + (err.error?.message || 'Không rõ'), confirmButtonText: 'Đóng' })
+          }
         });
       }
     });
@@ -179,19 +166,15 @@ export class PartnerBookingDetailComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.cancelBooking(this.bookingId).subscribe({
-          next: (res: any) => {
+          next: () => {
             Swal.fire({ icon: 'success', title: 'Đã hủy!', text: 'Đã hủy đơn hàng!', showConfirmButton: false, timer: 1500 });
             this.loadBookingDetail();
-          },
-          error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi hủy đơn: ' + (err.error?.message || 'Không rõ'), confirmButtonText: 'Đóng' })
+          }
         });
       }
     });
   }
 
-  // ==========================================
-  // XỬ LÝ ĐỔI PHÒNG (ROOM MOVE) Ở TAB 1
-  // ==========================================
   changingRoomId: number | null = null;   
   selectedNewRoomId: number | null = null; 
 
@@ -209,10 +192,6 @@ export class PartnerBookingDetailComponent implements OnInit {
           return;
         }
         this.cdr.detectChanges(); 
-      },
-      error: () => {
-        Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi tải danh sách phòng trống!', confirmButtonText: 'Đóng' });
-        this.cancelChangeRoom();
       }
     });
   }
@@ -230,14 +209,10 @@ export class PartnerBookingDetailComponent implements OnInit {
         Swal.fire({ icon: 'success', title: 'Thành công!', text: '🔄 Đổi phòng thành công!', showConfirmButton: false, timer: 1500 });
         this.changingRoomId = null; this.selectedNewRoomId = null;
         this.loadBookingDetail();
-      },
-      error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi đổi phòng: ' + (err.error?.message || 'Không xác định'), confirmButtonText: 'Đóng' })
+      }
     });
   }
 
-  // ==========================================
-  // XỬ LÝ SỬA LIÊN HỆ & GHI CHÚ (TAB 1)
-  // ==========================================
   isEditingNotes: boolean = false;
   editingPhone: string = '';
   editingSpecialRequests: string = '';
@@ -257,14 +232,10 @@ export class PartnerBookingDetailComponent implements OnInit {
         Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Cập nhật Ghi chú & Liên hệ thành công!', showConfirmButton: false, timer: 1500 });
         this.isEditingNotes = false;
         this.loadBookingDetail();
-      },
-      error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi cập nhật: ' + (err.error?.message || 'Không xác định'), confirmButtonText: 'Đóng' })
+      }
     });
   }
   
-  // ==========================================
-  // CÁC BIẾN & HÀM CHO TAB 2 (DỊCH VỤ / MINIBAR)
-  // ==========================================
   activeServiceTab: number = 1; 
   menuServices: any[] = [];
   menuMinibars: any[] = [];
@@ -288,8 +259,7 @@ export class PartnerBookingDetailComponent implements OnInit {
         this.cartMinibars = res.cart_minibars || [];
         this.calculateCartTotal();
         this.cdr.detectChanges();
-      },
-      error: (err: any) => console.log('Lỗi tải menu:', err)
+      }
     });
   }
 
@@ -298,12 +268,6 @@ export class PartnerBookingDetailComponent implements OnInit {
     this.cartServices.forEach(item => total += (Number(item.price_at_booking) * item.quantity));
     this.cartMinibars.forEach(item => total += (Number(item.price_at_booking) * item.quantity));
     this.cartTotal = total;
-
-    const roomTotal = Number(this.booking?.total_amount || 0);
-    // Cộng thêm tổng phụ thu vào đây để tính VAT
-    const surchargeTotal = this.booking?.surcharges ? this.booking.surcharges.reduce((sum: number, item: any) => sum + Number(item.amount), 0) : 0;
-    
-    this.calculatedVat = (roomTotal + this.cartTotal + surchargeTotal) * 0.10; 
   }
 
   addToCart(item: any, type: number) {
@@ -322,61 +286,94 @@ export class PartnerBookingDetailComponent implements OnInit {
     });
   }
 
-  removeFromCart(cartId: number) {
+  isWebPurchasedItem(cartItem: any): boolean {
+    if (this.booking?.payment_status !== 1) return false;
+    const bookingTime = new Date(this.booking.created_at).getTime();
+    const itemTime = new Date(cartItem.created_at).getTime();
+    return Math.abs(itemTime - bookingTime) < 120000;
+  }
+
+  removeFromCart(cartId: number, cartItem: any) {
+    if (this.isWebPurchasedItem(cartItem)) {
+      Swal.fire('Cảnh báo', 'Dịch vụ này khách đã mua từ trên web. Không thể hủy để tránh lệch biên lai!', 'warning');
+      return;
+    }
+
     Swal.fire({
-      title: 'Xóa món?', text: 'Bạn có chắc chắn muốn xóa món này khỏi hóa đơn?', icon: 'warning',
-      showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#94a3b8',
-      confirmButtonText: 'Xóa bỏ', cancelButtonText: 'Hủy'
-    }).then((result) => {
-      if (result.isConfirmed) {
+      title: 'Xóa món?', text: 'Chắc chắn muốn xóa khỏi hóa đơn?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'
+    }).then((res) => {
+      if (res.isConfirmed) {
         this.bookingService.removeExtraService(this.bookingId, cartId).subscribe({
-          next: () => this.loadMenuAndCart(),
-          error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi khi xóa món: ' + (err.error?.message || 'Không xác định'), confirmButtonText: 'Đóng' })
+          next: () => this.loadMenuAndCart()
         });
       }
     });
   }
 
   changeQuantity(cartItem: any, change: number) {
-    const newQuantity = cartItem.quantity + change;
-    if (newQuantity <= 0) {
-      this.removeFromCart(cartItem.id);
+    if (change < 0 && this.isWebPurchasedItem(cartItem)) {
+      Swal.fire('Cảnh báo', 'Không thể giảm số lượng của dịch vụ đã thanh toán Online!', 'warning');
       return;
     }
 
-    if (change > 0 && cartItem.service?.type === 2) {
-      const stock = cartItem.service?.quantity ?? 0;
-      if (newQuantity > stock) {
-        Swal.fire({ icon: 'warning', title: 'Cảnh báo', text: `Không thể tăng! Trong kho chỉ còn tối đa ${stock} mặt hàng.`, confirmButtonText: 'Đóng' });
-        return;
-      }
-    }
-
-    const payload = { quantity: newQuantity, note: cartItem.note };
-    this.bookingService.updateExtraService(this.bookingId, cartItem.id, payload).subscribe({
-      next: () => this.loadMenuAndCart(),
-      error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi cập nhật số lượng: ' + (err.error?.message || 'Không rõ'), confirmButtonText: 'Đóng' })
+    const newQty = cartItem.quantity + change;
+    if (newQty <= 0) { this.removeFromCart(cartItem.id, cartItem); return; }
+    this.bookingService.updateExtraService(this.bookingId, cartItem.id, { quantity: newQty, note: cartItem.note }).subscribe({
+      next: () => this.loadMenuAndCart()
     });
   }
 
   saveNote(cartItem: any, event: any) {
+    if (this.isWebPurchasedItem(cartItem)) return;
     const newNote = event.target.value;
     const payload = { quantity: cartItem.quantity, note: newNote };
     this.bookingService.updateExtraService(this.bookingId, cartItem.id, payload).subscribe({
-      next: () => { cartItem.note = newNote; },
-      error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi lưu ghi chú: ' + (err.error?.message || 'Không rõ'), confirmButtonText: 'Đóng' })
+      next: () => { cartItem.note = newNote; }
     });
   }
 
-  // ==========================================
-  // XỬ LÝ THANH TOÁN, TRẢ PHÒNG & PHỤ THU (TAB 3)
-  // ==========================================
   numberOfNights: number = 1;
-  calculatedVat: number = 0;
-// Biến cho phần Đền bù vật tư
   availableSupplies: any[] = [];
-supplyForm: any = { supply_id: '', incident_type: 1, quantity: 1, actual_price: 0, note: '' };  availableSurcharges: any[] = [];
+  supplyForm: any = { supply_id: '', incident_type: 1, quantity: 1, actual_price: 0, note: '' };  
+  availableSurcharges: any[] = [];
   surchargeForm: any = { surcharge_category_id: '', amount: '', note: '' };
+
+  // 👉 TÍNH TOÁN LẠI VAT TRỰC TIẾP (LIVE VAT)
+  getCurrentVatAmount(): number {
+    const room = Number(this.booking?.details?.[0]?.subtotal || 0);
+    const srv = Number(this.cartTotal || 0);
+    const sur = this.getSurchargeTotal();
+    const dmg = this.getDamagedItemsTotal();
+    const disc = Number(this.booking?.discount_amount || 0);
+
+    const vatRate = Number(this.booking?.vat_rate ?? 10); // Lấy % VAT đã chốt trong đơn
+
+    // Công thức: (Phòng + Dịch vụ + Phụ thu + Đền bù - Khuyến mãi) * (vat_rate / 100)
+    const taxableAmount = Math.max(0, room + srv + sur + dmg - disc);
+    return taxableAmount * (vatRate / 100);
+  }
+
+  // 👉 TÍNH TỔNG TIỀN DỰA TRÊN LIVE VAT
+  getFinalInvoiceTotal(): number {
+    const room = Number(this.booking?.details?.[0]?.subtotal || 0);
+    const srv = Number(this.cartTotal || 0);
+    const sur = this.getSurchargeTotal();
+    const dmg = this.getDamagedItemsTotal();
+    const disc = Number(this.booking?.discount_amount || 0);
+    
+    const vat = this.getCurrentVatAmount(); // Lấy Live VAT vừa tính
+
+    return room + srv + sur + dmg + vat - disc;
+  }
+
+  getAlreadyPaidAmount(): number {
+    return this.booking?.payment_status === 1 ? Number(this.booking?.total_price || 0) : 0;
+  }
+
+  getRemainingAmount(): number {
+    const rem = this.getFinalInvoiceTotal() - this.getAlreadyPaidAmount();
+    return rem > 0 ? rem : 0;
+  }
 
   loadSurchargeCategories() {
     this.partnerService.getSurchargeCategories().subscribe({
@@ -396,26 +393,23 @@ supplyForm: any = { supply_id: '', incident_type: 1, quantity: 1, actual_price: 
     this.bookingService.addSurcharge(this.bookingId, this.surchargeForm).subscribe({
       next: () => {
         Swal.fire({ icon: 'success', title: 'Thành công', text: 'Đã thêm khoản phụ thu!', showConfirmButton: false, timer: 1500 });
-        this.surchargeForm = { surcharge_category_id: '', amount: '', note: '' }; // Reset form
-        this.loadBookingDetail(); // Reload lại đơn hàng để hiện phụ thu vào hóa đơn
-      },
-      error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: err.error?.message || 'Lỗi thêm phụ thu', confirmButtonText: 'Đóng' })
+        this.surchargeForm = { surcharge_category_id: '', amount: '', note: '' }; 
+        this.loadBookingDetail(); 
+      }
     });
   }
 
   removeSurcharge(surchargeId: number) {
     Swal.fire({
       title: 'Xóa phụ thu?', text: 'Bạn có chắc chắn muốn xóa khoản phụ thu này khỏi hóa đơn?', icon: 'warning',
-      showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#94a3b8',
-      confirmButtonText: 'Xóa', cancelButtonText: 'Hủy'
+      showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Xóa', cancelButtonText: 'Hủy'
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.removeSurcharge(this.bookingId, surchargeId).subscribe({
           next: () => {
             Swal.fire({ icon: 'success', title: 'Đã xóa', text: 'Đã xóa khoản phụ thu.', showConfirmButton: false, timer: 1500 });
             this.loadBookingDetail();
-          },
-          error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: err.error?.message || 'Lỗi xóa phụ thu', confirmButtonText: 'Đóng' })
+          }
         });
       }
     });
@@ -430,20 +424,67 @@ supplyForm: any = { supply_id: '', incident_type: 1, quantity: 1, actual_price: 
       if (result.isConfirmed) {
         const payload = { payment_method: this.selectedPaymentMethod };
         this.bookingService.checkOutBooking(this.bookingId, payload).subscribe({
-          next: (res: any) => {
+          next: () => {
             Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Trả phòng thành công! Cảm ơn bạn.', showConfirmButton: false, timer: 1500 });
             this.loadBookingDetail(); 
           },
-          error: (err: any) => {
-            console.error(err);
-            Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi khi trả phòng: ' + (err.error?.message || 'Vui lòng kiểm tra lại.'), confirmButtonText: 'Đóng' });
-          }
+          error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi khi trả phòng: ' + (err.error?.message || 'Vui lòng kiểm tra lại.'), confirmButtonText: 'Đóng' })
         });
       }
     });
   }
 
-  printInvoice() { window.print(); }
+ isExportingInvoice: boolean = false;
+
+  printInvoice() {
+    this.isExportingInvoice = true;
+    this.cdr.detectChanges(); // Ép giao diện cập nhật trạng thái "Đang tạo..." lập tức
+
+    const token = localStorage.getItem('partner_token') || '';
+    const apiUrl = `http://localhost:8000/api/partner/bookings/${this.bookingId}/export-invoice`;
+
+    Swal.fire({ title: 'Đang tạo Hóa đơn...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+    this.http.get(apiUrl, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      responseType: 'blob'
+    }).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Hoa_Don_Folio_${this.booking?.booking_code}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // CẬP NHẬT LẠI TRẠNG THÁI NÚT BẤM
+        this.isExportingInvoice = false;
+        this.cdr.detectChanges(); 
+        Swal.close();
+      },
+      error: (err: any) => {
+        this.isExportingInvoice = false;
+        this.cdr.detectChanges(); 
+        
+        if (err.error instanceof Blob) {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            try {
+              const errorData = JSON.parse(e.target.result);
+              Swal.fire('Lỗi từ hệ thống', errorData.message, 'error');
+            } catch {
+              Swal.fire('Lỗi', 'Không thể tạo Hóa đơn PDF!', 'error');
+            }
+          };
+          reader.readAsText(err.error);
+        } else {
+          Swal.fire('Lỗi', 'Không thể tạo Hóa đơn PDF!', 'error');
+        }
+      }
+    });
+  }
 
   calculateNights() {
     if (!this.booking?.check_in || !this.booking?.check_out) {
@@ -455,28 +496,22 @@ supplyForm: any = { supply_id: '', incident_type: 1, quantity: 1, actual_price: 
     this.numberOfNights = diffDays > 0 ? diffDays : 1; 
   }
   
-  // Getter tính tổng phụ thu để dùng ngoài HTML
   getSurchargeTotal(): number {
     if (!this.booking?.surcharges) return 0;
     return this.booking.surcharges.reduce((sum: number, item: any) => sum + Number(item.amount), 0);
   }
 
-
-  // ==========================================
-  // QUẢN LÝ VẬT TƯ (SUPPLIES)
-  // ==========================================
-loadSupplies() {
+  loadSupplies() {
     this.partnerService.getSupplies().subscribe({
       next: (res: any) => {
         const allSupplies = res.data || res || [];
-        // LỌC: Chỉ lấy những vật tư có status == 1 (Đang áp dụng)
         this.availableSupplies = allSupplies.filter((item: any) => item.status == 1);
         this.cdr.detectChanges();
       }
     });
   }
 
-addDamagedItem() {
+  addDamagedItem() {
     if (!this.supplyForm.supply_id || this.supplyForm.quantity <= 0) {
       Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Vui lòng chọn vật tư và nhập số lượng hợp lệ!', confirmButtonText: 'Đóng' });
       return;
@@ -485,60 +520,48 @@ addDamagedItem() {
     this.bookingService.addDamagedItem(this.bookingId, this.supplyForm).subscribe({
       next: () => {
         Swal.fire({ icon: 'success', title: 'Thành công', text: 'Đã thêm phí đền bù!', showConfirmButton: false, timer: 1500 });
-        this.supplyForm = { supply_id: '', quantity: 1, note: '' }; // Reset form
+        this.supplyForm = { supply_id: '', incident_type: 1, quantity: 1, actual_price: 0, note: '' }; 
         this.loadBookingDetail(); 
-      },
-      error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: err.error?.message || 'Lỗi thêm vật tư đền bù', confirmButtonText: 'Đóng' })
+      }
     });
   }
 
   removeDamagedItem(itemId: number) {
     Swal.fire({
       title: 'Xóa phí đền bù?', text: 'Bạn có chắc muốn xóa khoản đền bù này khỏi hóa đơn?', icon: 'warning',
-      showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#94a3b8',
-      confirmButtonText: 'Xóa', cancelButtonText: 'Hủy'
+      showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Xóa', cancelButtonText: 'Hủy'
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.removeDamagedItem(this.bookingId, itemId).subscribe({
           next: () => {
             Swal.fire({ icon: 'success', title: 'Đã xóa', text: 'Đã xóa khoản đền bù.', showConfirmButton: false, timer: 1500 });
             this.loadBookingDetail();
-          },
-          error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: err.error?.message || 'Lỗi xóa vật tư', confirmButtonText: 'Đóng' })
+          }
         });
       }
     });
   }
 
-getDamagedItemsTotal(): number {
+  getDamagedItemsTotal(): number {
     if (!this.booking?.supply_incidents) return 0;
-    
-    return this.booking.supply_incidents.reduce((sum: number, item: any) => {
-      // actual_price lúc này chính là cục tiền tổng cuối cùng lễ tân gõ vào
-      const finalPrice = item.actual_price || 0; 
-      return sum + Number(finalPrice); // Không nhân với item.quantity nữa
-    }, 0);
+    return this.booking.supply_incidents.reduce((sum: number, item: any) => sum + Number(item.actual_price), 0);
   }
-  // Hàm tự động tính toán Giá thu đề xuất = Giá gốc * Số lượng
+
   calculateSuggestedPrice() {
     if (!this.supplyForm.supply_id) {
       this.supplyForm.actual_price = 0;
       return;
     }
 
-  const selectedSupply = this.availableSupplies.find(
-                          s => Number(s.id) === Number(this.supplyForm.supply_id));
+    const selectedSupply = this.availableSupplies.find(s => Number(s.id) === Number(this.supplyForm.supply_id));
 
-  if (selectedSupply) {
+    if (selectedSupply) {
       const basePrice = Number(selectedSupply.price_per_unit) || 0;
       const qty = Number(this.supplyForm.quantity) || 1;
-      
-      // Tự động điền Tổng tiền vào ô Giá thu
       this.supplyForm.actual_price = basePrice * qty;
     }
   }
 
-  // Hẹn giờ đến trễ
   reportLateCheckIn() {
     Swal.fire({
       title: 'Khách hẹn đến trễ', text: 'Nhập giờ khách dự kiến tới (VD: 19:30):',
@@ -556,7 +579,6 @@ getDamagedItemsTotal(): number {
     });
   }
 
-  // Hẹn giờ trả phòng trễ
   reportLateCheckOut() {
     Swal.fire({
       title: 'Khách xin trả phòng trễ', text: 'Nhập giờ khách dự kiến đi (VD: 15:00):',
@@ -574,7 +596,6 @@ getDamagedItemsTotal(): number {
     });
   }
 
-  // Xử lý No-Show
   processNoShow() {
     Swal.fire({
       title: 'Khách KHÔNG ĐẾN (No-Show)?', text: 'Đơn hàng sẽ bị đóng và phòng sẽ được giải phóng lập tức.',

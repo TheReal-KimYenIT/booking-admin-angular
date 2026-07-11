@@ -281,3 +281,26 @@
     font-size: 14px;
     border-top: 1px solid #e2e8f0;
 }
+
+/* Custom thẻ booking-tag để trông giống một nút bấm chuyển hướng */
+.clickable-tag {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid transparent;
+}
+
+.clickable-tag:hover {
+    background-color: #f59e0b;
+    /* Đổi sang màu cam đậm hơn khi hover */
+    color: white;
+    transform: translateY(-2px);
+    /* Hiệu ứng nảy nhẹ lên */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.icon-link {
+    font-size: 11px;
+}

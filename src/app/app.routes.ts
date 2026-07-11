@@ -19,7 +19,9 @@ import { AdminBedTypesComponent } from './features/admin/admin-bed-types/admin-b
 import { AdminRoomViewsComponent } from './features/admin/admin-room-views/admin-room-views';
 import { AdminContactsComponent } from './features/admin/admin-contacts/admin-contacts';
 import { AdminPromotionsComponent } from './features/admin/admin-promotions/admin-promotions';
-
+import { TransactionsComponent } from './features/admin/admin-transactions/admin-transactions';
+import { SystemSettingsComponent } from './features/admin/admin-system-settings/admin-system-settings';
+import { AdminSettlementsComponent } from './features/admin/admin-settlements/admin-settlements';
 
 // ==========================================
 // IMPORT CÁC COMPONENT CỦA ĐỐI TÁC (PARTNER)
@@ -30,7 +32,6 @@ import { PartnerHotelProfileComponent } from './features/partner/partner-hotel-p
 import { PartnerRoomTypesComponent } from './features/partner/partner-room-types/partner-room-types';
 import { PartnerBookingsComponent } from './features/partner/partner-bookings/partner-bookings';
 import { PartnerBookingDetailComponent } from './features/partner/partner-booking-detail/partner-booking-detail';
-import { PartnerRoomsComponent } from './features/partner/partner-rooms/partner-rooms';
 import { PartnerAmenitiesComponent } from './features/partner/partner-amenities/partner-amenities'; 
 import { PartnerServicesComponent } from './features/partner/partner-services/partner-services';
 import { PartnerMinibarsComponent } from './features/partner/partner-minibars/partner-minibars';
@@ -46,6 +47,9 @@ import { PartnerInventoryComponent } from './features/partner/partner-inventory/
 import { PartnerRoomMatrixComponent } from './features/partner/partner-room-matrix/partner-room-matrix';
 // Import Guard bảo vệ route (Nếu bạn đã tạo auth-guard)
 import { authGuard } from './core/guards/auth-guard';
+
+import { PartnerTransactionsComponent } from './features/partner/partner-transactions/partner-transactions';
+import { PartnerSettlementsComponent } from './features/partner/partner-settlements/partner-settlements';
 
 export const routes: Routes = [
   // Mặc định khi vào web sẽ chuyển hướng đến trang Đăng nhập
@@ -79,6 +83,10 @@ export const routes: Routes = [
       { path: 'contacts', component: AdminContactsComponent },
       { path: 'room-views', component: AdminRoomViewsComponent },
       { path: 'promotions', component: AdminPromotionsComponent },
+      { path: 'transactions', component: TransactionsComponent },
+      { path: 'system-settings', component: SystemSettingsComponent },
+      { path: 'settlements', component: AdminSettlementsComponent },
+      
 
     ]
   },
@@ -114,6 +122,8 @@ export const routes: Routes = [
       { path: 'roles', component: PartnerRoleComponent },
       { path: 'inventory', component: PartnerInventoryComponent },
       { path: 'room-matrix', component: PartnerRoomMatrixComponent },
+      { path: 'transactions', component: PartnerTransactionsComponent },
+      { path: 'settlements', component: PartnerSettlementsComponent },
     ]
   },
 

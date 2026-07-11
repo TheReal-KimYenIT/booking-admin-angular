@@ -84,3 +84,34 @@ textarea {
 .modal-actions {
     text-align: right;
 }
+
+/* Thêm vào cuối file admin-partners.css */
+
+.btn-info {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+.btn-info:hover {
+    background-color: #31d2f2;
+}
+
+.text-white {
+    color: white !important;
+}
+
+/* Modal rộng dành cho xem chi tiết */
+.modal-lg {
+    width: 850px !important;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #dee2e6 !important;
+}

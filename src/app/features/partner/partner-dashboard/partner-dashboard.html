@@ -38,12 +38,6 @@
                 </a>
             </li>
 
-            <li *ngIf="hasPermission('room_matrix')">
-                <a routerLink="/dashboard/room-matrix" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">🔢</span> Sơ đồ & Số phòng
-                </a>
-            </li>
-
             <li *ngIf="hasPermission('bookings')">
                 <a routerLink="/dashboard/bookings" routerLinkActive="active-menu" class="menu-item">
                     <span class="icon">📝</span> Quản lý Đơn hàng
@@ -99,6 +93,16 @@
             <li>
                 <a routerLink="/dashboard/profile" routerLinkActive="active-menu" class="menu-item">
                     <span class="icon">👤</span> Tài khoản & Bảo mật
+                </a>
+            </li>
+            <li>
+                <a routerLink="/dashboard/transactions" routerLinkActive="active-menu" class="menu-item">
+                    <span class="icon">👤</span> Quản lý tài chính
+                </a>
+            </li>
+            <li>
+                <a routerLink="/dashboard/settlements" routerLinkActive="active-menu" class="menu-item">
+                    <span class="icon">👤</span> Quản lý công nợ
                 </a>
             </li>
         </ul>

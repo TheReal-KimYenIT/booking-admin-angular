@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { BookingService } from '../../../services/booking.service';
+import { PartnerService } from '../../../services/partner.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -14,18 +15,24 @@ import Swal from 'sweetalert2';
 })
 export class PartnerRoomMatrixComponent implements OnInit {
   headers: any[] = [];
-  matrixGrid: any[] = [];
-  isLoading = true;
+  matrixGrid: any[] = []; // Dữ liệu gốc 100% từ server
+  
+  // 👉 THÊM MỚI: Các biến phục vụ việc Lọc (Filter)
+  filteredMatrixGrid: any[] = []; // Dữ liệu đã qua màng lọc để in ra HTML
+  uniqueRoomTypes: string[] = []; // Danh sách tên Hạng phòng để đưa vào Dropdown
+  selectedRoomType: string = '';  // Giá trị hạng phòng đang chọn
+  selectedStatus: string = '';    // Giá trị trạng thái đang chọn
 
+  isLoading = true;
   startDate: string = '';
   endDate: string = '';
 
   constructor(
     private bookingService: BookingService,
+    private partnerService: PartnerService,
     private cdr: ChangeDetectorRef,
     private router: Router
   ) {
-    // Mặc định hiển thị dải lịch 15 ngày từ hôm nay đổ đi cho thoáng tầm nhìn
     const today = new Date();
     this.startDate = today.toISOString().split('T')[0];
     const targetEnd = new Date();
@@ -43,6 +50,13 @@ export class PartnerRoomMatrixComponent implements OnInit {
       next: (res: any) => {
         this.headers = res.headers;
         this.matrixGrid = res.matrix;
+        
+        // 👉 Lọc ra danh sách Hạng phòng không trùng lặp từ dữ liệu trả về
+        this.uniqueRoomTypes = [...new Set(this.matrixGrid.map(item => item.room_type_name))];
+        
+        // Gán dữ liệu lọc ban đầu
+        this.applyFilters();
+        
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -51,6 +65,19 @@ export class PartnerRoomMatrixComponent implements OnInit {
         this.isLoading = false;
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  // 👉 THÊM MỚI: Hàm xử lý Bộ Lọc
+  applyFilters() {
+    this.filteredMatrixGrid = this.matrixGrid.filter(row => {
+      // Điều kiện 1: Lọc theo hạng phòng
+      const matchType = this.selectedRoomType === '' || row.room_type_name === this.selectedRoomType;
+      
+      // Điều kiện 2: Lọc theo trạng thái phòng hiện tại
+      const matchStatus = this.selectedStatus === '' || row.current_status.toString() === this.selectedStatus;
+      
+      return matchType && matchStatus;
     });
   }
 
@@ -73,7 +100,6 @@ export class PartnerRoomMatrixComponent implements OnInit {
     this.loadMatrix();
   }
 
-  // Nhấp vào ô có khách để chuyển hướng bay thẳng tới trang Chi tiết đơn hàng xử lý
   viewBookingDetail(bookingId: number) {
     if (bookingId) {
       this.router.navigate(['/dashboard/bookings', bookingId]);
@@ -88,5 +114,24 @@ export class PartnerRoomMatrixComponent implements OnInit {
       case 3: return '🛠️ Bảo trì';
       default: return '---';
     }
+  }
+
+  updatePhysicalRoomStatus(roomId: number, newStatus: number) {
+    if (!roomId) return;
+    Swal.fire({
+      title: 'Đang cập nhật...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+    this.partnerService.updateRoom(roomId, { status: newStatus }).subscribe({
+      next: (res: any) => {
+        Swal.fire({ icon: 'success', title: 'Thành công!', showConfirmButton: false, timer: 1000 });
+        this.loadMatrix();
+      },
+      error: (err: any) => {
+        Swal.fire({ icon: 'error', title: 'Thất bại', text: err.error?.message });
+        this.loadMatrix(); 
+      }
+    });
   }
 }

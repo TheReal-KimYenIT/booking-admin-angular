@@ -1,0 +1,109 @@
+<div class="container-fluid p-4">
+    <!-- Header -->
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Tháng / Đối Soát Công Nợ</h2>
+            <p class="text-muted mb-0">Tính toán tiền cần thanh toán cho các khách sạn trong tháng</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="fw-bold text-muted mb-0 text-nowrap">Chọn tháng:</label>
+            <input type="month" [(ngModel)]="selectedMonth" (change)="loadData()"
+                class="form-control fw-bold border-primary">
+        </div>
+    </div>
+
+    <!-- BỘ LỌC TÌM KIẾM -->
+    <div class="row mb-3">
+        <div class="col-md-5 mb-2">
+            <input type="text" class="form-control" placeholder="🔍 Nhập tên khách sạn để tìm kiếm..."
+                [(ngModel)]="searchTerm">
+        </div>
+        <div class="col-md-4 mb-2">
+            <select class="form-select" [(ngModel)]="filterStatus">
+                <option value="ALL">Tất cả trạng thái</option>
+                <option value="OWE_SYSTEM">Cần thu từ Khách sạn</option>
+                <option value="OWE_HOTEL">Sàn cần chuyển khoản</option>
+                <option value="WAIT_HOTEL">Đang chờ Khách sạn duyệt</option>
+                <option value="DONE">Đã hoàn thành đối soát</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Bảng Dữ Liệu -->
+    <div class="card border-0 shadow-sm bg-white rounded-3">
+        <div class="card-body p-0">
+            <div *ngIf="isLoading" class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <h5 class="text-muted mt-3">Đang tính toán dữ liệu công nợ...</h5>
+            </div>
+
+            <div *ngIf="!isLoading && settlements.length === 0" class="text-center p-5 text-muted fst-italic">
+                Không phát sinh doanh dịch thành công nào trong tháng này.
+            </div>
+
+            <!-- HIỂN THỊ KHI TÌM KIẾM KHÔNG RA KẾT QUẢ -->
+            <div *ngIf="!isLoading && settlements.length > 0 && filteredSettlements.length === 0"
+                class="text-center p-5 text-danger fw-bold">
+                Không tìm thấy khách sạn nào khớp với bộ lọc của bạn.
+            </div>
+
+            <div *ngIf="!isLoading && filteredSettlements.length > 0" class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted small uppercase">
+                        <tr>
+                            <th class="ps-4">Khách sạn</th>
+                            <th class="text-end">Tổng Doanh Thu</th>
+                            <th class="text-end text-success">Sàn Giữ (VNPAY)</th>
+                            <th class="text-end text-danger">Hoa hồng Sàn thu</th>
+                            <th class="text-end fw-bold text-primary">Chốt Công Nợ</th>
+                            <th class="text-center pe-4">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Vòng lặp lấy dữ liệu từ filteredSettlements -->
+                        <tr *ngFor="let item of filteredSettlements">
+                            <td class="ps-4 fw-bold text-dark">{{ item.hotel_name }}</td>
+                            <td class="text-end fw-bold">{{ item.total_revenue | number }} đ</td>
+                            <td class="text-end fw-bold text-success">{{ item.vnpay_total | number }} đ</td>
+                            <td class="text-end fw-bold text-danger">- {{ item.commission_total | number }} đ</td>
+
+                            <td class="text-end fw-bold fs-6">
+                                <span [ngClass]="item.payout_to_hotel >= 0 ? 'text-primary' : 'text-danger'">
+                                    {{ item.payout_to_hotel | number }} đ
+                                </span>
+                            </td>
+
+                            <td class="text-center pe-4" style="min-width: 160px;">
+                                <div class="d-flex flex-column gap-2 align-items-center">
+                                    <button class="btn btn-outline-secondary btn-sm w-100"
+                                        (click)="exportPdf(item.hotel_id)">📄 PDF</button>
+
+                                    <!-- CHỈ HIỆN NÚT KHI STATUS === 0 -->
+                                    <button *ngIf="item.status === 0" class="btn btn-primary btn-sm w-100 fw-bold"
+                                        (click)="confirmPayment(item)">
+                                        {{ item.payout_to_hotel < 0 ? 'Xác nhận thu tiền' : 'Xác nhận chuyển' }}
+                                            </button>
+
+                                            <!-- HIỆN "Chờ duyệt" KHI STATUS === 2 -->
+                                            <span *ngIf="item.status === 2" class="badge bg-warning w-100 py-2">Chờ KS
+                                                duyệt</span>
+
+                                            <!-- HIỆN "Đã đối soát" KHI STATUS === 1 -->
+                                            <span *ngIf="item.status === 1" class="badge bg-success w-100 py-2">Đã đối
+                                                soát</span>
+
+                                            <!-- NÚT XEM BILL -->
+                                            <a *ngIf="item.proof_image"
+                                                [href]="'http://localhost:8000' + item.proof_image" target="_blank"
+                                                class="small text-info text-decoration-none fw-bold mt-1">
+                                                📄 Xem Bill
+                                            </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
