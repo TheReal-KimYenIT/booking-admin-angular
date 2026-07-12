@@ -1,0 +1,95 @@
+<div class="container-fluid p-4">
+    <!-- Header -->
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Quản Lý Hoàn Tiền</h2>
+            <p class="text-muted mb-0">Xử lý hoàn tiền cho các đơn hàng khách đã hủy hợp lệ</p>
+        </div>
+        <button class="btn btn-primary" (click)="loadData()">🔄 Làm mới</button>
+    </div>
+
+    <!-- Bộ lọc -->
+    <div class="row mb-3">
+        <div class="col-md-5 mb-2">
+            <input type="text" class="form-control" placeholder="🔍 Tìm theo mã đơn hoặc tên khách hàng..."
+                [(ngModel)]="searchTerm">
+        </div>
+        <div class="col-md-4 mb-2">
+            <select class="form-select" [(ngModel)]="filterStatus">
+                <option value="ALL">Tất cả trạng thái</option>
+                <option value="PENDING">Đang chờ chuyển khoản</option>
+                <option value="COMPLETED">Đã hoàn tất</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Bảng Dữ Liệu -->
+    <div class="card border-0 shadow-sm bg-white rounded-3">
+        <div class="card-body p-0">
+            <div *ngIf="isLoading" class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <h5 class="text-muted mt-3">Đang tải dữ liệu...</h5>
+            </div>
+
+            <div *ngIf="!isLoading && filteredRefunds.length === 0" class="text-center p-5 text-muted fw-bold">
+                Không có yêu cầu hoàn tiền nào khớp với bộ lọc của bạn.
+            </div>
+
+            <div *ngIf="!isLoading && filteredRefunds.length > 0" class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted small uppercase">
+                        <tr>
+                            <th class="ps-4">Mã Đơn / Khách hàng</th>
+                            <th>Thông tin nhận tiền (Ngân hàng)</th>
+                            <th class="text-end text-danger fw-bold">Số tiền hoàn</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center pe-4">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of filteredRefunds">
+                            <!-- Cột 1: Thông tin đơn -->
+                            <td class="ps-4">
+                                <span class="fw-bold text-primary">{{ item.booking_code }}</span><br>
+                                <span class="text-dark">{{ item.guest_name }}</span>
+                            </td>
+
+                            <!-- Cột 2: Thông tin Ngân hàng của khách -->
+                            <td>
+                                <div class="bg-light p-2 rounded" style="font-size: 13px;">
+                                    <strong>NH:</strong> {{ item.refund_bank }}<br>
+                                    <strong>STK:</strong> <span class="text-primary fw-bold">{{ item.refund_account
+                                        }}</span><br>
+                                    <strong>Tên:</strong> {{ item.refund_account_name }}
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Số tiền -->
+                            <td class="text-end fw-bold text-danger fs-6">
+                                {{ item.refund_amount | number }} đ
+                            </td>
+
+                            <!-- Cột 4: Trạng thái -->
+                            <td class="text-center">
+                                <span *ngIf="item.refund_status === 1" class="badge bg-warning text-dark px-3 py-2">⏳
+                                    Chờ chuyển khoản</span>
+                                <span *ngIf="item.refund_status === 2" class="badge bg-success px-3 py-2">✅ Đã hoàn
+                                    tất</span>
+                            </td>
+
+                            <!-- Cột 5: Thao tác -->
+                            <td class="text-center pe-4">
+                                <button *ngIf="item.refund_status === 1" class="btn btn-success btn-sm fw-bold w-100"
+                                    (click)="confirmRefund(item)">
+                                    Xác nhận đã chuyển
+                                </button>
+                                <span *ngIf="item.refund_status === 2" class="text-muted small italic">Không cần thao
+                                    tác</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

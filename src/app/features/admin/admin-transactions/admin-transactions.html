@@ -116,7 +116,9 @@
                             <th class="ps-4">Mã Đơn / Thời gian</th>
                             <th>Khách sạn</th>
                             <th class="text-center">Hình thức</th>
-                            <th class="text-end">Tổng khách quẹt</th>
+                            <!-- 👉 Cập nhật Header Bảng -->
+                            <th class="text-end">Gốc (Khách quẹt)</th>
+                            <th class="text-end text-warning">Đã Hoàn</th>
                             <th class="text-center">Hoa hồng</th>
                             <th class="text-end text-primary">Phí Sàn thu</th>
                             <th class="text-end text-success pe-4">Thực trả KS</th>
@@ -145,7 +147,15 @@
                                     class="badge bg-danger-subtle text-danger border border-danger w-100">Thất
                                     bại</span>
                             </td>
+
+                            <!-- 👉 Dữ liệu số tiền gốc -->
                             <td class="text-end fw-bold text-dark fs-6">{{ item.amount | number }} đ</td>
+
+                            <!-- 👉 Dữ liệu số tiền hoàn (NẾU CÓ) -->
+                            <td class="text-end fw-bold text-warning fs-6">
+                                <span *ngIf="item.refund_deducted > 0">-{{ item.refund_deducted | number }} đ</span>
+                                <span *ngIf="!item.refund_deducted || item.refund_deducted === 0">0 đ</span>
+                            </td>
 
                             <td class="text-center fw-bold text-muted">{{ item.applied_rate || 15 }}%</td>
                             <td class="text-end fw-bold text-primary">{{ item.commission_fee | number }} đ</td>

@@ -1,0 +1,42 @@
+<div class="admin-container">
+    <h2>Danh Sách Khách Hàng Lưu Trú</h2>
+
+    <!-- Thanh tìm kiếm -->
+    <div class="search-box mb-3">
+        <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()"
+            placeholder="Tìm theo tên hoặc số điện thoại..." class="form-control">
+    </div>
+
+    <table class="table" *ngIf="!isLoading">
+        <thead>
+            <tr>
+                <th>Khách Hàng</th>
+                <th>Thông tin Liên hệ</th>
+                <th class="text-center">Số Lần Đặt</th>
+                <th>Trạng Thái</th>
+                <th>Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of filteredList" [class.row-blocked]="item.is_blocked == 1">
+                <td><strong>{{ item.last_name }} {{ item.first_name }}</strong></td>
+                <td>✉️ {{ item.email }} <br> 📞 {{ item.phone }}</td>
+                <td class="text-center">{{ item.total_bookings }}</td>
+                <td>
+                    <span class="badge" [class.bg-success]="item.is_blocked == 0"
+                        [class.bg-danger]="item.is_blocked == 1">
+                        {{ item.is_blocked == 0 ? 'Bình thường' : 'Đang bị chặn' }}
+                    </span>
+                </td>
+                <td class="d-flex gap-2">
+                    <button class="btn btn-sm btn-info" (click)="goToMessages(item)">Tin nhắn</button>
+                    <button class="btn btn-sm btn-secondary" (click)="viewOrders(item)">Đơn hàng</button>
+                    <button class="btn btn-sm" [class.btn-danger]="item.is_blocked == 0"
+                        [class.btn-success]="item.is_blocked == 1" (click)="toggleBlock(item)">
+                        {{ item.is_blocked == 0 ? 'Chặn' : 'Mở' }}
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

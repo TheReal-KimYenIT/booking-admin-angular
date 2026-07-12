@@ -8,7 +8,8 @@ import Swal from 'sweetalert2';
   selector: 'app-admin-settlements',
   standalone: true,
   imports: [CommonModule, FormsModule, HttpClientModule],
-  templateUrl: './admin-settlements.html'
+  templateUrl: './admin-settlements.html',
+  styleUrl: './admin-settlements.css'
 })
 export class AdminSettlementsComponent implements OnInit {
   private apiUrl = 'http://localhost:8000/api/admin/settlements';
@@ -17,10 +18,7 @@ export class AdminSettlementsComponent implements OnInit {
   isLoading = false;
   isExportingId: number | null = null;
 
-  // Lấy tháng năm hiện tại mặc định (VD: "2026-06")
   selectedMonth: string = '';
-
-  // BỘ LỌC TÌM KIẾM
   searchTerm: string = '';
   filterStatus: string = 'ALL';
 
@@ -54,22 +52,19 @@ export class AdminSettlementsComponent implements OnInit {
     });
   }
 
-  // HÀM LỌC DỮ LIỆU ĐỂ HIỂN THỊ
   get filteredSettlements() {
     return this.settlements.filter(item => {
-      // 1. Lọc theo tên khách sạn (không phân biệt hoa thường)
       const matchName = item.hotel_name.toLowerCase().includes(this.searchTerm.toLowerCase());
       
-      // 2. Lọc theo trạng thái nghiệp vụ
       let matchStatus = true;
       if (this.filterStatus === 'OWE_SYSTEM') {
-        matchStatus = item.payout_to_hotel < 0 && item.status === 0; // KS nợ Sàn, chưa thu
+        matchStatus = item.payout_to_hotel < 0 && item.status === 0; 
       } else if (this.filterStatus === 'OWE_HOTEL') {
-        matchStatus = item.payout_to_hotel >= 0 && item.status === 0; // Sàn nợ KS, chưa trả
+        matchStatus = item.payout_to_hotel >= 0 && item.status === 0; 
       } else if (this.filterStatus === 'WAIT_HOTEL') {
-        matchStatus = item.payout_to_hotel >= 0 && item.status === 2; // Sàn đã chuyển, chờ duyệt
+        matchStatus = item.payout_to_hotel >= 0 && item.status === 2; 
       } else if (this.filterStatus === 'DONE') {
-        matchStatus = item.status === 1; // Đã đối soát xong
+        matchStatus = item.status === 1; 
       }
 
       return matchName && matchStatus;
@@ -121,11 +116,10 @@ export class AdminSettlementsComponent implements OnInit {
   }
 
   confirmPayment(item: any) {
-    const isHotelDebt = item.payout_to_hotel < 0; // true nếu Khách sạn nợ Sàn
+    const isHotelDebt = item.payout_to_hotel < 0; 
     const title = isHotelDebt ? 'Xác nhận đã nhận tiền từ KS' : 'Xác nhận đã chuyển khoản cho KS';
     
     if (isHotelDebt) {
-      // TRƯỜNG HỢP 1: KHÁCH SẠN NỢ SÀN (Chỉ cần xác nhận, không cần tải ảnh)
       Swal.fire({
         title: title,
         html: `Bạn xác nhận đã nhận đủ tiền từ <b>${item.hotel_name}</b> cho tháng ${this.selectedMonth}?`,
@@ -135,12 +129,11 @@ export class AdminSettlementsComponent implements OnInit {
         cancelButtonText: 'Hủy'
       }).then((result) => {
         if (result.isConfirmed) {
-          this.submitConfirmAPI(item, null); // Không gửi file
+          this.submitConfirmAPI(item, null); 
         }
       });
 
     } else {
-      // TRƯỜNG HỢP 2: SÀN NỢ KHÁCH SẠN (Cần tải ảnh Bill chuyển khoản)
       Swal.fire({
         title: title,
         html: `Bạn xác nhận đã chuyển khoản cho <b>${item.hotel_name}</b>?<br><br>

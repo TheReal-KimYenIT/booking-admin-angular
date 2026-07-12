@@ -18,3 +18,8 @@ table td {
 .card {
     border-radius: 10px;
 }
+
+/* Tránh lỗi render canvas biểu đồ Chart.js khi chưa có độ cao */
+canvas {
+    min-height: 150px;
+}

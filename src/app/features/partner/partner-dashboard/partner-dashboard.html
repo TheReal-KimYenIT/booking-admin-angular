@@ -37,6 +37,11 @@
                     <span *ngIf="newContactCount > 0" class="notification-badge">{{ newContactCount }}</span>
                 </a>
             </li>
+            <li *ngIf="hasPermission('customers')">
+                <a routerLink="/dashboard/customers" routerLinkActive="active-menu" class="menu-item">
+                    <span class="icon">📝</span> Quản lý khách hàng
+                </a>
+            </li>
 
             <li *ngIf="hasPermission('bookings')">
                 <a routerLink="/dashboard/bookings" routerLinkActive="active-menu" class="menu-item">

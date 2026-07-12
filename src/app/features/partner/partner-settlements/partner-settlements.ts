@@ -8,15 +8,15 @@ import Swal from 'sweetalert2';
   selector: 'app-partner-settlements',
   standalone: true,
   imports: [CommonModule, FormsModule, HttpClientModule],
-  templateUrl: './partner-settlements.html'
+  templateUrl: './partner-settlements.html',
+  styleUrl: './partner-settlements.css'
 })
 export class PartnerSettlementsComponent implements OnInit {
   private apiUrl = 'http://localhost:8000/api/partner/settlements';
   
-  settlementData: any = null; // Partner chỉ xem dữ liệu của chính mình (Object thay vì Array)
+  settlementData: any = null;
   isLoading = false;
   isExporting = false;
-
   selectedMonth: string = '';
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
@@ -38,7 +38,7 @@ export class PartnerSettlementsComponent implements OnInit {
       headers: { 'Authorization': `Bearer ${token}` }
     }).subscribe({
       next: (res: any) => {
-        this.settlementData = res.data; // Dữ liệu trả về trực tiếp từ Backend
+        this.settlementData = res.data;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -81,37 +81,36 @@ export class PartnerSettlementsComponent implements OnInit {
 
   selectedFile: File | null = null;
 
-onFileSelected(event: any) {
-  this.selectedFile = event.target.files[0];
-}
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
 
-uploadProof() {
-  if (!this.selectedFile) return;
+  uploadProof() {
+    if (!this.selectedFile) return;
 
-  const [year, month] = this.selectedMonth.split('-');
-  const formData = new FormData();
-  formData.append('month', month);
-  formData.append('year', year);
-  formData.append('proof_image', this.selectedFile);
+    const [year, month] = this.selectedMonth.split('-');
+    const formData = new FormData();
+    formData.append('month', month);
+    formData.append('year', year);
+    formData.append('proof_image', this.selectedFile);
 
-  const token = localStorage.getItem('partner_token');
-  
-  // Dùng HttpClient đã inject trong constructor
-  this.http.post('http://localhost:8000/api/partner/settlements/upload-proof', formData, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  }).subscribe({
-    next: () => {
-      Swal.fire('Thành công', 'Đã gửi ảnh chuyển khoản cho Admin!', 'success');
-      this.loadData();
-    },
-    error: (err) => {
-      console.error(err);
-      Swal.fire('Lỗi', 'Không thể gửi Bill. Vui lòng thử lại!', 'error');
-    }
-  });
-}
+    const token = localStorage.getItem('partner_token');
+    
+    this.http.post('http://localhost:8000/api/partner/settlements/upload-proof', formData, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).subscribe({
+      next: () => {
+        Swal.fire('Thành công', 'Đã gửi ảnh chuyển khoản cho Admin!', 'success');
+        this.loadData();
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire('Lỗi', 'Không thể gửi Bill. Vui lòng thử lại!', 'error');
+      }
+    });
+  }
 
-partnerConfirm() {
+  partnerConfirm() {
     Swal.fire({
       title: 'Xác nhận đã nhận tiền?',
       text: 'Bạn xác nhận đã nhận đủ tiền chuyển khoản công nợ từ hệ thống Sàn?',

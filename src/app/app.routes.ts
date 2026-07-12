@@ -22,6 +22,8 @@ import { AdminPromotionsComponent } from './features/admin/admin-promotions/admi
 import { TransactionsComponent } from './features/admin/admin-transactions/admin-transactions';
 import { SystemSettingsComponent } from './features/admin/admin-system-settings/admin-system-settings';
 import { AdminSettlementsComponent } from './features/admin/admin-settlements/admin-settlements';
+import { AdminRefundsComponent } from './features/admin/admin-refunds/admin-refunds';
+
 
 // ==========================================
 // IMPORT CÁC COMPONENT CỦA ĐỐI TÁC (PARTNER)
@@ -41,7 +43,6 @@ import { PartnerPromotionsComponent } from './features/partner/partner-promotion
 import { PartnerStaffComponent } from './features/partner/partner-staff/partner-staff';
 import { PartnerSupportComponent } from './features/partner/partner-support/partner-support';
 import { PartnerRoleComponent } from './features/partner/partner-role/partner-role';
-// 👉 THÊM DÒNG NÀY: Import component Profile mới tạo
 import { PartnerProfileComponent } from './features/partner/partner-profile/partner-profile';
 import { PartnerInventoryComponent } from './features/partner/partner-inventory/partner-inventory';
 import { PartnerRoomMatrixComponent } from './features/partner/partner-room-matrix/partner-room-matrix';
@@ -50,6 +51,7 @@ import { authGuard } from './core/guards/auth-guard';
 
 import { PartnerTransactionsComponent } from './features/partner/partner-transactions/partner-transactions';
 import { PartnerSettlementsComponent } from './features/partner/partner-settlements/partner-settlements';
+import { PartnerCustomersComponent } from './features/partner/partner-customers/partner-customers';
 
 export const routes: Routes = [
   // Mặc định khi vào web sẽ chuyển hướng đến trang Đăng nhập
@@ -86,6 +88,7 @@ export const routes: Routes = [
       { path: 'transactions', component: TransactionsComponent },
       { path: 'system-settings', component: SystemSettingsComponent },
       { path: 'settlements', component: AdminSettlementsComponent },
+      { path: 'refunds', component: AdminRefundsComponent },
       
 
     ]
@@ -124,6 +127,9 @@ export const routes: Routes = [
       { path: 'room-matrix', component: PartnerRoomMatrixComponent },
       { path: 'transactions', component: PartnerTransactionsComponent },
       { path: 'settlements', component: PartnerSettlementsComponent },
+      { path: 'customers', component: PartnerCustomersComponent },
+
+      
     ]
   },
 

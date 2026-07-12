@@ -89,8 +89,10 @@
                             <th class="ps-4">Mã Đơn / Thời gian</th>
                             <th>Khách hàng</th>
                             <th class="text-center">Hình thức / Trạng thái</th>
-                            <th class="text-end text-dark">Tổng khách thanh toán</th>
-                            <th class="text-center">Chiết khấu</th>
+                            <!-- 👉 Cập nhật Header Bảng -->
+                            <th class="text-end text-dark">Gốc (Khách quẹt)</th>
+                            <th class="text-end text-warning">Đã Hoàn</th>
+                            <th class="text-center">Tỉ lệ</th>
                             <th class="text-end text-danger">Phí Sàn thu (-)</th>
                             <th class="text-end text-success pe-4">Tiền thực nhận</th>
                         </tr>
@@ -112,7 +114,15 @@
                                 <span *ngIf="item.payment_status !== 1" class="text-warning small fw-bold">⏳ Xử
                                     lý</span>
                             </td>
+                            <!-- 👉 Dữ liệu số tiền gốc -->
                             <td class="text-end fw-bold text-dark fs-6">{{ item.amount | number }} đ</td>
+
+                            <!-- 👉 Dữ liệu số tiền hoàn (NẾU CÓ) -->
+                            <td class="text-end fw-bold text-warning fs-6">
+                                <span *ngIf="item.refund_deducted > 0">-{{ item.refund_deducted | number }} đ</span>
+                                <span *ngIf="!item.refund_deducted || item.refund_deducted === 0">0 đ</span>
+                            </td>
+
                             <td class="text-center fw-bold text-muted">{{ item.applied_rate }}%</td>
                             <td class="text-end fw-bold text-danger">- {{ item.commission_fee | number }} đ</td>
                             <td class="text-end fw-bold text-success pe-4 fs-6">{{ item.payout_amount | number }} đ</td>

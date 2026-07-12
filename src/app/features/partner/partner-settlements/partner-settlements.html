@@ -15,7 +15,6 @@
                     target="_blank" class="btn btn-link btn-sm">Xem Bill chuyển khoản</a>
             </div>
 
-            <!-- Hiện nút xác nhận nhận tiền nếu Sàn đã chuyển khoản và trạng thái đang chờ khách duyệt (status = 2) -->
             <div *ngIf="settlementData?.status === 2" class="mt-3 p-3 border rounded text-center bg-light">
                 <p class="fw-bold text-success">💰 Bạn đã nhận được tiền chưa? Hãy xác nhận để hệ thống chốt sổ:</p>
                 <button (click)="partnerConfirm()" class="btn btn-success fw-bold">Xác nhận đã nhận đủ tiền</button>
@@ -31,25 +30,29 @@
         </div>
     </div>
 
-    <!-- Sửa các dòng hiển thị dữ liệu thành dạng có dấu ? -->
     <div class="card border-0 shadow-sm p-4" *ngIf="!isLoading && settlementData">
         <div class="row">
             <div class="col-md-6">
                 <h5 class="fw-bold mb-3">Thông tin tài chính</h5>
                 <ul class="list-group list-group-flush">
-                    <!-- Thêm dấu ? vào settlementData?.total_revenue -->
-                    <li class="list-group-item d-flex justify-content-between"><span>Tổng doanh thu:</span> <strong>{{
-                            settlementData?.total_revenue | number }} đ</strong></li>
-                    <li class="list-group-item d-flex justify-content-between"><span>Sàn giữ (VNPAY):</span> <strong
-                            class="text-success">{{ settlementData?.vnpay_total | number }} đ</strong></li>
-                    <li class="list-group-item d-flex justify-content-between"><span>Hoa hồng Sàn thu:</span> <strong
-                            class="text-danger">- {{ settlementData?.commission_total | number }} đ</strong></li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <!-- 👉 Cập nhật ghi chú -->
+                        <span>Tổng doanh thu <small class="text-muted">(Đã trừ tiền hoàn khách)</small>:</span>
+                        <strong>{{ settlementData?.total_revenue | number }} đ</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Sàn giữ (VNPAY):</span>
+                        <strong class="text-success">{{ settlementData?.vnpay_total | number }} đ</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Hoa hồng Sàn thu:</span>
+                        <strong class="text-danger">- {{ settlementData?.commission_total | number }} đ</strong>
+                    </li>
                 </ul>
             </div>
             <div class="col-md-6 border-start">
                 <div class="p-3 bg-light rounded text-center">
                     <h6 class="text-muted">CÔNG NỢ CẦN THANH TOÁN</h6>
-                    <!-- Thêm dấu ? ở đây -->
                     <h2 class="fw-black text-primary"
                         [ngClass]="settlementData?.payout_to_hotel < 0 ? 'text-danger' : 'text-success'">
                         {{ settlementData?.payout_to_hotel | number }} đ

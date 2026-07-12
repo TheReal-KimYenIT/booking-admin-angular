@@ -41,7 +41,6 @@
                 Không phát sinh doanh dịch thành công nào trong tháng này.
             </div>
 
-            <!-- HIỂN THỊ KHI TÌM KIẾM KHÔNG RA KẾT QUẢ -->
             <div *ngIf="!isLoading && settlements.length > 0 && filteredSettlements.length === 0"
                 class="text-center p-5 text-danger fw-bold">
                 Không tìm thấy khách sạn nào khớp với bộ lọc của bạn.
@@ -52,7 +51,8 @@
                     <thead class="table-light text-muted small uppercase">
                         <tr>
                             <th class="ps-4">Khách sạn</th>
-                            <th class="text-end">Tổng Doanh Thu</th>
+                            <!-- 👉 Cập nhật ghi chú cho Admin hiểu -->
+                            <th class="text-end">Tổng Doanh Thu <br><small>(Đã trừ Hoàn Khách)</small></th>
                             <th class="text-end text-success">Sàn Giữ (VNPAY)</th>
                             <th class="text-end text-danger">Hoa hồng Sàn thu</th>
                             <th class="text-end fw-bold text-primary">Chốt Công Nợ</th>
@@ -60,7 +60,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Vòng lặp lấy dữ liệu từ filteredSettlements -->
                         <tr *ngFor="let item of filteredSettlements">
                             <td class="ps-4 fw-bold text-dark">{{ item.hotel_name }}</td>
                             <td class="text-end fw-bold">{{ item.total_revenue | number }} đ</td>
@@ -78,21 +77,16 @@
                                     <button class="btn btn-outline-secondary btn-sm w-100"
                                         (click)="exportPdf(item.hotel_id)">📄 PDF</button>
 
-                                    <!-- CHỈ HIỆN NÚT KHI STATUS === 0 -->
                                     <button *ngIf="item.status === 0" class="btn btn-primary btn-sm w-100 fw-bold"
                                         (click)="confirmPayment(item)">
                                         {{ item.payout_to_hotel < 0 ? 'Xác nhận thu tiền' : 'Xác nhận chuyển' }}
                                             </button>
 
-                                            <!-- HIỆN "Chờ duyệt" KHI STATUS === 2 -->
                                             <span *ngIf="item.status === 2" class="badge bg-warning w-100 py-2">Chờ KS
                                                 duyệt</span>
-
-                                            <!-- HIỆN "Đã đối soát" KHI STATUS === 1 -->
                                             <span *ngIf="item.status === 1" class="badge bg-success w-100 py-2">Đã đối
                                                 soát</span>
 
-                                            <!-- NÚT XEM BILL -->
                                             <a *ngIf="item.proof_image"
                                                 [href]="'http://localhost:8000' + item.proof_image" target="_blank"
                                                 class="small text-info text-decoration-none fw-bold mt-1">
