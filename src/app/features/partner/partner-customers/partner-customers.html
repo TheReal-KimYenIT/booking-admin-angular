@@ -1,42 +1,326 @@
-<div class="admin-container">
-    <h2>Danh Sách Khách Hàng Lưu Trú</h2>
-
-    <!-- Thanh tìm kiếm -->
-    <div class="search-box mb-3">
-        <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()"
-            placeholder="Tìm theo tên hoặc số điện thoại..." class="form-control">
+<div class="fade-in-up">
+    <!-- 1. Header Trang -->
+    <div class="d-flex justify-content-between align-items-start align-items-md-center mb-4 flex-column flex-md-row gap-3">
+        <div>
+            <h2 class="mb-1 fw-bold text-slate-800 fs-3 fs-md-2">Danh Sách Khách Hàng Lưu Trú</h2>
+            <p class="text-muted mb-0 small">Hồ sơ khách hàng, tần suất lưu trú, lịch sử đặt phòng và danh sách đen (Blacklist)</p>
+        </div>
+        <div class="d-flex align-items-center gap-2 w-100 w-md-auto flex-wrap flex-sm-nowrap">
+            <button (click)="loadData()" class="btn btn-outline-secondary btn-sm fw-semibold d-flex align-items-center justify-content-center gap-1.5 shadow-xs flex-grow-1 flex-md-grow-0">
+                <i class="bi bi-arrow-clockwise"></i> Tải lại
+            </button>
+            <button (click)="exportToExcel()" class="btn btn-success btn-sm fw-semibold d-flex align-items-center justify-content-center gap-1.5 shadow-xs flex-grow-1 flex-md-grow-0">
+                <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+            </button>
+        </div>
     </div>
 
-    <table class="table" *ngIf="!isLoading">
-        <thead>
-            <tr>
-                <th>Khách Hàng</th>
-                <th>Thông tin Liên hệ</th>
-                <th class="text-center">Số Lần Đặt</th>
-                <th>Trạng Thái</th>
-                <th>Thao Tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let item of filteredList" [class.row-blocked]="item.is_blocked == 1">
-                <td><strong>{{ item.last_name }} {{ item.first_name }}</strong></td>
-                <td>✉️ {{ item.email }} <br> 📞 {{ item.phone }}</td>
-                <td class="text-center">{{ item.total_bookings }}</td>
-                <td>
-                    <span class="badge" [class.bg-success]="item.is_blocked == 0"
-                        [class.bg-danger]="item.is_blocked == 1">
-                        {{ item.is_blocked == 0 ? 'Bình thường' : 'Đang bị chặn' }}
-                    </span>
-                </td>
-                <td class="d-flex gap-2">
-                    <button class="btn btn-sm btn-info" (click)="goToMessages(item)">Tin nhắn</button>
-                    <button class="btn btn-sm btn-secondary" (click)="viewOrders(item)">Đơn hàng</button>
-                    <button class="btn btn-sm" [class.btn-danger]="item.is_blocked == 0"
-                        [class.btn-success]="item.is_blocked == 1" (click)="toggleBlock(item)">
-                        {{ item.is_blocked == 0 ? 'Chặn' : 'Mở' }}
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <!-- 2. Thẻ Thống Kê Tổng Quan (KPIs) - Responsive 1 col (xs) -> 2 cols (sm/md/lg) -> 4 cols (xl) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card shadow-xs">
+                <div class="kpi-icon bg-blue-light text-primary">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Tổng khách hàng</div>
+                    <div class="kpi-value text-slate-800">{{ totalCustomers | number:'1.0-0' }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card shadow-xs">
+                <div class="kpi-icon bg-amber-light text-amber">
+                    <i class="bi bi-star-fill"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Khách quen & VIP</div>
+                    <div class="kpi-value text-amber">{{ loyalCustomersCount | number:'1.0-0' }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card shadow-xs">
+                <div class="kpi-icon bg-rose-light text-danger">
+                    <i class="bi bi-slash-circle-fill"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Bị chặn (Blacklist)</div>
+                    <div class="kpi-value text-danger">{{ blockedCustomersCount | number:'1.0-0' }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card shadow-xs">
+                <div class="kpi-icon bg-emerald-light text-success">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-label">Tổng doanh thu tích lũy</div>
+                    <div class="kpi-value text-success font-monospace">{{ totalRevenue | number:'1.0-0' }} <span class="fs-6 fw-normal">đ</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Thanh Lọc & Tìm Kiếm - Responsive Flex -->
+    <div class="card border-0 shadow-xs mb-4">
+        <div class="card-body p-3 d-flex flex-column flex-lg-row justify-content-between align-items-stretch align-items-lg-center gap-3">
+            <!-- Filter Tabs -->
+            <div class="d-flex gap-2 flex-wrap">
+                <button (click)="setFilterTab('all')"
+                    class="filter-tab-btn flex-grow-1 flex-sm-grow-0" [class.active]="activeFilterTab === 'all'">
+                    <i class="bi bi-list-ul me-1"></i> Tất cả ({{ totalCustomers }})
+                </button>
+                <button (click)="setFilterTab('loyal')"
+                    class="filter-tab-btn flex-grow-1 flex-sm-grow-0" [class.active]="activeFilterTab === 'loyal'">
+                    <i class="bi bi-star-fill text-warning me-1"></i> Khách quen & VIP ({{ loyalCustomersCount }})
+                </button>
+                <button (click)="setFilterTab('blocked')"
+                    class="filter-tab-btn text-danger flex-grow-1 flex-sm-grow-0" [class.active]="activeFilterTab === 'blocked'">
+                    <i class="bi bi-slash-circle me-1"></i> Đang bị chặn ({{ blockedCustomersCount }})
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-wrapper position-relative w-100 w-lg-auto">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
+                    placeholder="Tìm theo tên, SĐT hoặc email..."
+                    class="form-control form-control-sm search-input">
+                <button *ngIf="searchTerm" (click)="clearSearch()" class="search-clear-btn" title="Xóa tìm kiếm">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Trạng Thái Đang Tải -->
+    <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="text-muted mt-2 small">Đang tải danh sách khách hàng...</div>
+    </div>
+
+    <!-- 5. Bảng Dữ Liệu Khách Hàng -->
+    <div *ngIf="!isLoading" class="card border-0 shadow-xs overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 custom-customer-table">
+                <thead class="table-light text-muted">
+                    <tr>
+                        <th class="ps-4" style="min-width: 250px;">Khách Hàng</th>
+                        <th style="min-width: 230px;">Thông Tin Liên Hệ</th>
+                        <th class="text-center" style="min-width: 130px;">Phân Loại</th>
+                        <th class="text-center" style="min-width: 100px;">Số Lần Đặt</th>
+                        <th class="text-end" style="min-width: 160px;">Tổng Chi Tiêu</th>
+                        <th class="text-center" style="min-width: 140px;">Lần Đặt Gần Nhất</th>
+                        <th style="min-width: 160px;">Trạng Thái</th>
+                        <th class="text-end pe-4" style="min-width: 240px;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of filteredList" [class.row-blocked-highlight]="item.is_blocked == 1">
+                        <!-- Cột 1: Khách Hàng (Avatar initials + Tên) -->
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="customer-avatar" [style.background-color]="getAvatarColor(item.id)">
+                                    {{ getInitials(item.first_name, item.last_name) }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-slate-800 fs-6 text-nowrap customer-name">
+                                        {{ item.last_name }} {{ item.first_name }}
+                                    </div>
+                                    <div class="text-muted small">Mã KH: #CUS-{{ item.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Cột 2: Thông Tin Liên Hệ -->
+                        <td>
+                            <div class="d-flex flex-column gap-1 small">
+                                <div class="d-flex align-items-center gap-2 text-slate-700 text-truncate" style="max-width: 220px;" [title]="item.email || 'Chưa cung cấp'">
+                                    <i class="bi bi-envelope text-muted"></i>
+                                    <span class="text-truncate">{{ item.email || 'Chưa cung cấp' }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 text-slate-700">
+                                    <i class="bi bi-telephone text-muted"></i>
+                                    <span class="font-monospace fw-semibold">{{ item.phone || 'Chưa cung cấp' }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Cột 3: Phân Loại (Huy hiệu VIP/Khách quen) -->
+                        <td class="text-center">
+                            <span class="badge" [ngClass]="getCustomerTier(item.total_bookings).class">
+                                <i [class]="getCustomerTier(item.total_bookings).iconClass + ' me-1'"></i>{{ getCustomerTier(item.total_bookings).label }}
+                            </span>
+                        </td>
+
+                        <!-- Cột 4: Số Lần Đặt -->
+                        <td class="text-center">
+                            <span class="badge bg-slate-100 text-slate-800 fw-bold border border-slate-200 px-3 py-1 fs-6">
+                                {{ item.total_bookings }}
+                            </span>
+                        </td>
+
+                        <!-- Cột 5: Tổng Chi Tiêu -->
+                        <td class="text-end">
+                            <span class="fw-bold text-slate-800 font-monospace text-nowrap">
+                                {{ (item.total_spent || 0) | number:'1.0-0' }} đ
+                            </span>
+                        </td>
+
+                        <!-- Cột 6: Lần Đặt Gần Nhất -->
+                        <td class="text-center text-muted small text-nowrap">
+                            {{ item.latest_booking_at ? (item.latest_booking_at | date:'dd/MM/yyyy') : '---' }}
+                        </td>
+
+                        <!-- Cột 7: Trạng Thái & Lý do -->
+                        <td>
+                            <div *ngIf="item.is_blocked == 0">
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1 text-nowrap">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Hoạt động
+                                </span>
+                            </div>
+                            <div *ngIf="item.is_blocked == 1">
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1 text-nowrap">
+                                    <i class="bi bi-slash-circle-fill me-1"></i> Đang bị chặn
+                                </span>
+                                <div *ngIf="item.block_reason" class="block-reason-badge mt-1" [title]="item.block_reason">
+                                    <i class="bi bi-info-circle me-1"></i>Lý do: {{ item.block_reason }}
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Cột 8: Thao Tác (Tin nhắn, Đơn đặt, Chặn/Mở) -->
+                        <td class="text-end pe-4">
+                            <div class="d-inline-flex gap-1.5 align-items-center">
+                                <button class="btn btn-sm btn-outline-primary btn-action-icon" (click)="goToMessages(item)" title="Nhắn tin với khách">
+                                    <i class="bi bi-chat-dots me-1"></i> Tin nhắn
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary btn-action-icon" (click)="viewOrders(item)" title="Xem lịch sử đặt phòng">
+                                    <i class="bi bi-receipt me-1"></i> Đơn đặt
+                                </button>
+                                <button *ngIf="item.is_blocked == 0" class="btn btn-sm btn-outline-danger btn-action-icon" (click)="toggleBlock(item)" title="Chặn đặt phòng">
+                                    <i class="bi bi-slash-circle me-1"></i> Chặn
+                                </button>
+                                <button *ngIf="item.is_blocked == 1" class="btn btn-sm btn-success btn-action-icon" (click)="toggleBlock(item)" title="Mở khóa khách hàng">
+                                    <i class="bi bi-unlock me-1"></i> Mở
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Trạng thái không có kết quả -->
+                    <tr *ngIf="filteredList.length === 0">
+                        <td colspan="8" class="text-center py-5">
+                            <div class="text-muted">
+                                <div class="fs-1 mb-2 text-slate-400"><i class="bi bi-search"></i></div>
+                                <h6 class="fw-bold mb-1">Không tìm thấy khách hàng nào</h6>
+                                <p class="small mb-3">Thử tìm bằng từ khóa khác hoặc xóa bộ lọc tìm kiếm.</p>
+                                <button *ngIf="searchTerm" (click)="clearSearch()" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-1"></i> Xóa tìm kiếm
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 6. Modal Lịch Sử Đặt Phòng Của Khách Hàng -->
+    <div class="modal fade show" *ngIf="isOrderModalOpen" style="display: block; background: rgba(15, 23, 42, 0.6);" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <!-- Modal Header -->
+                <div class="modal-header bg-slate-900 text-white p-3 p-md-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="modal-avatar" [style.background-color]="getAvatarColor(selectedCustomer?.id || 1)">
+                            {{ getInitials(selectedCustomer?.first_name, selectedCustomer?.last_name) }}
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0 text-white fs-6 fs-md-5">Lịch sử đặt phòng: {{ selectedCustomerName }}</h5>
+                            <div class="small text-slate-300 mt-1 d-flex align-items-center flex-wrap gap-2">
+                                <span><i class="bi bi-telephone me-1"></i> {{ selectedCustomer?.phone || '---' }}</span>
+                                <span class="d-none d-sm-inline">•</span>
+                                <span><i class="bi bi-envelope me-1"></i> {{ selectedCustomer?.email || '---' }}</span>
+                                <span class="d-none d-sm-inline">•</span>
+                                <span>Tổng chi tiêu: <strong class="text-emerald-400 font-monospace">{{ (selectedCustomer?.total_spent || 0) | number:'1.0-0' }} đ</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" (click)="closeOrderModal()"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body p-3 p-md-4">
+                    <!-- Đang tải -->
+                    <div *ngIf="isOrdersLoading" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted small">Đang tải lịch sử đặt phòng...</p>
+                    </div>
+
+                    <!-- Bảng danh sách đơn đặt -->
+                    <div class="table-responsive" *ngIf="!isOrdersLoading && selectedCustomerOrders.length > 0">
+                        <table class="table table-hover align-middle border mb-0" style="min-width: 780px;">
+                            <thead class="table-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="ps-3">Mã Đặt Phòng</th>
+                                    <th>Hạng Phòng Đặt</th>
+                                    <th>Ngày Đặt</th>
+                                    <th>Thời Gian Lưu Trú</th>
+                                    <th class="text-end">Tổng Tiền</th>
+                                    <th class="text-center">Trạng Thái</th>
+                                    <th class="text-end pe-3">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let order of selectedCustomerOrders">
+                                    <td class="ps-3 fw-bold text-primary font-monospace">
+                                        {{ order.booking_code || '#' + order.id }}
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">{{ order.details?.[0]?.room_type?.name || 'Chưa rõ hạng phòng' }}</div>
+                                        <div *ngIf="order.details?.length > 1" class="small text-muted">+ {{ order.details.length - 1 }} hạng phòng khác</div>
+                                    </td>
+                                    <td class="text-muted small">
+                                        {{ order.created_at | date:'dd/MM/yyyy HH:mm' }}
+                                    </td>
+                                    <td class="small">
+                                        <div class="fw-semibold text-dark">
+                                            <i class="bi bi-calendar3 me-1 text-muted"></i>{{ order.check_in | date:'dd/MM/yyyy' }} - {{ order.check_out | date:'dd/MM/yyyy' }}
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-bold text-slate-800 font-monospace text-nowrap">
+                                        {{ order.total_amount | number:'1.0-0' }} đ
+                                    </td>
+                                    <td class="text-center">
+                                        <span [ngClass]="getBookingStatusInfo(order.status).class">
+                                            {{ getBookingStatusInfo(order.status).label }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <button class="btn btn-sm btn-primary fw-semibold px-3 text-nowrap shadow-xs d-inline-flex align-items-center gap-1" (click)="goToOrderDetails(order)">
+                                            Chi tiết đơn <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Trống -->
+                    <div *ngIf="!isOrdersLoading && selectedCustomerOrders.length === 0" class="text-center py-5">
+                        <div class="fs-1 text-muted mb-2"><i class="bi bi-receipt"></i></div>
+                        <h6 class="fw-bold text-muted">Khách hàng chưa có đơn đặt phòng nào</h6>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer bg-light p-3">
+                    <button type="button" class="btn btn-secondary btn-sm fw-semibold px-4 w-100 w-sm-auto" (click)="closeOrderModal()">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -2,27 +2,26 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-// ĐÃ SỬA: Lùi 3 cấp để trỏ về thư mục services gốc
 import { PartnerService } from '../../../services/partner.service';
-import Swal from 'sweetalert2'; // Thêm import Swal
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-partner-amenities',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './partner-amenities.html',
-  styleUrl: './partner-amenities.css' // Dùng styleUrl cho Angular 17+
+  styleUrl: './partner-amenities.css'
 })
 export class PartnerAmenitiesComponent implements OnInit {
-  
   isLoading = true;
+  isSaving = false;
+
   allAmenities: any[] = [];
+  filteredAmenities: any[] = [];
   selectedIds: number[] = [];
 
-  showToast = false;
-  toastMessage = '';
-  toastType: 'success' | 'error' = 'success';
-  toastTimeout: any;
+  searchTerm: string = '';
+  activeFilterTab: 'all' | 'selected' | 'unselected' = 'all';
 
   constructor(
     private router: Router,
@@ -31,31 +30,16 @@ export class PartnerAmenitiesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // LỚP BẢO VỆ: KIỂM TRA QUYỀN TRƯỚC KHI TẢI TRANG
-    // =========================================
     const userStr = localStorage.getItem('partner_user');
     if (userStr) {
       const user = JSON.parse(userStr);
-      // Lễ tân (role_id = 3) không được vào trang này
       if (Number(user.role_id) === 3) {
         Swal.fire('Từ chối truy cập', 'Bạn là Lễ tân, không có quyền vào trang này!', 'error');
-        this.router.navigate(['/dashboard/room-matrix']); // Đá văng ra trang sơ đồ phòng
-        return; // Dừng lập tức, không chạy code tải dữ liệu bên dưới
+        this.router.navigate(['/dashboard/room-matrix']);
+        return;
       }
     }
     this.loadData();
-  }
-
-  displayToast(message: string, type: 'success' | 'error' = 'success') {
-    this.toastMessage = message;
-    this.toastType = type;
-    this.showToast = true;
-    this.cdr.detectChanges();
-    if (this.toastTimeout) clearTimeout(this.toastTimeout);
-    this.toastTimeout = setTimeout(() => {
-      this.showToast = false;
-      this.cdr.detectChanges();
-    }, 3000);
   }
 
   loadData() {
@@ -63,38 +47,121 @@ export class PartnerAmenitiesComponent implements OnInit {
     this.partnerService.getHotelAmenities().subscribe({
       next: (res: any) => {
         this.allAmenities = res.all_amenities || [];
-        this.selectedIds = res.selected_ids || [];
+        this.selectedIds = (res.selected_ids || []).map((id: any) => Number(id));
+        this.applyFilter();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
       error: (err: any) => {
-        console.error(err);
+        console.error('Lỗi nạp tiện ích:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
+        Swal.fire('Lỗi', 'Không thể tải danh sách tiện ích khách sạn!', 'error');
       }
     });
   }
 
-  // Hàm xử lý khi Đối tác tích/bỏ tích Checkbox
-  toggleAmenity(amenityId: number, event: any) {
-    if (event.target.checked) {
-      // Nếu tích vào -> Thêm ID vào mảng
-      this.selectedIds.push(amenityId);
-    } else {
-      // Nếu bỏ tích -> Xóa ID khỏi mảng
-      this.selectedIds = this.selectedIds.filter(id => id !== amenityId);
+  // Lọc tìm kiếm và tabs
+  applyFilter() {
+    let list = [...this.allAmenities];
+
+    // 1. Lọc theo tab
+    if (this.activeFilterTab === 'selected') {
+      list = list.filter(item => this.selectedIds.includes(item.id));
+    } else if (this.activeFilterTab === 'unselected') {
+      list = list.filter(item => !this.selectedIds.includes(item.id));
     }
+
+    // 2. Tìm kiếm theo tên
+    if (this.searchTerm && this.searchTerm.trim() !== '') {
+      const term = this.searchTerm.trim().toLowerCase();
+      list = list.filter(item => (item.name || '').toLowerCase().includes(term));
+    }
+
+    this.filteredAmenities = list;
+    this.cdr.detectChanges();
   }
 
+  setFilterTab(tab: 'all' | 'selected' | 'unselected') {
+    this.activeFilterTab = tab;
+    this.applyFilter();
+  }
+
+  onSearch() {
+    this.applyFilter();
+  }
+
+  clearSearch() {
+    this.searchTerm = '';
+    this.applyFilter();
+  }
+
+  // Bật/Tắt lựa chọn tiện ích
+  toggleAmenity(amenityId: number) {
+    const id = Number(amenityId);
+    const index = this.selectedIds.indexOf(id);
+    if (index > -1) {
+      this.selectedIds.splice(index, 1);
+    } else {
+      this.selectedIds.push(id);
+    }
+    this.cdr.detectChanges();
+  }
+
+  isSelected(amenityId: number): boolean {
+    return this.selectedIds.includes(Number(amenityId));
+  }
+
+  // Chọn nhanh tất cả
+  selectAll() {
+    this.selectedIds = this.allAmenities.map(a => Number(a.id));
+    this.applyFilter();
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 1500
+    });
+    Toast.fire({ icon: 'info', title: `Đã chọn tất cả ${this.selectedIds.length} tiện ích` });
+  }
+
+  // Bỏ chọn tất cả
+  deselectAll() {
+    this.selectedIds = [];
+    this.applyFilter();
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 1500
+    });
+    Toast.fire({ icon: 'info', title: 'Đã bỏ chọn tất cả tiện ích' });
+  }
+
+  // Lưu xuống Database
   saveAmenities() {
+    this.isSaving = true;
+    Swal.fire({ title: 'Đang lưu tiện ích...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
     this.partnerService.updateHotelAmenities(this.selectedIds).subscribe({
       next: (res: any) => {
-        // Thay đổi: Dùng Swal báo thành công
-        Swal.fire({ icon: 'success', title: 'Thành công!', text: res.message || 'Lưu tiện ích thành công!', showConfirmButton: false, timer: 1500 });
+        this.isSaving = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công!',
+          text: res.message || 'Cập nhật danh mục tiện ích khách sạn thành công!',
+          timer: 1600,
+          showConfirmButton: false
+        });
       },
       error: (err: any) => {
-        // Thay đổi: Dùng Swal báo lỗi
-        Swal.fire({ icon: 'error', title: 'Lỗi', text: err.error?.message || 'Lỗi lưu tiện ích.', confirmButtonText: 'Đóng' });
+        this.isSaving = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Lỗi',
+          text: err.error?.message || 'Có lỗi xảy ra khi lưu tiện ích.',
+          confirmButtonText: 'Đóng'
+        });
       }
     });
   }

@@ -4,264 +4,187 @@
     box-sizing: border-box;
 }
 
-.booking-dashboard {
-    background-color: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+/* Điều chỉnh padding cho bảng để tránh tràn dòng chữ và rớt ký tự */
+.glass-table th {
+    padding: 12px 14px !important;
+    white-space: nowrap !important;
 }
 
-/* HEADER */
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
-.page-title {
-    margin: 0;
-    color: #111;
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.search-box input {
-    padding: 8px 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 250px;
-    outline: none;
-    font-size: 14px;
-}
-
-.search-box input:focus {
-    border-color: #0f766e;
-}
-
-/* TABS */
-.custom-tabs {
-    display: flex;
-    border-bottom: 2px solid #eef2f6;
-    margin-bottom: 20px;
-    gap: 30px;
-}
-
-.tab-item {
-    padding: 10px 0;
-    cursor: pointer;
-    font-weight: 600;
-    color: #64748b;
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s;
-    font-size: 14px;
-    position: relative;
-    margin-bottom: -2px;
-    /* Đè lên viền dưới */
-}
-
-.tab-item.active {
-    color: #0f766e;
-    /* Màu xanh lá đậm giống ảnh mẫu */
-    border-bottom-color: #0f766e;
-}
-
-.tab-item:hover:not(.active) {
-    color: #334155;
-}
-
-.count-badge {
-    background-color: #f1f5f9;
-    color: #475569;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    margin-left: 5px;
-}
-
-.tab-item.active .count-badge {
-    background-color: #ccfbf1;
-    color: #0f766e;
-}
-
-/* BẢNG SIRVOY STYLE */
-.table-container {
-    overflow-x: auto;
-}
-
-.sirvoy-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    min-width: 900px;
-}
-
-.sirvoy-table th {
-    padding: 12px 10px;
-    border-bottom: 1px solid #eef2f6;
-    color: #64748b;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.sirvoy-table td {
-    padding: 15px 10px;
-    border-bottom: 1px solid #f1f5f9;
+.glass-table td {
+    padding: 14px 14px !important;
     vertical-align: middle;
 }
 
-.sirvoy-table tr:hover {
-    background-color: #f8fafc;
-}
-
-/* Các định dạng trong cột */
-.booking-code-wrapper {
-    display: flex;
+/* Tab badge số lượng */
+.tab-badge {
+    background-color: #e2e8f0;
+    color: #475569;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    transition: all 0.2s ease;
 }
 
-.star-icon {
-    color: #cbd5e1;
-    font-size: 16px;
-    cursor: pointer;
+.tab-badge.active-badge {
+    background-color: #ffffff;
+    color: #be123c;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.star-icon:hover {
-    color: #f59e0b;
-}
-
-.code-link {
-    color: #0284c7;
-    font-weight: 500;
-    text-decoration: underline;
-    font-size: 14px;
-}
-
-.code-link:hover {
-    color: #0369a1;
-}
-
-.badge-new {
+.tab-badge.highlight-badge {
     background-color: #dbeafe;
     color: #1e40af;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: bold;
 }
 
-.guest-name {
-    font-weight: 600;
-    color: #1e293b;
-    font-size: 14px;
-    margin-bottom: 2px;
+.tab-badge.highlight-badge-amber {
+    background-color: #fef3c7;
+    color: #92400e;
 }
 
-.guest-meta {
-    font-size: 12px;
-    color: #64748b;
-}
-
-.room-tag {
-    font-weight: 500;
+/* Nút Xuất Excel */
+.btn-excel {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     color: #334155;
-    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
 }
 
-.time-row {
-    font-size: 13px;
-    color: #334155;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+.btn-excel:hover {
+    border-color: #10b981;
+    color: #059669;
+    background-color: #f0fdf4;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
 }
 
-.time-row span {
-    font-size: 10px;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.text-center {
-    text-align: center;
-}
-
-.fw-bold {
-    font-weight: bold;
-    color: #0f172a;
-}
-
-/* Cột Trạng thái */
-.status-wrapper {
-    display: flex;
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #475569;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    border: 1px solid transparent;
+    white-space: nowrap;
 }
 
 .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
     display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+    flex-shrink: 0;
 }
 
-.dot-0 {
-    background-color: #f59e0b;
+/* 1. Đã xác nhận: Blue */
+.badge-confirmed {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+.badge-confirmed .status-dot {
+    background-color: #2563eb;
 }
 
-/* Vàng chờ duyệt */
-.dot-1 {
-    background-color: #3b82f6;
+/* 2. Đang lưu trú: Emerald (Active Stay) */
+.badge-staying {
+    background-color: #ecfdf5;
+    color: #047857;
+    border-color: #a7f3d0;
 }
-
-/* Xanh biển sắp đến */
-.dot-2 {
+.badge-staying .status-dot {
     background-color: #10b981;
 }
 
-/* Xanh lá đang ở */
-.dot-3 {
+/* 3. Đã trả phòng: Slate (Completed / History) */
+.badge-completed {
+    background-color: #f8fafc;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+.badge-completed .status-dot {
     background-color: #94a3b8;
 }
 
-/* Xám đã trả */
-.dot-4,
-.dot-5 {
-    background-color: #ef4444;
+/* 4. Đã hủy: Rose / Red */
+.badge-cancelled {
+    background-color: #fff1f2;
+    color: #be123c;
+    border-color: #fecdd3;
+}
+.badge-cancelled .status-dot {
+    background-color: #f43f5e;
 }
 
-/* Đỏ hủy/noshow */
+/* 5. No-show: Amber / Orange */
+.badge-noshow {
+    background-color: #fffbeb;
+    color: #b45309;
+    border-color: #fde68a;
+}
+.badge-noshow .status-dot {
+    background-color: #f59e0b;
+}
 
-/* Nút Chi tiết */
-.btn-action {
-    border: 1px solid #e2e8f0;
-    background: transparent;
+/* Default */
+.badge-default {
+    background-color: #f1f5f9;
+    color: #64748b;
+    border-color: #e2e8f0;
+}
+.badge-default .status-dot {
+    background-color: #94a3b8;
+}
+
+/* Phân trang (Pagination) */
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 6px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
     color: #475569;
-    padding: 6px 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    border-color: #fda4af;
+    color: #e11d48;
+    background-color: #fff1f2;
+}
+
+.page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.page-btn.active-page {
+    background-color: #e11d48;
+    color: #ffffff;
+    border-color: #e11d48;
+    box-shadow: 0 2px 6px rgba(225, 29, 72, 0.25);
+}
+
+/* Scrollbar mỏng cho thanh tab */
+.scrollbar-thin::-webkit-scrollbar {
+    height: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
     border-radius: 4px;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-    transition: 0.2s;
-}
-
-.btn-action:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #94a3b8;
-    font-style: italic;
 }

@@ -95,3 +95,33 @@
 .login-link:hover {
     text-decoration: underline;
 }
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+.password-wrapper .form-control {
+    padding-right: 40px;
+}
+.toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    z-index: 10;
+}
+.toggle-password-btn:hover {
+    color: #047857;
+}
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}

@@ -1,26 +1,168 @@
-<div class="partner-container">
-  <h2>Cập Nhật Tiện Ích Khách Sạn</h2>
-  <p>Vui lòng đánh dấu vào các tiện ích mà khách sạn của bạn đang cung cấp.</p>
+<div class="fade-in-up">
+    <!-- 1. Header Trang -->
+    <div class="d-flex justify-content-between align-items-start align-items-md-center mb-4 flex-column flex-md-row gap-3">
+        <div>
+            <h2 class="mb-1 fw-bold text-slate-800 fs-3 fs-md-2">Cập Nhật Tiện Ích Khách Sạn</h2>
+            <p class="text-muted mb-0 small">Đánh dấu các tiện nghi, dịch vụ và trải nghiệm nổi bật mà khách sạn đang cung cấp để thu hút du khách</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" (click)="saveAmenities()" [disabled]="isSaving || isLoading"
+                class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2 px-3 py-2 shadow-xs text-nowrap">
+                <i class="bi bi-floppy"></i>
+                <span>{{ isSaving ? 'Đang lưu...' : 'Lưu Tiện Ích' }}</span>
+            </button>
+        </div>
+    </div>
 
-  <div *ngIf="isLoading" class="loading">Đang tải danh sách tiện ích...</div>
+    <!-- 2. Thẻ Thống Kê Tổng Quan (KPIs) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-4">
+            <div class="kpi-mini-card shadow-xs">
+                <div class="kpi-mini-icon bg-blue-light text-primary">
+                    <i class="bi bi-grid-fill"></i>
+                </div>
+                <div>
+                    <div class="kpi-mini-label">Tổng tiện ích hệ thống</div>
+                    <div class="kpi-mini-value text-slate-800">{{ allAmenities.length }} <span class="fs-6 fw-normal text-muted">tiện ích</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="kpi-mini-card shadow-xs">
+                <div class="kpi-mini-icon bg-emerald-light text-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div>
+                    <div class="kpi-mini-label">Khách sạn đang cung cấp</div>
+                    <div class="kpi-mini-value text-success font-monospace">{{ selectedIds.length }} <span class="fs-6 fw-normal text-muted">tiện ích</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="kpi-mini-card shadow-xs">
+                <div class="kpi-mini-icon bg-amber-light text-amber">
+                    <i class="bi bi-pie-chart-fill"></i>
+                </div>
+                <div>
+                    <div class="kpi-mini-label">Mức độ hoàn thiện tiện nghi</div>
+                    <div class="kpi-mini-value text-amber font-monospace">
+                        {{ allAmenities.length ? (selectedIds.length / allAmenities.length * 100 | number:'1.0-0') : 0 }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <div class="amenities-grid" *ngIf="!isLoading">
-    <label class="amenity-card" *ngFor="let item of allAmenities">
-      <input type="checkbox" 
-             [checked]="selectedIds.includes(item.id)" 
-             (change)="toggleAmenity(item.id, $event)">
-      <div class="card-content">
-        <span class="icon">{{ item.icon }}</span>
-        <span class="name">{{ item.name }}</span>
-      </div>
-    </label>
-  </div>
+    <!-- 3. Thanh Công Cụ & Bộ Lọc -->
+    <div class="card border-0 shadow-xs mb-4">
+        <div class="card-body p-3 d-flex flex-column flex-lg-row justify-content-between align-items-stretch align-items-lg-center gap-3">
+            <!-- Filter Tabs -->
+            <div class="d-flex gap-2 flex-wrap">
+                <button (click)="setFilterTab('all')"
+                    class="filter-tab-btn" [class.active]="activeFilterTab === 'all'">
+                    <i class="bi bi-list-ul me-1"></i> Tất cả ({{ allAmenities.length }})
+                </button>
+                <button (click)="setFilterTab('selected')"
+                    class="filter-tab-btn text-success" [class.active]="activeFilterTab === 'selected'">
+                    <i class="bi bi-check-circle-fill me-1"></i> Đang cung cấp ({{ selectedIds.length }})
+                </button>
+                <button (click)="setFilterTab('unselected')"
+                    class="filter-tab-btn text-muted" [class.active]="activeFilterTab === 'unselected'">
+                    <i class="bi bi-circle me-1"></i> Chưa chọn ({{ allAmenities.length - selectedIds.length }})
+                </button>
+            </div>
 
-  <div class="actions" *ngIf="!isLoading">
-    <button class="btn btn-primary" (click)="saveAmenities()">Lưu Cập Nhật Tiện Ích</button>
-  </div>
+            <!-- Action Buttons & Search -->
+            <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
+                <!-- Nút chọn nhanh -->
+                <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold text-nowrap d-flex align-items-center gap-1 shadow-xs"
+                    (click)="selectAll()" title="Đánh dấu chọn tất cả">
+                    <i class="bi bi-check-all fs-6"></i> Chọn tất cả
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold text-nowrap d-flex align-items-center gap-1 shadow-xs"
+                    (click)="deselectAll()" title="Hủy chọn toàn bộ">
+                    <i class="bi bi-x-circle fs-6"></i> Bỏ chọn
+                </button>
 
-  <div class="toast-notification" [class.toast-error]="toastType === 'error'" *ngIf="showToast">
-    {{ toastMessage }}
-  </div>
+                <!-- Search Bar -->
+                <div class="search-wrapper position-relative w-100 w-sm-auto">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
+                        placeholder="Tìm kiếm tiện ích..."
+                        class="form-control form-control-sm search-input">
+                    <button *ngIf="searchTerm" (click)="clearSearch()" class="search-clear-btn" title="Xóa tìm kiếm">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Trạng Thái Đang Tải -->
+    <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="text-muted mt-2 small">Đang tải danh sách tiện ích khách sạn...</div>
+    </div>
+
+    <!-- 5. Lưới Danh Sách Tiện Ích (Amenity Cards Grid) -->
+    <div *ngIf="!isLoading">
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3" *ngFor="let item of filteredAmenities">
+                <div class="amenity-interactive-card shadow-xs"
+                    [class.is-selected]="isSelected(item.id)"
+                    (click)="toggleAmenity(item.id)">
+                    
+                    <!-- Checkmark Indicator góc phải -->
+                    <div class="amenity-check-indicator" [class.checked]="isSelected(item.id)">
+                        <i class="bi" [ngClass]="isSelected(item.id) ? 'bi-check-lg' : 'bi-plus'"></i>
+                    </div>
+
+                    <!-- Icon tròn nổi bật -->
+                    <div class="amenity-icon-box" [class.icon-box-active]="isSelected(item.id)">
+                        <span class="fs-4">{{ item.icon || '✨' }}</span>
+                    </div>
+
+                    <!-- Tên tiện ích & Trạng thái -->
+                    <div class="amenity-card-info">
+                        <div class="fw-bold text-slate-800 amenity-name">{{ item.name }}</div>
+                        <div class="amenity-status-tag" [class.tag-active]="isSelected(item.id)">
+                            <span *ngIf="isSelected(item.id)">
+                                <i class="bi bi-check2 me-1"></i> Đang cung cấp
+                            </span>
+                            <span *ngIf="!isSelected(item.id)" class="text-muted">
+                                Chưa kích hoạt
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trạng thái tìm kiếm không có kết quả -->
+        <div *ngIf="filteredAmenities.length === 0" class="card border-0 shadow-xs py-5 text-center mt-2">
+            <div class="text-muted">
+                <div class="fs-1 mb-2 text-slate-400"><i class="bi bi-search"></i></div>
+                <h6 class="fw-bold mb-1">Không tìm thấy tiện ích nào phù hợp</h6>
+                <p class="small mb-3">Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc tìm kiếm hiện tại.</p>
+                <button *ngIf="searchTerm" (click)="clearSearch()" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i> Xóa tìm kiếm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Bottom Action Bar -->
+    <div class="card border-0 shadow-xs mt-4" *ngIf="!isLoading">
+        <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2 text-slate-700 small">
+                <i class="bi bi-shield-check text-primary fs-5"></i>
+                <span>Đã chọn <strong>{{ selectedIds.length }}</strong> / <strong>{{ allAmenities.length }}</strong> tiện ích cho khách sạn. Hãy nhấn <strong>Lưu Tiện Ích</strong> để cập nhật lên trang đặt phòng.</span>
+            </div>
+            <button type="button" (click)="saveAmenities()" [disabled]="isSaving"
+                class="btn btn-primary fw-semibold px-4 py-2 shadow-xs d-flex align-items-center gap-2">
+                <i class="bi bi-floppy"></i>
+                <span>{{ isSaving ? 'Đang lưu tiện ích...' : 'Lưu Cập Nhật Tiện Ích' }}</span>
+            </button>
+        </div>
+    </div>
 </div>

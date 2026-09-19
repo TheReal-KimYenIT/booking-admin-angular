@@ -1,0 +1,408 @@
+<div class="p-6 sm:p-8 space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm"></span>
+                Quản Lý Hoàn Tiền Khách Hàng
+            </h1>
+            <p class="text-sm text-slate-500 mt-1 font-medium">
+                Xử lý hoàn tiền cho các đơn đặt phòng khách đã hủy hợp lệ theo chính sách khách sạn
+            </p>
+        </div>
+        <div class="flex items-center gap-2.5 self-start sm:self-auto">
+            <!-- Nút Xuất file Excel (.xlsx) -->
+            <button (click)="exportExcel()"
+                    title="Tải danh sách đối soát dạng file Excel (.xlsx) chuẩn từng cột"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-2xs hover:shadow-xs transition-all cursor-pointer">
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Xuất Excel (.xlsx)</span>
+            </button>
+
+            <!-- Nút Làm mới -->
+            <button (click)="loadData()"
+                    title="Tải lại danh sách hoàn tiền"
+                    class="inline-flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition-all cursor-pointer">
+                <svg class="w-4 h-4 text-slate-600" [class.animate-spin]="isLoading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                    <path d="M16 21h5v-5"/>
+                </svg>
+                <span>Làm mới</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 3 Thẻ Thống kê Tài chính Rõ ràng (Click để lọc nhanh) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Thẻ 1: Cần chuyển trả khách -->
+        <div (click)="quickFilter('PENDING')"
+             [class.ring-2]="filterStatus === 'PENDING'"
+             [class.ring-amber-500]="filterStatus === 'PENDING'"
+             [class.shadow-md]="filterStatus === 'PENDING'"
+             title="Bấm để lọc các đơn Cần chuyển trả khách"
+             class="bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200/80 rounded-2xl p-4 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 transition-all cursor-pointer select-none group">
+            <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-xs font-bold text-amber-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Cần chuyển trả khách
+                </span>
+                <span class="text-xs font-extrabold px-2.5 py-0.5 bg-amber-200/80 text-amber-900 rounded-full group-hover:bg-amber-300 transition-colors">
+                    {{ pendingCount }} đơn chờ xử lý
+                </span>
+            </div>
+            <div class="text-2xl font-black text-amber-950 tracking-tight">
+                {{ pendingAmount | number }} <span class="text-sm font-semibold text-amber-700">đ</span>
+            </div>
+            <div class="flex items-center justify-between mt-1.5 text-[11px] text-amber-700 font-medium">
+                <span>Khoản tiền cần chuyển khoản lại cho khách</span>
+                <span *ngIf="filterStatus === 'PENDING'" class="font-bold text-amber-900 bg-amber-200/90 px-1.5 py-0.2 rounded text-[10px]">Đang lọc ✓</span>
+            </div>
+        </div>
+
+        <!-- Thẻ 2: Tổng tiền đã hoàn trả -->
+        <div (click)="quickFilter('COMPLETED')"
+             [class.ring-2]="filterStatus === 'COMPLETED'"
+             [class.ring-emerald-500]="filterStatus === 'COMPLETED'"
+             [class.shadow-md]="filterStatus === 'COMPLETED'"
+             title="Bấm để lọc các đơn Đã hoàn trả thành công"
+             class="bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-200/80 rounded-2xl p-4 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 transition-all cursor-pointer select-none group">
+            <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-xs font-bold text-emerald-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    Tổng tiền đã hoàn trả
+                </span>
+                <span class="text-xs font-extrabold px-2.5 py-0.5 bg-emerald-200/80 text-emerald-900 rounded-full group-hover:bg-emerald-300 transition-colors">
+                    {{ completedCount }} đơn thành công
+                </span>
+            </div>
+            <div class="text-2xl font-black text-emerald-950 tracking-tight">
+                {{ completedAmount | number }} <span class="text-sm font-semibold text-emerald-700">đ</span>
+            </div>
+            <div class="flex items-center justify-between mt-1.5 text-[11px] text-emerald-700 font-medium">
+                <span>Tổng tiền khách sạn đã chuyển trả thành công</span>
+                <span *ngIf="filterStatus === 'COMPLETED'" class="font-bold text-emerald-900 bg-emerald-200/90 px-1.5 py-0.2 rounded text-[10px]">Đang lọc ✓</span>
+            </div>
+        </div>
+
+        <!-- Thẻ 3: Tiền phạt hủy thu được -->
+        <div (click)="quickFilter('PARTIAL')"
+             [class.ring-2]="filterPolicy === 'PARTIAL'"
+             [class.ring-sky-500]="filterPolicy === 'PARTIAL'"
+             [class.shadow-md]="filterPolicy === 'PARTIAL'"
+             title="Bấm để lọc các đơn Khách sạn có thu tiền phạt hủy"
+             class="bg-gradient-to-br from-sky-500/10 via-sky-500/5 to-transparent border border-sky-200/80 rounded-2xl p-4 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 transition-all cursor-pointer select-none group">
+            <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-xs font-bold text-sky-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="8" cy="8" r="6"/>
+                        <path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
+                        <path d="M7 6h1v4"/>
+                        <path d="m16.71 13.88.7.71-2.82 2.82"/>
+                    </svg>
+                    Tiền phạt hủy thu được
+                </span>
+                <span class="text-xs font-extrabold px-2.5 py-0.5 bg-sky-200/80 text-sky-900 rounded-full group-hover:bg-sky-300 transition-colors">
+                    Doanh thu giữ lại
+                </span>
+            </div>
+            <div class="text-2xl font-black text-sky-950 tracking-tight">
+                {{ totalCancellationFee | number }} <span class="text-sm font-semibold text-sky-700">đ</span>
+            </div>
+            <div class="flex items-center justify-between mt-1.5 text-[11px] text-sky-700 font-medium">
+                <span>Tiền cọc giữ lại từ các đơn hủy theo chính sách</span>
+                <span *ngIf="filterPolicy === 'PARTIAL'" class="font-bold text-sky-900 bg-sky-200/90 px-1.5 py-0.2 rounded text-[10px]">Đang lọc ✓</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thanh Tìm Kiếm & Bộ Lọc Tinh Gọn (1 Hàng Duy Nhất) -->
+    <div class="bg-white p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <!-- Ô tìm kiếm toàn năng -->
+        <div class="relative flex-1">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" 
+                   [(ngModel)]="searchTerm"
+                   (ngModelChange)="onFilterChange()"
+                   placeholder="Tìm theo mã đơn, tên khách, số điện thoại, số tài khoản, tên ngân hàng..."
+                   class="w-full pl-9 pr-9 py-2 bg-slate-50/70 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 transition-all">
+            
+            <!-- Nút xóa nhanh từ khóa tìm kiếm -->
+            <button *ngIf="searchTerm"
+                    (click)="searchTerm = ''; onFilterChange()"
+                    title="Xóa tìm kiếm"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Bộ lọc thời gian duy nhất + Nút đặt lại + Tóm tắt số lượng -->
+        <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-between md:justify-end">
+            <!-- 1 Dropdown duy nhất: Khoảng thời gian -->
+            <div class="relative min-w-[155px]">
+                <select [(ngModel)]="filterDate"
+                        (ngModelChange)="onFilterChange()"
+                        class="w-full pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 transition-all cursor-pointer appearance-none">
+                    <option value="ALL">Tất cả thời gian</option>
+                    <option value="TODAY">Hôm nay</option>
+                    <option value="WEEK">7 ngày qua</option>
+                    <option value="THIS_MONTH">Tháng này</option>
+                    <option value="LAST_MONTH">Tháng trước</option>
+                </select>
+                <svg class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+
+            <!-- Nút Đặt lại bộ lọc -->
+            <button *ngIf="hasActiveFilter"
+                    (click)="resetFilters()"
+                    title="Xóa tất cả điều kiện lọc để xem toàn bộ danh sách"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 rounded-xl border border-rose-200/80 transition-colors cursor-pointer whitespace-nowrap">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+                <span>Đặt lại</span>
+            </button>
+
+            <!-- Tóm tắt số lượng -->
+            <div class="text-xs text-slate-500 font-medium pl-1 whitespace-nowrap">
+                Hiển thị <strong class="text-slate-800 font-bold">{{ filteredRefunds.length }}</strong> đơn
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng Dữ Liệu Hoàn Tiền -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+        <!-- Trạng thái Loading -->
+        <div *ngIf="isLoading" class="text-center py-16">
+            <div class="inline-block w-8 h-8 border-3 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-600 mt-3">Đang tải danh sách hoàn tiền...</p>
+        </div>
+
+        <!-- Trạng thái trống -->
+        <div *ngIf="!isLoading && filteredRefunds.length === 0" class="text-center py-16 px-4">
+            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="20" height="14" x="2" y="5" rx="2"/>
+                    <line x1="2" x2="22" y1="10" y2="10"/>
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-slate-700">Không tìm thấy yêu cầu hoàn tiền nào</h3>
+            <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+                Không có đơn đặt phòng nào khớp với các tiêu chí tìm kiếm hoặc bộ lọc hiện tại của bạn.
+            </p>
+            <button *ngIf="hasActiveFilter" 
+                    (click)="resetFilters()"
+                    class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-sky-50 text-sky-700 hover:bg-sky-100 text-xs font-bold rounded-xl border border-sky-200 transition-colors cursor-pointer">
+                <span>Xóa bộ lọc để xem tất cả</span>
+            </button>
+        </div>
+
+        <!-- Table -->
+        <div *ngIf="!isLoading && filteredRefunds.length > 0" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/90 border-b border-slate-200/80 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+                        <th class="py-3.5 px-4 pl-6">Mã Đơn / Khách hàng</th>
+                        <th class="py-3.5 px-4">Thông tin nhận tiền (Ngân hàng)</th>
+                        <th class="py-3.5 px-4 text-right">Chi tiết Hoàn tiền</th>
+                        <th class="py-3.5 px-4 text-center">Trạng thái</th>
+                        <th class="py-3.5 px-4 pr-6 text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr *ngFor="let item of paginatedRefunds" class="hover:bg-slate-50/70 transition-colors">
+                        <!-- Cột 1: Mã đơn & Khách hàng -->
+                        <td class="py-4 px-4 pl-6 align-top">
+                            <div class="space-y-1">
+                                <a [routerLink]="['/dashboard/bookings', item.id]" 
+                                   title="Bấm để xem chi tiết đơn hàng"
+                                   class="inline-flex items-center gap-1 font-extrabold text-sky-600 hover:text-sky-700 text-sm hover:underline">
+                                    <span>{{ item.booking_code }}</span>
+                                    <svg class="w-3 h-3 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                        <polyline points="15 3 21 3 21 9"/>
+                                        <line x1="10" y1="14" x2="21" y2="3"/>
+                                    </svg>
+                                </a>
+                                <p class="text-sm font-bold text-slate-800">{{ item.guest_name }}</p>
+                                <div class="text-xs text-slate-500 flex flex-wrap items-center gap-2">
+                                    <span *ngIf="item.guest_phone" class="inline-flex items-center gap-1 font-medium text-slate-600">
+                                        <svg class="w-3 h-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                        </svg>
+                                        {{ item.guest_phone }}
+                                    </span>
+                                </div>
+                                <div *ngIf="item.cancellation_reason" 
+                                     class="text-[11px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/70 inline-block font-medium">
+                                    Lý do: <span class="font-semibold">{{ item.cancellation_reason }}</span>
+                                </div>
+                                <p class="text-[10px] text-slate-400">
+                                    Cập nhật: {{ item.updated_at | date:'dd/MM/yyyy HH:mm' }}
+                                </p>
+                            </div>
+                        </td>
+
+                        <!-- Cột 2: Thông tin Ngân hàng của khách -->
+                        <td class="py-4 px-4 align-top">
+                            <div class="bg-slate-50/90 border border-slate-200/80 p-3 rounded-xl space-y-1.5 text-xs max-w-[260px]">
+                                <div class="flex items-center justify-between text-slate-500">
+                                    <span>Ngân hàng:</span>
+                                    <strong class="text-slate-800 font-bold">{{ item.refund_bank || 'Chưa cập nhật' }}</strong>
+                                </div>
+                                <div class="flex items-center justify-between gap-1 text-slate-500">
+                                    <span>Số tài khoản:</span>
+                                    <div class="flex items-center gap-1.5 font-bold text-sky-700">
+                                        <span>{{ item.refund_account || 'Chưa có' }}</span>
+                                        <button *ngIf="item.refund_account"
+                                                (click)="copyToClipboard(item.refund_account, 'Số tài khoản')"
+                                                title="Sao chép STK"
+                                                class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-semibold bg-white border border-slate-200 rounded hover:bg-slate-100 transition-colors cursor-pointer text-slate-600">
+                                            <svg class="w-2.5 h-2.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                                            </svg>
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between text-slate-500">
+                                    <span>Chủ tài khoản:</span>
+                                    <strong class="text-slate-800 font-bold uppercase">{{ item.refund_account_name || 'Chưa có' }}</strong>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Cột 3: Chi tiết số tiền -->
+                        <td class="py-4 px-4 align-top text-right">
+                            <div class="space-y-1">
+                                <div class="text-xs text-slate-500">
+                                    Khách đã trả: <strong class="text-slate-700 font-semibold">{{ (item.original_payment || item.refund_amount) | number }} đ</strong>
+                                </div>
+                                <!-- Sửa triệt để lỗi ép kiểu số so sánh chuỗi -->
+                                <div *ngIf="isPartialRefund(item)" 
+                                     class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 inline-block">
+                                    Khách sạn thu phí hủy: + {{ getPenaltyFee(item) | number }} đ
+                                </div>
+                                <div class="text-sm font-extrabold text-rose-600 pt-1 border-t border-slate-100">
+                                    Cần hoàn: {{ item.refund_amount | number }} đ
+                                </div>
+                                <div class="inline-flex items-center gap-1 text-[11px] text-sky-700 bg-sky-50/70 px-2 py-0.5 rounded font-medium border border-sky-100">
+                                    <svg class="w-3 h-3 text-sky-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="16" x2="12" y2="12"/>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                    </svg>
+                                    <span>{{ getCancelPolicyText(item.free_cancel_hours, item.partial_refund_hours, item.partial_refund_percent) }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Cột 4: Trạng thái -->
+                        <td class="py-4 px-4 align-middle text-center">
+                            <span *ngIf="item.refund_status === 1" 
+                                  class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 font-bold text-xs rounded-full border border-amber-200 shadow-2xs whitespace-nowrap">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                Chờ chuyển khoản
+                            </span>
+                            <span *ngIf="item.refund_status === 2" 
+                                  class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 font-bold text-xs rounded-full border border-emerald-200 shadow-2xs whitespace-nowrap">
+                                <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                Đã hoàn tất
+                            </span>
+                        </td>
+
+                        <!-- Cột 5: Thao tác -->
+                        <td class="py-4 px-4 pr-6 align-middle text-center">
+                            <!-- Nút chuyển tiền cho đơn Chờ xử lý -->
+                            <button *ngIf="item.refund_status === 1" 
+                                     (click)="confirmRefund(item)"
+                                     class="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs hover:shadow-xs transition-all cursor-pointer whitespace-nowrap">
+                                <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m22 2-7 20-4-9-9-4Z"/>
+                                    <path d="M22 2 11 13"/>
+                                </svg>
+                                <span>Chuyển tiền & Xác nhận</span>
+                            </button>
+
+                            <!-- Nút xem biên nhận cho đơn Đã hoàn tất -->
+                            <div *ngIf="item.refund_status === 2" class="flex items-center justify-center">
+                                <button (click)="viewReceipt(item)"
+                                        title="Xem ảnh chứng từ chuyển tiền"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100/90 text-sky-700 hover:text-sky-800 border border-sky-200/80 rounded-lg text-xs font-semibold shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer whitespace-nowrap">
+                                    <svg class="w-3.5 h-3.5 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    <span>Xem biên nhận</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Thanh Phân Trang & Thống Kê (Pagination Bar) -->
+        <div *ngIf="!isLoading && filteredRefunds.length > 0" 
+             class="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-3.5 bg-slate-50/80 border-t border-slate-200/80 text-xs text-slate-600 font-medium">
+            <!-- Thống kê vị trí hiển thị -->
+            <div>
+                Hiển thị <strong class="text-slate-800 font-bold">{{ startRecord }} - {{ endRecord }}</strong> trong số <strong class="text-slate-800 font-bold">{{ filteredRefunds.length }}</strong> yêu cầu
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Chọn số dòng mỗi trang -->
+                <div class="flex items-center gap-1.5">
+                    <span class="text-slate-500 text-[11px]">Dòng/trang:</span>
+                    <select [(ngModel)]="pageSize" 
+                            (ngModelChange)="currentPage = 1"
+                            class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-sky-500 cursor-pointer">
+                        <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }}</option>
+                    </select>
+                </div>
+
+                <!-- Điều hướng trang (Prev / Next) -->
+                <div class="flex items-center gap-1">
+                    <button (click)="goToPage(currentPage - 1)" 
+                            [disabled]="currentPage === 1"
+                            title="Trang trước"
+                            class="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+
+                    <span class="px-2 font-bold text-slate-700">
+                        Trang {{ currentPage }} / {{ totalPages }}
+                    </span>
+
+                    <button (click)="goToPage(currentPage + 1)" 
+                            [disabled]="currentPage === totalPages"
+                            title="Trang tiếp theo"
+                            class="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

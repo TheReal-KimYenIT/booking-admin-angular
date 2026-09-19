@@ -1,219 +1,491 @@
 :host {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.partner-container {
-    padding: 30px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    width: 100%;
-    box-sizing: border-box;
+.promotions-container {
+  max-width: 100%;
 }
 
-.header-action {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+/* ========================================================================= */
+/* TAGS & GENERAL SHADOWS                                                    */
+/* ========================================================================= */
+.portal-tag {
+  background-color: #e0e7ff !important;
+  color: #3730a3 !important;
+  border: 1px solid #c7d2fe !important;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
+.shadow-xs {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
 }
 
-.table th,
-.table td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: left;
-    vertical-align: middle;
+.shadow-2xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
-.table th {
-    background-color: #f8f9fa;
+.btn-header-action {
+  width: 100%;
 }
 
-.voucher-code {
-    display: inline-block;
-    padding: 4px 10px;
-    background: #e9ecef;
-    border: 1px dashed #6c757d;
-    font-weight: bold;
-    letter-spacing: 1px;
-    color: #d9534f;
-    border-radius: 4px;
-}
-
-.btn {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    color: white;
-    font-weight: bold;
-    margin-right: 5px;
-}
-
-.btn-primary {
-    background-color: #0d6efd;
-}
-
-.btn-warning {
-    background-color: #ffc107;
-    color: #000;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-}
-
-.btn-success {
-    background-color: #198754;
-    color: white;
-}
-
-.badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    color: white;
-    font-size: 0.85em;
-    display: inline-block;
+@media (min-width: 768px) {
+  .btn-header-action {
+    width: auto !important;
     white-space: nowrap;
-    font-weight: bold;
+  }
 }
 
-.bg-success {
-    background-color: #198754;
+/* ========================================================================= */
+/* KPI SUMMARY CARDS & COLORS                                                */
+/* ========================================================================= */
+.bg-indigo-50 { background-color: #eef2ff !important; }
+.text-indigo-600 { color: #4f46e5 !important; }
+.bg-emerald-50 { background-color: #ecfdf5 !important; }
+.text-emerald-600 { color: #059669 !important; }
+.bg-blue-50 { background-color: #eff6ff !important; }
+.text-blue-600 { color: #2563eb !important; }
+.bg-amber-50 { background-color: #fffbeb !important; }
+.text-amber-600 { color: #d97706 !important; }
+
+.kpi-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid #f1f5f9;
 }
 
-/* Đang diễn ra */
-.bg-info {
-    background-color: #0dcaf0;
-    color: #000;
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
-/* Chưa diễn ra */
-.bg-danger {
-    background-color: #dc3545;
+.kpi-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Hết hạn */
-.bg-warning {
-    background-color: #ffc107;
-    color: #000;
+/* ========================================================================= */
+/* SEARCH & TOOLBAR                                                          */
+/* ========================================================================= */
+.search-group input:focus {
+  background-color: #ffffff !important;
+  box-shadow: none;
+  border-color: #cbd5e1;
 }
 
-/* Hết lượt */
-.bg-secondary {
-    background-color: #6c757d;
+/* ========================================================================= */
+/* TABLE & CELLS                                                             */
+/* ========================================================================= */
+.table-responsive {
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Bị khóa */
-
-.action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
 }
 
-.action-buttons .btn {
-    margin-right: 0;
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.promotions-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  min-width: 820px;
+}
+
+.table-header-row th {
+  background-color: #f8fafc !important;
+  color: #475569;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0;
+  border-top: none;
+}
+
+.promotion-row {
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.promotion-row:hover {
+  background-color: #f8fafc;
+}
+
+.promotion-row-inactive {
+  background-color: #fafbfc;
+  opacity: 0.75;
+}
+
+.promotion-row-inactive:hover {
+  opacity: 0.95;
+}
+
+/* ========================================================================= */
+/* VOUCHER TICKET BADGE & DISCOUNT                                           */
+/* ========================================================================= */
+.voucher-ticket-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  background: #f8fafc;
+  border: 1.5px dashed #818cf8;
+  border-radius: 6px;
+  color: #3730a3;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.voucher-ticket-badge:hover {
+  background: #e0e7ff;
+  border-color: #6366f1;
+  transform: translateY(-1px);
+}
+
+.voucher-ticket-badge:active {
+  transform: translateY(0);
+}
+
+.voucher-ticket-badge .copy-icon-hover {
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+}
+
+.voucher-ticket-badge:hover .copy-icon-hover {
+  opacity: 1;
+  color: #4f46e5 !important;
+}
+
+.discount-badge-pct {
+  font-size: 15px;
+  font-weight: 800;
+  color: #4338ca;
+}
+
+.discount-badge-fixed {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #0284c7;
+}
+
+/* Progress bar colors */
+.bg-emerald-500 {
+  background-color: #10b981 !important;
+}
+
+.bg-amber-500 {
+  background-color: #f59e0b !important;
+}
+
+.bg-rose-500 {
+  background-color: #f43f5e !important;
+}
+
+/* ========================================================================= */
+/* STATUS BADGES                                                             */
+/* ========================================================================= */
+.badge-status-active {
+  background-color: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1px solid #a7f3d0 !important;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.badge-status-upcoming {
+  background-color: #f0f9ff !important;
+  color: #0369a1 !important;
+  border: 1px solid #bae6fd !important;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.badge-status-depleted {
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.badge-status-expired {
+  background-color: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.badge-status-locked {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* ========================================================================= */
+/* ACTION BUTTONS (HORIZONTAL INLINE)                                        */
+/* ========================================================================= */
+.btn-action-btn {
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 8px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.3;
+}
+
+.btn-action-edit {
+  background-color: #f1f5f9;
+  color: #4338ca;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-action-edit:hover {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  border-color: #c7d2fe;
+}
+
+.btn-action-copy {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.btn-action-copy:hover {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+.btn-action-pause {
+  background-color: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+
+.btn-action-pause:hover {
+  background-color: #fee2e2;
+  color: #9f1239;
+  border-color: #fda4af;
+}
+
+.btn-action-resume {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.btn-action-resume:hover {
+  background-color: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+
+.btn-action-delete {
+  background-color: #ffffff;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-action-delete:hover {
+  background-color: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+/* ========================================================================= */
+/* MODAL POPUP & FORM CONTROLS                                               */
+/* ========================================================================= */
+.custom-modal-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 16px;
+}
+
+.custom-modal-content {
+  background-color: #ffffff !important;
+  border-radius: 16px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-content .modal-body {
+  overflow-y: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.form-control-solid,
+.form-select-solid {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  color: #0f172a;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.form-control-solid:focus,
+.form-select-solid:focus {
+  background-color: #ffffff;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+/* ========================================================================= */
+/* MOBILE CARD VIEW (< 768px)                                                */
+/* ========================================================================= */
+.voucher-mobile-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0 !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.voucher-mobile-card:hover {
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+/* ========================================================================= */
+/* RESPONSIVE MEDIA QUERIES                                                  */
+/* ========================================================================= */
+@media (max-width: 768px) {
+  .filter-btn-group {
     width: 100%;
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+
+  .filter-btn-group::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-btn-group .btn {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    font-size: 11.5px;
     text-align: center;
+  }
+
+  .search-group {
+    width: 100%;
+  }
+
+  .custom-modal-content {
+    max-width: 96vw;
+    margin: auto 8px;
+    border-radius: 14px;
+    max-height: 92vh;
+  }
+}
+
+@media (max-width: 576px) {
+  .kpi-card .card-body {
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+
+  .kpi-icon-wrapper {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    font-size: 16px !important;
+    padding: 4px !important;
+  }
+
+  .kpi-card .fs-6 {
+    font-size: 13px !important;
+  }
+
+  .portal-tag {
+    font-size: 10.5px;
+    padding: 2px 8px;
+  }
+
+  .custom-modal-overlay {
     padding: 8px;
-}
+  }
 
-.text-danger {
-    color: #dc3545;
-}
-
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    z-index: 1000;
-    padding-top: 5vh;
-}
-
-.modal-content {
-    background: white;
-    padding: 25px;
-    border-radius: 8px;
-    width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-sizing: border-box;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 0.9em;
-}
-
-.form-control {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.modal-actions {
-    margin-top: 20px;
-    text-align: right;
-}
-
-.loading,
-.empty-state {
-    padding: 20px;
-    text-align: center;
-    color: #666;
-    font-style: italic;
-}
-
-.toast-notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background-color: #198754;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 9999;
-    font-weight: bold;
-    animation: slideIn 0.3s ease-out;
-}
-
-.toast-notification.toast-error {
-    background-color: #dc3545;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+  .voucher-mobile-card {
+    padding: 10px !important;
+  }
 }

@@ -1,113 +1,334 @@
 <div class="fade-in-up">
-    <h2 class="page-title">Hồ sơ Khách sạn</h2>
+    <!-- 1. Header Trang -->
+    <div class="d-flex justify-content-between align-items-start align-items-md-center mb-4 flex-column flex-md-row gap-3">
+        <div>
+            <h2 class="mb-1 fw-bold text-slate-800 fs-3 fs-md-2">Thiết Lập Hồ Sơ Khách Sạn</h2>
+            <p class="text-muted mb-0 small">Quản lý thông tin định danh, địa chỉ hành chính, thời gian nhận/trả phòng và thư viện ảnh</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" (click)="saveProfile()" [disabled]="isSaving"
+                class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2 px-3 py-2 shadow-xs text-nowrap">
+                <i class="bi bi-floppy"></i>
+                <span>{{ isSaving ? 'Đang lưu...' : 'Lưu Thay Đổi' }}</span>
+            </button>
+        </div>
+    </div>
 
-    <form #profileForm="ngForm" (ngSubmit)="saveProfile()" novalidate>
-
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="image-upload-section flex-column align-items-center text-center">
-                    <div class="image-preview-box mb-3">
-                        <img *ngIf="imagePreviewUrl" [src]="imagePreviewUrl" class="image-preview-img" alt="Ảnh bìa">
-                        <span *ngIf="!imagePreviewUrl" class="image-empty-text">Chưa có ảnh bìa</span>
+    <!-- 2. Form Nội Dung Chính -->
+    <form id="hotelProfileForm" #profileForm="ngForm" (ngSubmit)="saveProfile()" novalidate>
+        <div class="row g-3 mb-4">
+            <!-- CỘT TRÁI: THÔNG TIN CƠ BẢN -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-xs h-100">
+                    <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center gap-2">
+                        <i class="bi bi-building text-primary fs-5"></i>
+                        <h6 class="fw-bold text-slate-800 mb-0">Thông Tin Định Danh & Vận Hành</h6>
                     </div>
-                    <div class="upload-controls w-100">
-                        <label class="upload-label text-primary">📷 Ảnh bìa Khách sạn</label>
-                        <p class="upload-desc" style="font-size: 11px;">Kích thước hiển thị 16:9. Tối đa 20MB.</p>
-                        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="file-input w-100">
+                    <div class="card-body p-4">
+                        <!-- Tên khách sạn -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-slate-700 small">Tên Khách sạn (*)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-building"></i></span>
+                                <input type="text" [(ngModel)]="profile.name" name="name" #nameCtrl="ngModel" required
+                                    placeholder="Ví dụ: Khách sạn Mường Thanh Grand..."
+                                    class="form-control form-control-sm border-start-0 custom-input">
+                            </div>
+                            <small class="text-danger mt-1 d-block" *ngIf="nameCtrl.invalid && (nameCtrl.dirty || nameCtrl.touched)">
+                                Vui lòng nhập tên Khách sạn.
+                            </small>
+                        </div>
+
+                        <!-- Hạng sao & Mã số thuế -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label class="form-label fw-semibold text-slate-700 small">Hạng sao Khách sạn</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-warning"><i class="bi bi-star-fill"></i></span>
+                                    <select [(ngModel)]="profile.star_rating" name="star_rating" class="form-select form-select-sm border-start-0 custom-input">
+                                        <option [value]="1">1 Sao - Tiêu chuẩn</option>
+                                        <option [value]="2">2 Sao - Tiết kiệm</option>
+                                        <option [value]="3">3 Sao - Tiện nghi</option>
+                                        <option [value]="4">4 Sao - Cao cấp</option>
+                                        <option [value]="5">5 Sao - Sang trọng đẳng cấp</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label fw-semibold text-slate-700 small">Mã số thuế doanh nghiệp</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-receipt"></i></span>
+                                    <input type="text" [(ngModel)]="profile.tax_code" name="tax_code"
+                                        placeholder="VD: 0312345678"
+                                        class="form-control form-control-sm border-start-0 custom-input font-monospace">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Giờ nhận phòng & Giờ trả phòng -->
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label fw-semibold text-slate-700 small">Giờ Nhận phòng (Check-in)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-box-arrow-in-right"></i></span>
+                                    <input type="time" [(ngModel)]="profile.standard_check_in_time" name="standard_check_in_time"
+                                        class="form-control form-control-sm border-start-0 custom-input font-monospace">
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 11px;">Mặc định tiêu chuẩn: 14:00 (2:00 chiều)</small>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label fw-semibold text-slate-700 small">Giờ Trả phòng (Check-out)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-box-arrow-left"></i></span>
+                                    <input type="time" [(ngModel)]="profile.standard_check_out_time" name="standard_check_out_time"
+                                        class="form-control form-control-sm border-start-0 custom-input font-monospace">
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 11px;">Mặc định tiêu chuẩn: 12:00 (12:00 trưa)</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="image-upload-section flex-column align-items-center text-center"
-                    style="border-left: 1px dashed #cbd5e1; padding-left: 20px;">
-                    <div class="image-preview-box mb-3">
-                        <img *ngIf="licensePreviewUrl" [src]="licensePreviewUrl" class="image-preview-img"
-                            alt="Giấy phép">
-                        <span *ngIf="!licensePreviewUrl" class="image-empty-text">Chưa có ảnh GPKD</span>
+            <!-- CỘT PHẢI: ĐỊA CHỈ HÀNH CHÍNH -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-xs h-100">
+                    <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center gap-2">
+                        <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
+                        <h6 class="fw-bold text-slate-800 mb-0">Địa Chỉ & Vị Trí Hành Chính</h6>
                     </div>
-                    <div class="upload-controls w-100">
-                        <label class="upload-label text-warning">📜 Ảnh Giấy Phép Kinh Doanh</label>
-                        <p class="upload-desc" style="font-size: 11px;">Bảo mật tuyệt đối, chỉ dùng để xác thực hệ
-                            thống.</p>
-                        <input type="file" accept="image/*" (change)="onLicenseFileSelected($event)"
-                            class="file-input w-100">
+                    <div class="card-body p-4">
+                        <!-- Tỉnh / Thành phố -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-slate-700 small">Tỉnh / Thành phố (*)</label>
+                            <select [(ngModel)]="profile.city" (ngModelChange)="onProvinceChange()" name="province"
+                                #provinceCtrl="ngModel" required class="form-select form-select-sm custom-input">
+                                <option value="" disabled selected>-- Chọn Tỉnh / Thành phố --</option>
+                                <option *ngFor="let p of provinces" [value]="p.name">{{ p.name }}</option>
+                            </select>
+                        </div>
+
+                        <!-- Quận / Huyện & Phường / Xã -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-sm-6">
+                                <label class="form-label fw-semibold text-slate-700 small">Quận / Huyện (*)</label>
+                                <select [(ngModel)]="selectedDistrictName" (ngModelChange)="onDistrictChange()" name="district"
+                                    #districtCtrl="ngModel" required [disabled]="!districts.length" class="form-select form-select-sm custom-input">
+                                    <option value="" disabled selected>-- Chọn Quận/Huyện --</option>
+                                    <option *ngFor="let d of districts" [value]="d.name">{{ d.name }}</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label fw-semibold text-slate-700 small">Phường / Xã (*)</label>
+                                <select [(ngModel)]="selectedWardName" name="ward" #wardCtrl="ngModel" required
+                                    [disabled]="!wards.length" class="form-select form-select-sm custom-input">
+                                    <option value="" disabled selected>-- Chọn Phường/Xã --</option>
+                                    <option *ngFor="let w of wards" [value]="w.name">{{ w.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Số nhà, Tên đường -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-slate-700 small">Số nhà, Tên đường (*)</label>
+                            <input type="text" [(ngModel)]="streetAddress" name="streetAddress" #streetCtrl="ngModel"
+                                placeholder="Ví dụ: Số 123, Đường Trần Phú" required class="form-control form-control-sm custom-input">
+                        </div>
+
+                        <!-- Hiển thị địa chỉ tóm tắt -->
+                        <div class="p-2.5 bg-light rounded-3 border border-dashed text-slate-700 small d-flex align-items-start gap-2">
+                            <i class="bi bi-pin-map text-primary mt-0.5"></i>
+                            <div style="font-size: 12px; line-height: 1.4;">
+                                <strong>Địa chỉ định vị:</strong>
+                                <span> {{ streetAddress || 'Chưa nhập số nhà' }}</span>
+                                <span *ngIf="selectedWardName">, {{ selectedWardName }}</span>
+                                <span *ngIf="selectedDistrictName">, {{ selectedDistrictName }}</span>
+                                <span *ngIf="profile.city">, {{ profile.city }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <hr class="divider">
-
-        <div class="form-row">
-            <div class="form-col-large">
-                <label class="form-label">Tên Khách sạn (*)</label>
-                <input type="text" [(ngModel)]="profile.name" name="name" required class="form-control">
+        <!-- MÔ TẢ GIỚI THIỆU KHÁCH SẠN -->
+        <div class="card border-0 shadow-xs mb-4">
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center gap-2">
+                <i class="bi bi-file-text text-secondary fs-5"></i>
+                <h6 class="fw-bold text-slate-800 mb-0">Mô Tả & Giới Thiệu Khách Sạn</h6>
             </div>
-            <div class="form-col-small">
-                <label class="form-label">Mã số thuế doanh nghiệp</label>
-                <input type="text" [(ngModel)]="profile.tax_code" name="tax_code" placeholder="VD: 0312345678"
-                    class="form-control" style="border-color: #f59e0b;">
-            </div>
-        </div>
-
-        <div class="form-row mt-3">
-            <div class="form-col">
-                <label class="form-label">Tỉnh / Thành phố (*)</label>
-                <input type="text" list="provinceList" [(ngModel)]="profile.city" (ngModelChange)="onProvinceChange()"
-                    name="province" placeholder="-- Gõ để tìm Tỉnh/Thành --" required class="form-control">
-                <datalist id="provinceList">
-                    <option *ngFor="let p of provinces" [value]="p.name"></option>
-                </datalist>
-            </div>
-
-            <div class="form-col">
-                <label class="form-label">Quận / Huyện (*)</label>
-                <input type="text" list="districtList" [(ngModel)]="selectedDistrictName"
-                    (ngModelChange)="onDistrictChange()" name="district" placeholder="-- Gõ để tìm Quận/Huyện --"
-                    required [disabled]="!districts.length" class="form-control">
-                <datalist id="districtList">
-                    <option *ngFor="let d of districts" [value]="d.name"></option>
-                </datalist>
-            </div>
-
-            <div class="form-col">
-                <label class="form-label">Phường / Xã (*)</label>
-                <input type="text" list="wardList" [(ngModel)]="selectedWardName" name="ward"
-                    placeholder="-- Gõ để tìm Phường/Xã --" required [disabled]="!wards.length" class="form-control">
-                <datalist id="wardList">
-                    <option *ngFor="let w of wards" [value]="w.name"></option>
-                </datalist>
+            <div class="card-body p-4">
+                <textarea [(ngModel)]="profile.description" name="description" rows="4"
+                    placeholder="Mô tả về không gian lưu trú, phong cách thiết kế, vị trí gần các điểm tham quan nổi tiếng hoặc trải nghiệm dịch vụ nổi bật..."
+                    class="form-control custom-input"></textarea>
             </div>
         </div>
 
-        <div class="form-row mt-3">
-            <div class="form-col-large">
-                <label class="form-label">Số nhà, Tên đường (*)</label>
-                <input type="text" [(ngModel)]="streetAddress" name="streetAddress"
-                    placeholder="Ví dụ: Số 123, Đường Lê Lợi" required class="form-control">
+        <!-- THƯ VIỆN HÌNH ẢNH & HỒ SƠ PHÁP LÝ -->
+        <div class="row g-3 mb-4">
+            <!-- CỘT TRÁI: THƯ VIỆN ẢNH (COL-LG-8) -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-xs h-100">
+                    <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-images text-primary fs-5"></i>
+                            <h6 class="fw-bold text-slate-800 mb-0">Thư Viện Ảnh Khách Sạn</h6>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5" style="font-size: 11px;">
+                                {{ existingImages.length }} / 15 ảnh
+                            </span>
+                        </div>
+                        <div class="text-muted small d-flex align-items-center gap-1" style="font-size: 12px;">
+                            <i class="bi bi-arrows-move"></i> Kéo thả ảnh để thay đổi thứ tự
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <!-- Danh sách ảnh hiện tại (Kéo thả reorder) -->
+                        <div class="gallery-grid mb-4" (dragover)="onDragOver($event)" (drop)="onDrop($event)" *ngIf="existingImages.length > 0">
+                            <div *ngFor="let img of existingImages; let i = index"
+                                class="gallery-item-card"
+                                [class.is-primary-cover]="img.is_primary == 1"
+                                draggable="true"
+                                (dragstart)="onDragStart($event, i)"
+                                (dragenter)="onDragEnter($event, i)"
+                                (dragend)="onDragEnd($event)">
+                                
+                                <img [src]="imageBaseUrl + img.file_url" class="gallery-thumb" alt="Ảnh khách sạn">
+
+                                <!-- Badge Ảnh bìa -->
+                                <div class="primary-badge" *ngIf="img.is_primary == 1">
+                                    <i class="bi bi-star-fill text-warning me-0.5"></i> Ảnh bìa
+                                </div>
+
+                                <!-- Overlay Action Buttons -->
+                                <div class="gallery-item-overlay">
+                                    <button type="button" class="btn-overlay-action" (click)="openImageModal(imageBaseUrl + img.file_url, 'Ảnh khách sạn')" title="Xem phóng to">
+                                        <i class="bi bi-zoom-in"></i>
+                                    </button>
+                                    <button type="button" class="btn-overlay-action"
+                                        [class.text-warning]="img.is_primary == 1"
+                                        (click)="setPrimaryImage(img.id)"
+                                        [title]="img.is_primary == 1 ? 'Đang là ảnh bìa chính' : 'Đặt làm ảnh bìa chính'">
+                                        <i class="bi" [ngClass]="img.is_primary == 1 ? 'bi-star-fill' : 'bi-star'"></i>
+                                    </button>
+                                    <button type="button" class="btn-overlay-action text-danger" (click)="deleteExistingImage(img.id)" title="Xóa ảnh này">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dropzone Tải Thêm Ảnh Mới -->
+                        <div class="upload-dropzone" (click)="multiFileInput.click()" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+                            <input #multiFileInput type="file" multiple accept="image/*" (change)="onFileSelected($event)" class="d-none">
+                            <div class="dropzone-content text-center py-4">
+                                <div class="dropzone-icon mb-2 text-primary">
+                                    <i class="bi bi-cloud-arrow-up fs-1"></i>
+                                </div>
+                                <h6 class="fw-bold text-slate-800 mb-1">Kéo thả ảnh vào đây hoặc bấm để chọn tệp</h6>
+                                <p class="text-muted small mb-0">Hỗ trợ định dạng JPG, PNG, WEBP tối đa 20MB / file. Tối đa 15 ảnh tổng cộng.</p>
+                            </div>
+                        </div>
+
+                        <!-- Xem trước các ảnh mới chọn (chờ bấm Lưu) -->
+                        <div *ngIf="imagePreviews.length > 0" class="mt-4">
+                            <div class="fw-semibold text-slate-700 small mb-2 d-flex align-items-center gap-1.5">
+                                <i class="bi bi-clock-history text-warning"></i> Ảnh mới chọn chờ tải lên ({{ imagePreviews.length }} ảnh):
+                            </div>
+                            <div class="d-flex flex-wrap gap-2.5">
+                                <div *ngFor="let preview of imagePreviews; let idx = index" class="new-preview-box position-relative">
+                                    <img [src]="preview" class="new-preview-img rounded-3">
+                                    <span class="badge bg-success position-absolute top-1 start-1" style="font-size: 10px;">Mới</span>
+                                    <button type="button" class="btn-remove-new-preview position-absolute top-1 end-1" (click)="removeSelectedFile(idx)" title="Bỏ ảnh này">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-col-small">
-                <label class="form-label">Hạng sao</label>
-                <select [(ngModel)]="profile.star_rating" name="star_rating" class="form-control">
-                    <option [value]="1">1 Sao</option>
-                    <option [value]="2">2 Sao</option>
-                    <option [value]="3">3 Sao</option>
-                    <option [value]="4">4 Sao</option>
-                    <option [value]="5">5 Sao</option>
-                </select>
+            <!-- CỘT PHẢI: GIẤY PHÉP KINH DOANH (COL-LG-4) -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-xs h-100">
+                    <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-check text-success fs-5"></i>
+                        <h6 class="fw-bold text-slate-800 mb-0">Giấy Phép Kinh Doanh</h6>
+                    </div>
+                    <div class="card-body p-4 text-center d-flex flex-column align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted small mb-3">Tài liệu bảo mật dùng để xác thực quyền quản lý và tư cách pháp lý của cơ sở lưu trú.</p>
+
+                            <!-- Khung hiển thị giấy phép -->
+                            <div class="license-preview-container mx-auto position-relative rounded-3 overflow-hidden border">
+                                <img *ngIf="licensePreviewUrl" [src]="licensePreviewUrl" class="license-img" alt="Giấy phép kinh doanh">
+                                <div *ngIf="!licensePreviewUrl" class="h-100 d-flex flex-column align-items-center justify-content-center text-muted p-4">
+                                    <i class="bi bi-file-earmark-lock fs-1 text-slate-400 mb-2"></i>
+                                    <span class="small">Chưa tải ảnh Giấy phép kinh doanh</span>
+                                </div>
+
+                                <!-- Overlay xem ảnh lớn -->
+                                <div class="license-overlay" *ngIf="licensePreviewUrl">
+                                    <button type="button" class="btn btn-sm btn-light fw-semibold shadow-xs" (click)="openImageModal(licensePreviewUrl + '', 'Giấy phép kinh doanh')">
+                                        <i class="bi bi-arrows-fullscreen me-1"></i> Xem kích thước gốc
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Trạng thái xác thực -->
+                            <div class="mt-3">
+                                <span *ngIf="licensePreviewUrl" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Đã có bản lưu hồ sơ
+                                </span>
+                                <span *ngIf="!licensePreviewUrl" class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Chưa cập nhật hồ sơ
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Nút Tải lên / Thay đổi tệp -->
+                        <div class="w-100 mt-4 pt-3 border-top">
+                            <input #licenseFileInput type="file" accept="image/*,.pdf" (change)="onLicenseFileSelected($event)" class="d-none">
+                            <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold w-100 d-flex align-items-center justify-content-center gap-1.5" (click)="licenseFileInput.click()">
+                                <i class="bi bi-upload"></i> {{ licensePreviewUrl ? 'Cập nhật lại Giấy phép' : 'Tải lên Giấy phép GPKD' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="form-group mt-3">
-            <label class="form-label">Mô tả giới thiệu</label>
-            <textarea [(ngModel)]="profile.description" name="description" rows="5" class="form-control"></textarea>
+        <!-- 3. Bottom Action Bar -->
+        <div class="card border-0 shadow-xs mt-4">
+            <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-2 text-muted small">
+                    <i class="bi bi-info-circle"></i>
+                    <span>Hãy kiểm tra kỹ thông tin trước khi nhấn <strong>Lưu Thay Đổi</strong>.</span>
+                </div>
+                <button type="submit" [disabled]="isSaving" class="btn btn-primary fw-semibold px-4 py-2 shadow-xs d-flex align-items-center gap-2">
+                    <i class="bi bi-floppy"></i>
+                    <span>{{ isSaving ? 'Đang lưu hồ sơ...' : 'Lưu Thay Đổi Hồ Sơ' }}</span>
+                </button>
+            </div>
         </div>
-
-        <button type="submit" [disabled]="profileForm.invalid" [style.opacity]="profileForm.invalid ? '0.5' : '1'"
-            [style.cursor]="profileForm.invalid ? 'not-allowed' : 'pointer'" class="btn-submit mt-4">
-            💾 Lưu Thông Tin
-        </button>
     </form>
+
+    <!-- 4. Modal Lightbox Xem Ảnh Phóng To -->
+    <div class="modal fade show" *ngIf="previewModalImage" style="display: block; background: rgba(15, 23, 42, 0.75);" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bg-slate-900 text-white py-3 px-4">
+                    <h6 class="modal-title fw-bold mb-0 text-white">{{ previewModalTitle }}</h6>
+                    <button type="button" class="btn-close btn-close-white" (click)="closeImageModal()"></button>
+                </div>
+                <div class="modal-body p-0 text-center bg-black">
+                    <img [src]="previewModalImage" class="img-fluid" style="max-height: 75vh; object-fit: contain;">
+                </div>
+                <div class="modal-footer bg-light py-2 px-3 justify-content-end">
+                    <button type="button" class="btn btn-secondary btn-sm fw-semibold px-4" (click)="closeImageModal()">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

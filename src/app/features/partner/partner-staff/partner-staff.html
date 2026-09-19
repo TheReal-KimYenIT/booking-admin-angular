@@ -1,114 +1,542 @@
-<div class="staff-container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 style="color: #1e1b4b; margin: 0; font-weight: 800;">Quản Lý Nhân Viên</h2>
-            <p style="color: #64748b;">Tạo tài khoản và gán nhóm quyền cho nhân viên.</p>
-        </div>
-        <button class="btn btn-primary fw-bold"
-            style="background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%); border: none;"
-            (click)="openAddModal()">
-            + Thêm Nhân Viên
-        </button>
+<div class="staff-container p-2 p-md-3 fade-in-up">
+  <!-- 1. HEADER -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-people-fill me-1"></i> Quản Trị Nhân Sự & Tài Khoản
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Quản Lý Nhân Viên</h2>
+      <p class="text-muted mb-0 small">Tạo tài khoản nhân viên khách sạn, phân bổ nhóm vai trò và quản lý quyền truy cập hệ thống.</p>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0">
-                <thead style="background-color: #f8fafc;">
-                    <tr>
-                        <th class="p-3">Họ và Tên</th>
-                        <th>Email đăng nhập</th>
-                        <th>Số điện thoại</th>
-                        <th>Vai trò (Nhóm quyền)</th>
-                        <th>Trạng thái</th>
-                        <th class="text-center">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngIf="isLoading">
-                        <td colspan="6" class="text-center p-4">Đang tải...</td>
-                    </tr>
-                    <tr *ngIf="!isLoading && staffs.length === 0">
-                        <td colspan="6" class="text-center p-4 text-muted">Chưa có nhân viên nào.</td>
-                    </tr>
-
-                    <tr *ngFor="let staff of staffs">
-                        <td class="p-3 fw-bold">{{ staff.last_name }} {{ staff.first_name }}</td>
-                        <td>{{ staff.email }}</td>
-                        <td>{{ staff.phone || '---' }}</td>
-                        <td>
-                            <span class="badge bg-info text-dark">
-                                {{ staff.role?.name || 'Chưa gán quyền' }}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge" [ngClass]="staff.is_active ? 'bg-success' : 'bg-danger'">
-                                {{ staff.is_active ? 'Đang hoạt động' : 'Đã khóa' }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(staff)">✏️
-                                Sửa</button>
-                            <button class="btn btn-sm btn-light text-danger" (click)="deleteStaff(staff.id)">🗑️
-                                Xóa</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end">
+      <button class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 shadow-2xs d-inline-flex align-items-center gap-1.5 text-nowrap" (click)="loadStaffs()">
+        <i class="bi bi-arrow-clockwise"></i>
+        <span>Làm Mới</span>
+      </button>
+      <button class="btn btn-primary fw-semibold px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-2 text-nowrap" (click)="openAddModal()">
+        <i class="bi bi-person-plus-fill"></i>
+        <span>Thêm Nhân Viên</span>
+      </button>
     </div>
+  </div>
+
+  <!-- 2. KPI SUMMARY CARDS (4 CARDS) -->
+  <div class="row g-2 mb-3">
+    <!-- Card 1: Tổng Nhân Sự -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Tổng Nhân Sự</div>
+            <div class="fs-6 fw-bold text-slate-800 text-truncate">{{ totalStaff }} <span class="text-muted small fw-normal">nhân viên</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Đã cấp tài khoản</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Đang Hoạt Động -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-person-check-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Đang Hoạt Động</div>
+            <div class="fs-6 fw-bold text-emerald-600 text-truncate">{{ activeStaff }} <span class="text-muted small fw-normal">nhân sự</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Được phép đăng nhập</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Tạm Khóa -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-amber-50 text-amber-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-person-x-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Tạm Khóa / Dừng</div>
+            <div class="fs-6 fw-bold text-amber-600 text-truncate">{{ inactiveStaff }} <span class="text-muted small fw-normal">tài khoản</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Vô hiệu hóa truy cập</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Nhóm Quyền Đang Dùng -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-blue-50 text-blue-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Nhóm Quyền Sử Dụng</div>
+            <div class="fs-6 fw-bold text-blue-600 text-truncate">{{ totalRolesUsed }} / {{ roles.length }} <span class="text-muted small fw-normal">nhóm</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Phân bổ vai trò</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TOOLBAR TÌM KIẾM VÀ LỌC -->
+  <div class="card border-0 shadow-xs mb-3">
+    <div class="card-body p-2.5 p-md-3">
+      <div class="row g-2 align-items-center">
+        <!-- Live Search -->
+        <div class="col-12 col-lg-5">
+          <div class="search-input-wrapper position-relative">
+            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+            <input 
+              type="text" 
+              class="form-control form-control-sm ps-5 pe-4 py-2 rounded-3 border-slate-200" 
+              placeholder="Tìm theo họ tên, email, số điện thoại..." 
+              [(ngModel)]="searchKeyword">
+            <button *ngIf="searchKeyword" class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-1 text-muted p-0" (click)="searchKeyword = ''">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Role -->
+        <div class="col-6 col-sm-6 col-lg-3">
+          <select class="form-select form-select-sm rounded-3 border-slate-200 py-2" [(ngModel)]="selectedRoleId">
+            <option value="all">Tất cả vai trò ({{ roles.length }})</option>
+            <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
+          </select>
+        </div>
+
+        <!-- Filter Status -->
+        <div class="col-6 col-sm-6 col-lg-2">
+          <select class="form-select form-select-sm rounded-3 border-slate-200 py-2" [(ngModel)]="selectedStatus">
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Đang hoạt động</option>
+            <option value="inactive">Đã tạm khóa</option>
+          </select>
+        </div>
+
+        <!-- Counter & Reset -->
+        <div class="col-12 col-lg-2 text-lg-end d-flex align-items-center justify-content-between justify-content-lg-end gap-2">
+          <span class="text-muted small text-nowrap">
+            <strong>{{ filteredStaffs.length }}</strong> / {{ staffs.length }} NV
+          </span>
+          <button 
+            *ngIf="searchKeyword || selectedRoleId !== 'all' || selectedStatus !== 'all'" 
+            class="btn btn-sm btn-outline-secondary rounded-pill py-1 px-2.5 d-inline-flex align-items-center gap-1 text-nowrap"
+            (click)="resetFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. DANH SÁCH NHÂN VIÊN (BẢNG DESKTOP & CARDS RESPONSIVE) -->
+  <div class="card border-0 shadow-xs rounded-3 overflow-hidden">
+    <!-- Desktop Table View (>= 992px) -->
+    <div class="table-responsive d-none d-lg-block">
+      <table class="table table-hover align-middle mb-0 custom-staff-table">
+        <thead class="bg-slate-50 border-bottom border-slate-200">
+          <tr>
+            <th class="py-2.5 px-3 text-slate-700 font-semibold text-nowrap" style="width: 22%;">Nhân Viên</th>
+            <th class="py-2.5 px-3 text-slate-700 font-semibold text-nowrap" style="width: 24%;">Email Đăng Nhập</th>
+            <th class="py-2.5 px-3 text-slate-700 font-semibold text-nowrap" style="width: 14%;">Số Điện Thoại</th>
+            <th class="py-2.5 px-3 text-slate-700 font-semibold text-nowrap" style="width: 18%;">Vai Trò (Nhóm Quyền)</th>
+            <th class="py-2.5 px-3 text-slate-700 font-semibold text-nowrap text-center" style="width: 11%;">Trạng Thái</th>
+            <th class="py-2.5 px-3 text-slate-700 font-semibold text-nowrap text-end" style="width: 11%;">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Loading state -->
+          <tr *ngIf="isLoading">
+            <td colspan="6" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;"></div>
+              <div class="text-muted mt-2 small">Đang tải danh sách nhân viên...</div>
+            </td>
+          </tr>
+
+          <!-- Empty state -->
+          <tr *ngIf="!isLoading && filteredStaffs.length === 0">
+            <td colspan="6" class="text-center py-5">
+              <i class="bi bi-people fs-1 text-slate-300 d-block mb-2"></i>
+              <div class="fw-bold text-slate-700">Không tìm thấy nhân viên nào</div>
+              <div class="text-muted small">Thử thay đổi bộ lọc tìm kiếm hoặc thêm tài khoản nhân viên mới.</div>
+            </td>
+          </tr>
+
+          <!-- Data rows -->
+          <tr *ngFor="let staff of filteredStaffs" class="transition-all">
+            <!-- Nhân viên info -->
+            <td class="py-2.5 px-3 text-nowrap">
+              <div class="d-flex align-items-center gap-2.5">
+                <div class="avatar-circle rounded-circle text-white d-flex align-items-center justify-content-center fw-bold shadow-2xs flex-shrink-0"
+                     [style.background]="getAvatarBg(staff)">
+                  {{ getInitials(staff) }}
+                </div>
+                <div class="text-nowrap">
+                  <h6 class="mb-0 fw-bold text-slate-900 fs-7 text-nowrap">
+                    {{ staff.last_name }} {{ staff.first_name }}
+                  </h6>
+                  <span class="text-muted small text-nowrap" style="font-size: 11px;">
+                    Mã #{{ staff.id }} • Tạo {{ staff.created_at | date:'dd/MM/yyyy' }}
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Email đăng nhập -->
+            <td class="py-2.5 px-3 text-nowrap">
+              <div class="d-flex align-items-center gap-1.5 text-nowrap">
+                <i class="bi bi-envelope text-slate-400"></i>
+                <span class="text-slate-800 font-mono-sm">{{ staff.email }}</span>
+              </div>
+            </td>
+
+            <!-- Số điện thoại -->
+            <td class="py-2.5 px-3 text-nowrap">
+              <div class="d-flex align-items-center gap-1.5 text-nowrap" *ngIf="staff.phone">
+                <i class="bi bi-telephone text-slate-400"></i>
+                <span class="text-slate-700">{{ staff.phone }}</span>
+              </div>
+              <span *ngIf="!staff.phone" class="text-muted small fst-italic">Chưa cập nhật</span>
+            </td>
+
+            <!-- Vai trò (Nhóm quyền) -->
+            <td class="py-2.5 px-3 text-nowrap">
+              <div class="d-inline-flex align-items-center gap-1.5 text-nowrap">
+                <span class="role-badge" [title]="staff.role?.name ? ('Nhóm: ' + staff.role.name) : 'Chưa phân nhóm'">
+                  <i class="bi bi-shield-shaded"></i>
+                  <span>{{ staff.role?.name || 'Chưa gán quyền' }}</span>
+                </span>
+                <span *ngIf="getRolePermissionsCount(staff) > 0" class="badge-permission-count font-mono-sm" [title]="'Được cấp ' + getRolePermissionsCount(staff) + ' quyền hạn'">
+                  {{ getRolePermissionsCount(staff) }} quyền
+                </span>
+              </div>
+            </td>
+
+            <!-- Trạng thái -->
+            <td class="py-2.5 px-3 text-center text-nowrap">
+              <span class="status-indicator-badge"
+                    [ngClass]="staff.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'">
+                <span class="status-dot" [ngClass]="staff.is_active ? 'dot-active' : 'dot-inactive'"></span>
+                <span>{{ staff.is_active ? 'Đang hoạt động' : 'Đã tạm khóa' }}</span>
+              </span>
+            </td>
+
+            <!-- Thao tác -->
+            <td class="py-2.5 px-3 text-end text-nowrap">
+              <div class="d-inline-flex align-items-center gap-1 text-nowrap">
+                <!-- Sửa -->
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1 shadow-2xs d-inline-flex align-items-center gap-1"
+                        (click)="openEditModal(staff)" title="Sửa thông tin nhân viên">
+                  <i class="bi bi-pencil"></i>
+                  <span>Sửa</span>
+                </button>
+
+                <!-- Khóa / Mở khóa -->
+                <button class="btn btn-sm rounded-pill px-2 py-1 shadow-2xs d-inline-flex align-items-center gap-1"
+                        [ngClass]="staff.is_active ? 'btn-outline-amber' : 'btn-outline-emerald'"
+                        (click)="toggleStatus(staff)"
+                        [title]="staff.is_active ? 'Tạm khóa tài khoản' : 'Kích hoạt tài khoản'">
+                  <i class="bi" [ngClass]="staff.is_active ? 'bi-lock-fill' : 'bi-unlock-fill'"></i>
+                  <span>{{ staff.is_active ? 'Khóa' : 'Mở' }}</span>
+                </button>
+
+                <!-- Xóa -->
+                <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 shadow-2xs d-inline-flex align-items-center"
+                        (click)="deleteStaff(staff)" title="Xóa tài khoản nhân viên">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Responsive Cards View (< 992px: Tablets & Mobile) -->
+    <div class="d-lg-none p-2.5 bg-slate-50">
+      <!-- Loading state -->
+      <div *ngIf="isLoading" class="text-center py-4 bg-white rounded-3">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="text-muted mt-2 small">Đang tải danh sách nhân viên...</div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!isLoading && filteredStaffs.length === 0" class="text-center py-4 bg-white rounded-3">
+        <i class="bi bi-people fs-1 text-slate-300 d-block mb-1"></i>
+        <div class="fw-bold text-slate-700">Không tìm thấy nhân viên nào</div>
+        <div class="text-muted small">Thử thay đổi bộ lọc tìm kiếm.</div>
+      </div>
+
+      <!-- Staff Cards -->
+      <div *ngFor="let staff of filteredStaffs" class="card border-0 shadow-xs rounded-3 mb-2.5 bg-white">
+        <div class="card-body p-3">
+          <!-- Top info -->
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar-circle rounded-circle text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                   [style.background]="getAvatarBg(staff)" style="width: 40px; height: 40px; font-size: 14px;">
+                {{ getInitials(staff) }}
+              </div>
+              <div>
+                <h6 class="mb-0 fw-bold text-slate-900 fs-7">{{ staff.last_name }} {{ staff.first_name }}</h6>
+                <small class="text-muted font-mono-sm" style="font-size: 11px;">{{ staff.email }}</small>
+              </div>
+            </div>
+
+            <!-- Status indicator -->
+            <span class="status-indicator-badge"
+                  [ngClass]="staff.is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
+                  style="font-size: 11px; padding: 3px 8px !important;">
+              <span class="status-dot" [ngClass]="staff.is_active ? 'dot-active' : 'dot-inactive'"></span>
+              <span>{{ staff.is_active ? 'Hoạt động' : 'Tạm khóa' }}</span>
+            </span>
+          </div>
+
+          <!-- Mid details -->
+          <div class="bg-slate-50 p-2.5 rounded-3 mb-2.5 small d-flex flex-column gap-1.5 border border-slate-100">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted"><i class="bi bi-telephone me-1"></i>Điện thoại:</span>
+              <span class="text-slate-800 fw-semibold">{{ staff.phone || 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted"><i class="bi bi-shield-shaded me-1"></i>Nhóm quyền:</span>
+              <div class="d-inline-flex align-items-center gap-1">
+                <span class="role-badge" style="font-size: 11px; padding: 2px 8px;">
+                  {{ staff.role?.name || 'Chưa gán' }}
+                </span>
+                <span *ngIf="getRolePermissionsCount(staff) > 0" class="badge-permission-count" style="font-size: 10px;">
+                  {{ getRolePermissionsCount(staff) }} quyền
+                </span>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted"><i class="bi bi-calendar3 me-1"></i>Ngày tạo:</span>
+              <span class="text-slate-600 font-mono-sm" style="font-size: 11px;">{{ staff.created_at | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <!-- Bottom Actions -->
+          <div class="d-flex justify-content-end align-items-center gap-1.5 pt-2 border-top border-slate-100">
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1" (click)="openEditModal(staff)">
+              <i class="bi bi-pencil"></i> Sửa
+            </button>
+            <button class="btn btn-sm rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1"
+                    [ngClass]="staff.is_active ? 'btn-outline-amber' : 'btn-outline-emerald'"
+                    (click)="toggleStatus(staff)">
+              <i class="bi" [ngClass]="staff.is_active ? 'bi-lock-fill' : 'bi-unlock-fill'"></i>
+              <span>{{ staff.is_active ? 'Khóa' : 'Mở' }}</span>
+            </button>
+            <button class="btn btn-sm btn-outline-danger rounded-pill px-2.5 py-1 d-inline-flex align-items-center gap-1" (click)="deleteStaff(staff)">
+              <i class="bi bi-trash3"></i> Xóa
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- 5. MODAL TẠO & CẬP NHẬT NHÂN VIÊN -->
 <div class="custom-modal-overlay" *ngIf="showModal" (click)="closeModal()">
-    <div class="custom-modal-content" (click)="$event.stopPropagation()" style="max-width: 600px;">
-        <div class="modal-header border-bottom p-4 d-flex justify-content-between align-items-center bg-light">
-            <h4 class="mb-0 fw-bold">{{ isEditMode ? 'Cập nhật Nhân viên' : 'Thêm Nhân viên mới' }}</h4>
-            <button class="btn-close" (click)="closeModal()"></button>
+  <div class="custom-modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="modal-header px-4 py-3 bg-slate-900 text-white d-flex justify-content-between align-items-center border-0">
+      <div class="d-flex align-items-center gap-2">
+        <div class="modal-header-icon bg-indigo-500 text-white rounded-3 p-1.5 d-flex align-items-center justify-content-center">
+          <i class="bi" [ngClass]="isEditMode ? 'bi-pencil-square' : 'bi-person-plus-fill'"></i>
         </div>
-        <div class="modal-body p-4">
-            <div class="row mb-3">
-                <div class="col-6">
-                    <label class="form-label fw-bold">Họ và tên lót (*)</label>
-                    <input type="text" class="form-control" [(ngModel)]="formData.last_name">
-                </div>
-                <div class="col-6">
-                    <label class="form-label fw-bold">Tên (*)</label>
-                    <input type="text" class="form-control" [(ngModel)]="formData.first_name">
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Email đăng nhập (*)</label>
-                <input type="email" class="form-control" [(ngModel)]="formData.email" [disabled]="isEditMode">
-                <small *ngIf="isEditMode" class="text-muted">Không thể thay đổi email sau khi tạo.</small>
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-bold">Mật khẩu {{ isEditMode ? '(Bỏ trống nếu không đổi)' : '(*)' }}</label>
-                <input type="password" class="form-control" [(ngModel)]="formData.password">
-            </div>
-            <div class="row mb-3">
-                <div class="col-6">
-                    <label class="form-label fw-bold">Nhóm quyền (*)</label>
-                    <select class="form-select" [(ngModel)]="formData.role_id">
-                        <option *ngIf="roles.length === 0" [value]="null">Bạn chưa tạo Nhóm quyền nào!</option>
-                        <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
-                    </select>
-                </div>
-                <div class="col-6">
-                    <label class="form-label fw-bold">Số điện thoại</label>
-                    <input type="text" class="form-control" [(ngModel)]="formData.phone">
-                </div>
-            </div>
-            <div class="mb-3" *ngIf="isEditMode">
-                <label class="form-label fw-bold">Trạng thái</label>
-                <select class="form-select" [(ngModel)]="formData.is_active">
-                    <option [value]="1">Đang hoạt động (Được đăng nhập)</option>
-                    <option [value]="0">Đã khóa (Cấm đăng nhập)</option>
-                </select>
-            </div>
+        <div>
+          <h5 class="modal-title fw-bold fs-6 mb-0 text-white">{{ isEditMode ? 'Cập Nhật Tài Khoản Nhân Viên' : 'Tạo Tài Khoản Nhân Viên Mới' }}</h5>
+          <small class="text-slate-300" style="font-size: 11px;">Thiết lập thông tin định danh, thông tin liên hệ và phân quyền vai trò</small>
         </div>
-        <div class="modal-footer p-3 bg-light border-top text-end">
-            <button class="btn btn-secondary me-2" (click)="closeModal()">Hủy</button>
-            <button class="btn btn-primary" (click)="saveStaff()">Lưu thông tin</button>
-        </div>
+      </div>
+      <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
     </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body p-4 bg-slate-50" style="max-height: 72vh; overflow-y: auto;">
+      
+      <!-- Box 1: Thông tin cá nhân -->
+      <div class="card border-0 shadow-2xs rounded-3 mb-3 bg-white">
+        <div class="card-body p-3">
+          <div class="text-slate-900 fw-bold fs-7 mb-2.5 d-flex align-items-center gap-1.5">
+            <i class="bi bi-person-badge text-indigo-600"></i>
+            <span>Thông tin nhân sự</span>
+          </div>
+
+          <div class="row g-2.5">
+            <div class="col-12 col-sm-6">
+              <label class="form-label fw-bold text-slate-800 mb-1 small">
+                Họ và tên đệm <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="text" 
+                class="form-control form-control-sm rounded-3 border-slate-200" 
+                placeholder="Ví dụ: Nguyễn Văn" 
+                [(ngModel)]="formData.last_name">
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label class="form-label fw-bold text-slate-800 mb-1 small">
+                Tên nhân viên <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="text" 
+                class="form-control form-control-sm rounded-3 border-slate-200" 
+                placeholder="Ví dụ: An" 
+                [(ngModel)]="formData.first_name">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Box 2: Thông tin đăng nhập & Liên hệ -->
+      <div class="card border-0 shadow-2xs rounded-3 mb-3 bg-white">
+        <div class="card-body p-3">
+          <div class="text-slate-900 fw-bold fs-7 mb-2.5 d-flex align-items-center gap-1.5">
+            <i class="bi bi-key-fill text-indigo-600"></i>
+            <span>Tài khoản đăng nhập & Liên hệ</span>
+          </div>
+
+          <!-- Email -->
+          <div class="mb-2.5">
+            <label class="form-label fw-bold text-slate-800 mb-1 small">
+              Email đăng nhập <span class="text-danger">*</span>
+            </label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-slate-50 border-slate-200 text-muted">
+                <i class="bi" [ngClass]="isEditMode ? 'bi-lock-fill text-amber-500' : 'bi-envelope'"></i>
+              </span>
+              <input 
+                type="email" 
+                class="form-control border-slate-200 font-mono-sm" 
+                placeholder="nhanvien@khachsan.com"
+                [(ngModel)]="formData.email" 
+                [disabled]="isEditMode">
+            </div>
+            <small *ngIf="isEditMode" class="text-muted d-block mt-1" style="font-size: 11px;">
+              <i class="bi bi-info-circle me-1"></i> Email đăng nhập là định danh bảo mật duy nhất, không thể thay đổi sau khi tạo.
+            </small>
+          </div>
+
+          <!-- Số điện thoại -->
+          <div class="mb-2.5">
+            <label class="form-label fw-bold text-slate-800 mb-1 small">
+              Số điện thoại liên hệ
+            </label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-slate-50 border-slate-200 text-muted">
+                <i class="bi bi-telephone"></i>
+              </span>
+              <input 
+                type="text" 
+                class="form-control border-slate-200" 
+                placeholder="Ví dụ: 0981111003" 
+                [(ngModel)]="formData.phone">
+            </div>
+          </div>
+
+          <!-- Mật khẩu -->
+          <div>
+            <label class="form-label fw-bold text-slate-800 mb-1 small">
+              Mật khẩu {{ isEditMode ? '(Bỏ trống nếu giữ nguyên)' : 'khởi tạo (*)' }}
+            </label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-slate-50 border-slate-200 text-muted">
+                <i class="bi bi-shield-lock"></i>
+              </span>
+              <input 
+                [type]="showPassword ? 'text' : 'password'" 
+                class="form-control border-slate-200" 
+                [placeholder]="isEditMode ? 'Nhập mật khẩu mới nếu muốn đổi...' : 'Nhập mật khẩu ít nhất 8 ký tự...'" 
+                [(ngModel)]="formData.password">
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary border-slate-200" 
+                (click)="togglePasswordVisibility()" 
+                [title]="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
+                <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+              </button>
+            </div>
+            <small class="text-muted d-block mt-1" style="font-size: 10.5px;">
+              <i class="bi bi-shield-check text-indigo-600 me-0.5"></i> Yêu cầu: Tối thiểu 8 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường và 1 số.
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Box 3: Phân nhóm quyền & Trạng thái -->
+      <div class="card border-0 shadow-2xs rounded-3 bg-white">
+        <div class="card-body p-3">
+          <div class="text-slate-900 fw-bold fs-7 mb-2.5 d-flex align-items-center gap-1.5">
+            <i class="bi bi-sliders text-indigo-600"></i>
+            <span>Vai trò & Quyền hạn</span>
+          </div>
+
+          <div class="row g-2.5">
+            <!-- Nhóm quyền -->
+            <div class="col-12" [ngClass]="isEditMode ? 'col-sm-7' : ''">
+              <label class="form-label fw-bold text-slate-800 mb-1 small">
+                Nhóm vai trò (Role) <span class="text-danger">*</span>
+              </label>
+              <select class="form-select form-select-sm rounded-3 border-slate-200" [(ngModel)]="formData.role_id">
+                <option *ngIf="roles.length === 0" [value]="null">Bạn chưa tạo Nhóm quyền nào!</option>
+                <option *ngFor="let role of roles" [value]="role.id">
+                  {{ role.name }} ({{ role.permissions?.length || 0 }} quyền hạn)
+                </option>
+              </select>
+              <small class="text-muted d-block mt-1" style="font-size: 11px;">
+                Nhân viên sẽ được cấp các quyền tương ứng với nhóm vai trò đã chọn.
+              </small>
+            </div>
+
+            <!-- Trạng thái hoạt động -->
+            <div class="col-12 col-sm-5" *ngIf="isEditMode">
+              <label class="form-label fw-bold text-slate-800 mb-1 small">
+                Trạng thái đăng nhập
+              </label>
+              <select class="form-select form-select-sm rounded-3 border-slate-200" [(ngModel)]="formData.is_active">
+                <option [value]="1">🟢 Đang hoạt động (Cho phép)</option>
+                <option [value]="0">🔴 Tạm khóa (Cấm đăng nhập)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer px-4 py-3 bg-white border-top border-slate-200 d-flex justify-content-between align-items-center">
+      <span class="text-muted small">
+        <i class="bi bi-shield-check text-emerald-600 me-1"></i> Mật khẩu được mã hóa an toàn bằng Bcrypt.
+      </span>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-outline-secondary rounded-3 px-3 py-1.5" (click)="closeModal()" [disabled]="isSubmitting">
+          Hủy bỏ
+        </button>
+        <button type="button" class="btn btn-primary rounded-3 px-4 py-1.5 fw-bold shadow-xs d-inline-flex align-items-center gap-1.5"
+                (click)="saveStaff()" [disabled]="isSubmitting">
+          <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm" role="status"></span>
+          <i *ngIf="!isSubmitting" class="bi bi-check-lg"></i>
+          <span>{{ isSubmitting ? 'Đang lưu...' : (isEditMode ? 'Lưu Thay Đổi' : 'Tạo Tài Khoản') }}</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
 </div>

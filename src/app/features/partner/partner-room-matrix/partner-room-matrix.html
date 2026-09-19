@@ -1,124 +1,299 @@
-<div class="matrix-container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="matrix-container space-y-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 border-bottom">
         <div>
-            <h2 style="color: #1e1b4b; margin: 0; font-weight: 800;">Sơ Đồ Phòng Trực Quan</h2>
-            <p style="color: #64748b;">Quản lý gán phòng vật lý thời gian thực, điều phối check-in/check-out nhanh
-                chóng.</p>
-        </div>
-    </div>
-
-    <div class="card shadow-sm border-0 mb-3 bg-white p-3">
-        <div class="d-flex align-items-center flex-wrap gap-4 text-dark font-weight-bold" style="font-size: 13px;">
-            <span class="d-flex align-items-center gap-2">🎨 <b>Trạng thái đặt phòng:</b></span>
-            <span class="d-flex align-items-center gap-1"><span class="color-indicator mode-pending"></span> Chờ xác
-                nhận</span>
-            <span class="d-flex align-items-center gap-1"><span class="color-indicator mode-confirmed"></span> Đã xác
-                nhận (Sắp đến)</span>
-            <span class="d-flex align-items-center gap-1"><span class="color-indicator mode-staying"></span> Đang lưu
-                trú (Checked-in)</span>
-            <span class="d-flex align-items-center gap-1"><span class="color-indicator mode-done"></span> Đã trả phòng
-                (Completed)</span>
-        </div>
-    </div>
-
-    <div class="card shadow-sm border-0 mb-3 bg-white p-3">
-        <div class="d-flex align-items-center flex-wrap justify-content-between gap-3">
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="btn-group shadow-sm">
-                    <button class="btn btn-outline-secondary" (click)="shiftDays(-7)">« 1 Tuần</button>
-                    <button class="btn btn-outline-secondary" (click)="shiftDays(-1)">‹</button>
-                    <button class="btn btn-outline-secondary bg-light text-dark fw-bold" (click)="goToToday()">Hôm
-                        nay</button>
-                    <button class="btn btn-outline-secondary" (click)="shiftDays(1)">›</button>
-                    <button class="btn btn-outline-secondary" (click)="shiftDays(7)">1 Tuần »</button>
-                </div>
-
-                <div class="d-flex align-items-center gap-2 text-dark">
-                    <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate"
-                        (change)="loadMatrix()">
-                    <span>đến</span>
-                    <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate"
-                        (change)="loadMatrix()">
-                </div>
-            </div>
-
             <div class="d-flex align-items-center gap-2">
-                <span class="text-muted small fw-bold text-nowrap">Lọc phòng:</span>
-                <select class="form-select form-select-sm shadow-sm border-secondary" style="min-width: 160px;"
-                    [(ngModel)]="selectedRoomType" (change)="applyFilters()">
-                    <option value="">-- Tất cả Hạng phòng --</option>
-                    <option *ngFor="let type of uniqueRoomTypes" [value]="type">{{ type }}</option>
-                </select>
-
-                <select class="form-select form-select-sm shadow-sm border-secondary" style="min-width: 160px;"
-                    [(ngModel)]="selectedStatus" (change)="applyFilters()">
-                    <option value="">-- Tất cả Trạng thái --</option>
-                    <option value="1">🟢 Sẵn sàng (Trống)</option>
-                    <option value="0">🧹 Cần dọn dẹp</option>
-                    <option value="2">🛌 Đang có khách</option>
-                    <option value="3">🛠️ Đang bảo trì</option>
-                </select>
+                <span class="d-inline-block rounded-circle bg-primary" style="width: 10px; height: 10px;"></span>
+                <h2 style="color: #1e1b4b; margin: 0; font-weight: 800; font-size: 1.6rem;">Sơ Đồ Phòng Trực Quan</h2>
             </div>
+            <p class="text-muted small mt-1 mb-0 font-medium">
+                Ma trận điều phối buồng phòng thời gian thực, quản lý gán phòng và theo dõi lịch lưu trú của khách.
+            </p>
+        </div>
 
+        <div class="d-flex align-items-center gap-2">
+            <!-- Nút Làm mới -->
+            <button (click)="loadMatrix()"
+                    title="Tải lại dữ liệu ma trận phòng"
+                    class="btn btn-sm btn-white border shadow-sm d-inline-flex align-items-center gap-1.5 px-3 py-1.5 rounded-3 fw-semibold text-secondary">
+                <svg class="w-4 h-4" [class.animate-spin]="isLoading" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                    <path d="M16 21h5v-5"/>
+                </svg>
+                <span>Làm mới</span>
+            </button>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0 bg-white text-dark" style="overflow-x: auto;">
+    <!-- 4 Thẻ Thống Kê Buồng Phòng Thời Gian Thực (Bấm để lọc nhanh) -->
+    <div class="row g-3">
+        <!-- Thẻ 1: Sẵn sàng (Trống) -->
+        <div class="col-6 col-md-3">
+            <div (click)="quickFilterStatus('1')"
+                 [class.kpi-active]="selectedStatus === '1'"
+                 title="Bấm để lọc các phòng Sẵn sàng đón khách"
+                 class="kpi-card kpi-ready p-3 rounded-3 shadow-sm border cursor-pointer select-none">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-uppercase fw-bold text-success" style="font-size: 11.5px; letter-spacing: 0.5px;">
+                        Sẵn sàng (Trống)
+                    </span>
+                    <div class="kpi-icon-pill bg-success-subtle text-success">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <span class="fs-4 fw-bold text-success">{{ stats.ready }}</span>
+                    <span class="small text-muted">/ {{ stats.total }} phòng</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thẻ 2: Đang có khách -->
+        <div class="col-6 col-md-3">
+            <div (click)="quickFilterStatus('2')"
+                 [class.kpi-active]="selectedStatus === '2'"
+                 title="Bấm để lọc các phòng Đang có khách lưu trú"
+                 class="kpi-card kpi-occupied p-3 rounded-3 shadow-sm border cursor-pointer select-none">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-uppercase fw-bold text-primary" style="font-size: 11.5px; letter-spacing: 0.5px;">
+                        Đang có khách
+                    </span>
+                    <div class="kpi-icon-pill bg-primary-subtle text-primary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 20v-8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8"/>
+                            <path d="M5 10V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/>
+                            <path d="M3 18h18"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <span class="fs-4 fw-bold text-primary">{{ stats.occupied }}</span>
+                    <span class="small text-muted">phòng có khách</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thẻ 3: Cần dọn dẹp -->
+        <div class="col-6 col-md-3">
+            <div (click)="quickFilterStatus('0')"
+                 [class.kpi-active]="selectedStatus === '0'"
+                 title="Bấm để lọc các phòng Cần dọn dẹp"
+                 class="kpi-card kpi-cleaning p-3 rounded-3 shadow-sm border cursor-pointer select-none">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-uppercase fw-bold text-warning" style="font-size: 11.5px; letter-spacing: 0.5px;">
+                        Cần dọn dẹp
+                    </span>
+                    <div class="kpi-icon-pill bg-warning-subtle text-warning">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <span class="fs-4 fw-bold text-warning-emphasis">{{ stats.cleaning }}</span>
+                    <span class="small text-muted">chờ buồng phòng</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thẻ 4: Đang bảo trì -->
+        <div class="col-6 col-md-3">
+            <div (click)="quickFilterStatus('3')"
+                 [class.kpi-active]="selectedStatus === '3'"
+                 title="Bấm để lọc các phòng Đang bảo trì"
+                 class="kpi-card kpi-maintenance p-3 rounded-3 shadow-sm border cursor-pointer select-none">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-uppercase fw-bold text-danger" style="font-size: 11.5px; letter-spacing: 0.5px;">
+                        Đang bảo trì
+                    </span>
+                    <div class="kpi-icon-pill bg-danger-subtle text-danger">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <span class="fs-4 fw-bold text-danger">{{ stats.maintenance }}</span>
+                    <span class="small text-muted">tạm khóa</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng Chú Thích Trực Quan (Legend) -->
+    <div class="card shadow-sm border-0 bg-white p-3 rounded-3">
+        <div class="d-flex align-items-center flex-wrap justify-content-between gap-3" style="font-size: 13px;">
+            <div class="d-flex align-items-center flex-wrap gap-4 text-dark font-weight-medium">
+                <span class="fw-bold d-inline-flex align-items-center gap-1.5 text-slate-700">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Trạng thái đặt phòng:
+                </span>
+                <span class="d-flex align-items-center gap-1.5">
+                    <span class="color-indicator mode-confirmed"></span> Đã xác nhận (Sắp nhận phòng)
+                </span>
+                <span class="d-flex align-items-center gap-1.5">
+                    <span class="color-indicator mode-staying"></span> Đang lưu trú
+                </span>
+                <span class="d-flex align-items-center gap-1.5">
+                    <span class="color-indicator mode-done"></span> Đã trả phòng
+                </span>
+            </div>
+            <div class="small text-muted fst-italic">
+                * Nhấp vào ô lịch có khách để mở nhanh chi tiết đơn đặt phòng
+            </div>
+        </div>
+    </div>
+
+    <!-- Thanh Điều Hướng Thời Gian & Bộ Lọc -->
+    <div class="card shadow-sm border-0 bg-white p-3 rounded-3">
+        <div class="row align-items-center g-3">
+            <!-- Nhóm 1: Điều hướng dải ngày -->
+            <div class="col-12 col-xl-6">
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                    <div class="btn-group shadow-sm">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="shiftDays(-7)" title="Lùi 1 tuần">« 1 Tuần</button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="shiftDays(-1)" title="Lùi 1 ngày">‹</button>
+                        <button class="btn btn-sm btn-outline-secondary bg-light text-dark fw-bold" (click)="goToToday()" title="Trở về tuần hiện tại">Tuần này</button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="shiftDays(1)" title="Tiến 1 ngày">›</button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="shiftDays(7)" title="Tiến 1 tuần">1 Tuần »</button>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-1.5 text-dark ms-md-2">
+                        <input type="date" class="form-control form-control-sm border-secondary-subtle" [(ngModel)]="startDate"
+                            (change)="onDateChange()" style="width: 135px;">
+                        <span class="text-muted small">đến</span>
+                        <input type="date" class="form-control form-control-sm border-secondary-subtle" [(ngModel)]="endDate"
+                            (change)="onDateChange()" style="width: 135px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nhóm 2: Bộ lọc hạng phòng & trạng thái -->
+            <div class="col-12 col-xl-6">
+                <div class="d-flex align-items-center justify-content-xl-end flex-wrap gap-2">
+                    <span class="text-muted small fw-bold text-nowrap">Lọc phòng:</span>
+                    <select class="form-select form-select-sm shadow-sm border-secondary-subtle text-truncate" style="max-width: 230px; min-width: 160px;"
+                        [(ngModel)]="selectedRoomType" (change)="applyFilters()" title="Lọc theo hạng phòng">
+                        <option value="">-- Tất cả Hạng phòng --</option>
+                        <option *ngFor="let type of uniqueRoomTypes" [value]="type">{{ type }}</option>
+                    </select>
+
+                    <select class="form-select form-select-sm shadow-sm border-secondary-subtle" style="width: 165px;"
+                        [(ngModel)]="selectedStatus" (change)="applyFilters()" title="Lọc theo trạng thái buồng phòng">
+                        <option value="">-- Tất cả Trạng thái --</option>
+                        <option value="1">Sẵn sàng (Trống)</option>
+                        <option value="0">Cần dọn dẹp</option>
+                        <option value="2">Đang có khách</option>
+                        <option value="3">Đang bảo trì</option>
+                    </select>
+
+                    <button *ngIf="selectedRoomType || selectedStatus"
+                            (click)="resetFilters()"
+                            class="btn btn-sm btn-outline-danger shadow-sm d-inline-flex align-items-center gap-1 text-nowrap px-2.5 py-1"
+                            title="Xóa toàn bộ bộ lọc">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        <span>Xóa lọc</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng Ma Trận Buồng Phòng -->
+    <div class="card shadow-sm border-0 bg-white text-dark rounded-3" style="overflow-x: auto;">
         <table class="table table-bordered matrix-table mb-0">
             <thead>
                 <tr class="bg-light text-center">
-                    <th class="sticky-side font-title" style="min-width: 220px; z-index: 5;">SỐ PHÒNG / HẠNG PHÒNG</th>
+                    <th class="sticky-side font-title" style="min-width: 230px; max-width: 260px; z-index: 5;">
+                        SỐ PHÒNG / HẠNG PHÒNG
+                    </th>
                     <th *ngFor="let day of headers" class="p-2 cell-header"
+                        [class.is-today]="isToday(day.date_string)"
                         [class.is-weekend]="day.day_name === 'T7' || day.day_name === 'CN'">
-                        <div class="hdr-name text-uppercase">{{ day.day_name }}</div>
+                        <div class="hdr-name text-uppercase" [class.text-primary]="isToday(day.date_string)">
+                            {{ day.day_name }}
+                        </div>
                         <div class="hdr-label text-muted">{{ day.day_label }}</div>
+                        <div *ngIf="isToday(day.date_string)" class="today-badge mt-1">
+                            Hôm nay
+                        </div>
                     </th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Trạng thái Loading -->
                 <tr *ngIf="isLoading">
-                    <td [attr.colspan]="headers.length + 1" class="text-center p-5 text-muted">Đang vẽ ma trận phân phối
-                        buồng phòng...</td>
+                    <td [attr.colspan]="headers.length + 1" class="text-center p-5 text-muted">
+                        <div class="d-inline-flex align-items-center gap-2">
+                            <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                            <span>Đang vẽ ma trận phân phối buồng phòng...</span>
+                        </div>
+                    </td>
                 </tr>
 
+                <!-- Danh sách dữ liệu phòng -->
                 <ng-container *ngIf="!isLoading">
                     <tr *ngIf="filteredMatrixGrid.length === 0">
-                        <td [attr.colspan]="headers.length + 1" class="text-center p-5 fw-bold text-danger">
-                            Không tìm thấy phòng nào khớp với bộ lọc!
+                        <td [attr.colspan]="headers.length + 1" class="text-center p-5 fw-semibold text-danger">
+                            Không tìm thấy phòng nào khớp với bộ lọc hiện tại.
                         </td>
                     </tr>
 
                     <tr *ngFor="let row of filteredMatrixGrid">
-                        <td class="sticky-side bg-white align-middle fw-bold text-dark">
+                        <!-- Cột cố định thông tin phòng -->
+                        <td class="sticky-side bg-white align-middle text-dark p-3" style="min-width: 230px; max-width: 260px;">
                             <div class="d-flex flex-column gap-1">
-                                <span class="fs-6">🚪 Phòng {{ row.room_name }}</span>
-                                <span class="text-muted small fw-normal">{{ row.room_type_name }}</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="room-icon-box shadow-sm">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 21h18"/>
+                                            <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
+                                            <path d="M9 9h1"/>
+                                        </svg>
+                                    </div>
+                                    <span class="fs-6 fw-bold" style="color: #1e293b;">Phòng {{ row.room_name }}</span>
+                                </div>
+                                <span class="text-muted small fw-normal text-truncate mt-1" style="font-size: 11.5px;" [title]="row.room_type_name">
+                                    {{ row.room_type_name }}
+                                </span>
 
+                                <!-- Dropdown trạng thái buồng phòng quầy lễ tân -->
                                 <select [ngModel]="row.current_status"
-                                    (ngModelChange)="updatePhysicalRoomStatus(row.room_id, $event)"
+                                    (ngModelChange)="updatePhysicalRoomStatus(row.room_id, $event, row.current_status)"
                                     class="form-select form-select-sm mt-1 status-dropdown-pms"
                                     [class.status-dirty]="row.current_status === 0"
                                     [class.status-empty]="row.current_status === 1"
                                     [class.status-occupied]="row.current_status === 2"
                                     [class.status-repair]="row.current_status === 3"
-                                    [disabled]="row.current_status === 2">
-                                    <option [ngValue]="1">🟢 Trống (Sẵn sàng)</option>
-                                    <option [ngValue]="0">🧹 Cần dọn dẹp</option>
-                                    <option [ngValue]="2" disabled>🛌 Đang có khách</option>
-                                    <option [ngValue]="3">🛠️ Đang bảo trì</option>
+                                    title="Thay đổi trạng thái vật lý phòng này">
+                                    <option [ngValue]="1">● Sẵn sàng (Trống)</option>
+                                    <option [ngValue]="0">● Cần dọn dẹp</option>
+                                    <option [ngValue]="2">● Đang có khách</option>
+                                    <option [ngValue]="3">● Đang bảo trì</option>
                                 </select>
                             </div>
                         </td>
 
+                        <!-- Các ô lịch theo ngày -->
                         <td *ngFor="let day of row.days" class="matrix-cell-box text-center p-0"
-                            [class.clickable-occupied]="day.is_occupied" [class.status-0]="day.status === 0"
-                            [class.status-1]="day.status === 1" [class.status-2]="day.status === 2"
-                            [class.status-3]="day.status === 3"
+                            [class.col-today]="isToday(day.date)"
+                            [class.clickable-occupied]="day.is_occupied"
+                            [class.status-1]="day.is_occupied && day.status === 1"
+                            [class.status-2]="day.is_occupied && day.status === 2"
+                            [class.status-3]="day.is_occupied && day.status === 3"
                             (click)="day.is_occupied ? viewBookingDetail(day.booking_id) : null">
 
                             <div class="occupied-block p-1" *ngIf="day.is_occupied"
-                                title="Nhấp chuột để xem chi tiết đơn hàng">
+                                [title]="'Đơn ' + day.booking_code + ' - ' + day.guest_name + ' (Nhấp chuột để mở chi tiết)'">
                                 <div class="guest-title fw-bold">{{ day.guest_name }}</div>
                                 <div class="code-subtitle">{{ day.booking_code }}</div>
                             </div>

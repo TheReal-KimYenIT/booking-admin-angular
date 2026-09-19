@@ -1,148 +1,529 @@
-<div class="container-fluid p-4">
-    <div class="mb-4">
-        <h2 class="fw-bold text-dark mb-1">💼 Đối Soát Doanh Thu</h2>
-        <p class="text-muted mb-0">Theo dõi dòng tiền giao dịch, chiết khấu hoa hồng Sàn và số tiền thực nhận</p>
+<div class="container-fluid p-4 space-y-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-2 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="d-inline-block rounded-circle bg-primary" style="width: 10px; height: 10px;"></span>
+                <h2 style="color: #1e1b4b; margin: 0; font-weight: 800; font-size: 1.6rem;">Đối Soát Doanh Thu</h2>
+            </div>
+            <p class="text-muted small mt-1 mb-0 font-medium">
+                Theo dõi chi tiết dòng tiền giao dịch, chiết khấu hoa hồng Sàn StayHub và thực nhận của khách sạn (gồm VAT để nộp thuế).
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <!-- Nút Xuất file Excel (.xlsx) -->
+            <button (click)="exportExcel()"
+                    title="Tải bảng đối soát giao dịch định dạng file Excel (.xlsx)"
+                    class="btn btn-sm btn-success d-inline-flex align-items-center gap-1.5 px-3.5 py-2 rounded-3 fw-semibold shadow-sm text-white">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Xuất Excel (.xlsx)</span>
+            </button>
+
+            <!-- Nút Làm mới -->
+            <button (click)="loadTransactions(currentPage)"
+                    title="Tải lại dữ liệu giao dịch"
+                    class="btn btn-sm btn-white border shadow-sm d-inline-flex align-items-center gap-1.5 px-3 py-2 rounded-3 fw-semibold text-secondary">
+                <svg [class.animate-spin]="isLoading" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                    <path d="M16 21h5v-5"/>
+                </svg>
+                <span>Làm mới</span>
+            </button>
+        </div>
     </div>
 
-    <!-- KHỐI BỘ LỌC -->
-    <div class="bg-white p-3 border rounded shadow-sm mb-4 d-flex flex-wrap gap-3 align-items-end">
-        <div style="flex-grow: 1; min-width: 250px;">
-            <label class="small fw-bold text-muted mb-1">Mã đơn:</label>
-            <input type="text" [(ngModel)]="keyword" (keyup.enter)="onFilterChange()"
-                placeholder="VD: SB-NWEUOSSJ (Nhấn Enter)" class="form-control form-control-sm">
-        </div>
-        <div style="width: 150px;">
-            <label class="small fw-bold text-muted mb-1">Từ ngày:</label>
-            <input type="date" [(ngModel)]="startDate" (change)="onFilterChange()" class="form-control form-control-sm">
-        </div>
-        <div style="width: 150px;">
-            <label class="small fw-bold text-muted mb-1">Đến ngày:</label>
-            <input type="date" [(ngModel)]="endDate" (change)="onFilterChange()" class="form-control form-control-sm">
-        </div>
-        <div style="width: 180px;">
-            <label class="small fw-bold text-muted mb-1">Hình thức:</label>
-            <select [(ngModel)]="selectedMethod" (change)="onFilterChange()" class="form-select form-select-sm">
-                <option value="all">-- Tất cả --</option>
-                <option value="4">🌐 Cổng VNPAY</option>
-                <option value="1">💵 Tiền mặt quầy</option>
-                <option value="2">💳 Quẹt thẻ POS</option>
-            </select>
-        </div>
-        <div style="width: 150px;">
-            <label class="small fw-bold text-muted mb-1">Trạng thái:</label>
-            <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="form-select form-select-sm">
-                <option value="all">-- Tất cả --</option>
-                <option value="1">✅ Thành công</option>
-                <option value="0">⏳ Đang chờ</option>
-                <option value="2">❌ Thất bại</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- KHỐI THỐNG KÊ DOANH THU -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-primary text-white h-100">
-                <div class="card-body py-3">
-                    <h6 class="text-white-50 fw-bold small text-uppercase mb-1">Tiền vào qua VNPAY (Sàn đang giữ)</h6>
-                    <h3 class="fw-black my-1">{{ stats.vnpay_total | number }} đ</h3>
+    <!-- KHỐI 4 THẺ THỐNG KÊ DOANH THU & ĐỐI SOÁT TÀI CHÍNH -->
+    <div class="row g-3">
+        <!-- Thẻ 1: Tổng Dòng Tiền Thu Từ Khách -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm text-white h-100 rounded-3 stat-card-primary">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-white-50 fw-bold small text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                Tổng Tiền Khách Đặt (GMV)
+                            </span>
+                            <div class="stat-icon-pill">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23"/>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold my-1 fs-4">{{ stats.grand_total | number }} đ</h3>
+                    </div>
+                    <div class="small text-white-50 mt-2 pt-2 border-top border-white border-opacity-10 d-flex justify-content-between flex-wrap gap-1">
+                        <span>Thành công: <strong>{{ stats.success_count }}</strong></span>
+                        <span *ngIf="stats.pending_count > 0" class="text-warning">Chờ thu: <strong>{{ stats.pending_count }}</strong></span>
+                        <span *ngIf="stats.failed_count > 0">Đã hoàn: <strong>{{ stats.failed_count }}</strong></span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-success text-white h-100">
-                <div class="card-body py-3">
-                    <h6 class="text-white-50 fw-bold small text-uppercase mb-1">Tiền quầy tự thu (Khách sạn giữ)</h6>
-                    <h3 class="fw-black my-1">{{ (stats.cash_total + stats.pos_total) | number }} đ</h3>
+
+        <!-- Thẻ 2: Khách Thanh Toán VNPAY (Online) -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm text-white h-100 rounded-3 stat-card-vnpay">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-white-50 fw-bold small text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                Cổng Online VNPAY
+                            </span>
+                            <div class="stat-icon-pill">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                    <line x1="2" y1="10" x2="22" y2="10"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold my-1 fs-4">{{ stats.vnpay_total | number }} đ</h3>
+                    </div>
+                    <div class="small text-white-50 mt-2 pt-2 border-top border-white border-opacity-10">
+                        <span>Khách thanh toán cọc trực tuyến</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-dark text-white h-100">
-                <div class="card-body py-3">
-                    <h6 class="text-white-50 fw-bold small text-uppercase mb-1">Giao dịch thời gian này</h6>
-                    <div class="d-flex justify-content-between align-items-center mt-2">
-                        <span>🟢 Thành công: <strong class="fs-5">{{ stats.success_count }}</strong></span>
-                        <span>🔴 Thất bại: <strong class="fs-5">{{ stats.failed_count }}</strong></span>
+
+        <!-- Thẻ 3: Thu Tại Quầy (Khách Sạn Thu) -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm text-white h-100 rounded-3 stat-card-counter">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-white-50 fw-bold small text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                Thu Tại Quầy (KS Đã Thu)
+                            </span>
+                            <div class="stat-icon-pill">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="8.5" cy="7" r="4"/>
+                                    <polyline points="17 11 19 13 23 9"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold my-1 fs-4">{{ stats.counter_total | number }} đ</h3>
+                    </div>
+                    <div class="small text-white-50 mt-2 pt-2 border-top border-white border-opacity-10 d-flex justify-content-between flex-wrap gap-1">
+                        <span>Tiền mặt: {{ stats.cash_total | number }} đ</span>
+                        <span *ngIf="stats.transfer_total > 0">CK: {{ stats.transfer_total | number }} đ</span>
+                        <span *ngIf="stats.pos_total > 0">POS: {{ stats.pos_total | number }} đ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thẻ 4: Quyết Toán Hoa Hồng Sàn & Thực Nhận -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm text-white h-100 rounded-3 stat-card-settlement">
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-white-50 fw-bold small text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                                Quyết Toán Sàn & Thực Nhận
+                            </span>
+                            <div class="stat-icon-pill">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-baseline mt-1">
+                            <span class="small text-white-50">Phí Sàn thu (-):</span>
+                            <span class="fw-bold text-warning">-{{ stats.total_commission | number }} đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-baseline mt-1">
+                            <span class="small text-white-50">Thực nhận KS:</span>
+                            <span class="fw-bold text-success-light fs-5">{{ stats.total_payout | number }} đ</span>
+                        </div>
+                    </div>
+                    <div class="small text-white-50 mt-2 pt-2 border-top border-white border-opacity-10 d-flex justify-content-between">
+                        <span>Hoa hồng: <strong>{{ stats.commission_rate || 15 }}%</strong></span>
+                        <span title="Khách sạn chịu trách nhiệm kê khai nộp thuế">Gồm VAT: <strong>{{ stats.total_vat | number }} đ</strong></span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- BẢNG LỊCH SỬ ĐỐI SOÁT -->
+    <!-- KHỐI BỘ LỌC TỔNG QUAN -->
+    <div class="card shadow-sm border-0 bg-white p-3 rounded-3">
+        <div class="row g-3 align-items-end">
+            <!-- Ô Tìm kiếm đa năng -->
+            <div class="col-12 col-md-4 col-xl-3">
+                <label class="small fw-bold text-muted mb-1">Tìm kiếm giao dịch:</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-secondary-subtle">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </span>
+                    <input type="text" [(ngModel)]="keyword" (keyup.enter)="onFilterChange()"
+                           placeholder="Mã đơn, tên khách, SĐT..." class="form-control form-control-sm border-secondary-subtle">
+                    <button *ngIf="keyword" (click)="clearKeyword()" class="btn btn-outline-secondary border-secondary-subtle" type="button" title="Xóa từ khóa">
+                        ✕
+                    </button>
+                    <button (click)="onFilterChange()" class="btn btn-primary btn-sm px-2.5" type="button" title="Tìm kiếm">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Từ ngày -->
+            <div class="col-6 col-md-2 col-xl-2">
+                <label class="small fw-bold text-muted mb-1">Từ ngày:</label>
+                <input type="date" [(ngModel)]="startDate" (change)="onCustomDateChange()" class="form-control form-control-sm border-secondary-subtle">
+            </div>
+
+            <!-- Đến ngày -->
+            <div class="col-6 col-md-2 col-xl-2">
+                <label class="small fw-bold text-muted mb-1">Đến ngày:</label>
+                <input type="date" [(ngModel)]="endDate" (change)="onCustomDateChange()" class="form-control form-control-sm border-secondary-subtle">
+            </div>
+
+            <!-- Hình thức thanh toán -->
+            <div class="col-6 col-md-3 col-xl-2">
+                <label class="small fw-bold text-muted mb-1">Hình thức thanh toán:</label>
+                <select [(ngModel)]="selectedMethod" (change)="onFilterChange()" class="form-select form-select-sm border-secondary-subtle">
+                    <option value="all">-- Tất cả hình thức --</option>
+                    <option value="4">🌐 Cổng VNPAY (Online)</option>
+                    <option value="1">💵 Tiền mặt (Tại quầy)</option>
+                    <option value="2">💳 Quẹt thẻ POS (Tại quầy)</option>
+                    <option value="3">📱 Chuyển khoản (Mã QR)</option>
+                </select>
+            </div>
+
+            <!-- Trạng thái giao dịch -->
+            <div class="col-6 col-md-3 col-xl-2">
+                <label class="small fw-bold text-muted mb-1">Trạng thái:</label>
+                <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="form-select form-select-sm border-secondary-subtle">
+                    <option value="all">-- Tất cả trạng thái --</option>
+                    <option value="1">✅ Thành công</option>
+                    <option value="0">⏳ Chờ thanh toán</option>
+                    <option value="2">🔄 Đã hoàn tiền</option>
+                </select>
+            </div>
+
+            <!-- Phím tắt dải ngày & Xóa lọc -->
+            <div class="col-12 col-xl-1 d-flex gap-1 justify-content-end align-items-center">
+                <button (click)="resetAllFilters()"
+                        class="btn btn-sm btn-outline-secondary w-100 shadow-sm d-inline-flex align-items-center justify-content-center gap-1 text-nowrap"
+                        title="Đặt lại toàn bộ bộ lọc về mặc định">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    <span>Xóa lọc</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Phím tắt nhanh dải ngày -->
+        <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top flex-wrap">
+            <span class="small text-muted fw-bold">Chọn nhanh:</span>
+            <button type="button"
+                    class="btn btn-xs px-2.5 py-1 rounded-pill fw-semibold shadow-2xs transition-all"
+                    [class.btn-primary]="activeDatePreset === 'this_month'"
+                    [class.text-white]="activeDatePreset === 'this_month'"
+                    [class.btn-outline-secondary]="activeDatePreset !== 'this_month'"
+                    style="font-size: 11.5px;"
+                    (click)="setThisMonth()">
+                Tháng này
+            </button>
+            <button type="button"
+                    class="btn btn-xs px-2.5 py-1 rounded-pill fw-semibold shadow-2xs transition-all"
+                    [class.btn-primary]="activeDatePreset === 'last_month'"
+                    [class.text-white]="activeDatePreset === 'last_month'"
+                    [class.btn-outline-secondary]="activeDatePreset !== 'last_month'"
+                    style="font-size: 11.5px;"
+                    (click)="setLastMonth()">
+                Tháng trước
+            </button>
+            <button type="button"
+                    class="btn btn-xs px-2.5 py-1 rounded-pill fw-semibold shadow-2xs transition-all"
+                    [class.btn-primary]="activeDatePreset === 'all'"
+                    [class.text-white]="activeDatePreset === 'all'"
+                    [class.btn-outline-secondary]="activeDatePreset !== 'all'"
+                    style="font-size: 11.5px;"
+                    (click)="setAllTime()">
+                Toàn thời gian
+            </button>
+        </div>
+    </div>
+
+    <!-- BẢNG LỊCH SỬ ĐỐI SOÁT GIAO DỊCH -->
     <div class="card border-0 shadow-sm bg-white rounded-3">
         <div class="card-body p-0">
+            <!-- Trạng thái Loading -->
             <div *ngIf="isLoading" class="text-center p-5">
                 <div class="spinner-border text-primary" role="status"></div>
-                <h5 class="text-muted mt-3">Đang truy xuất dữ liệu...</h5>
+                <h6 class="text-muted mt-3 font-medium">Đang truy xuất sổ chi tiết giao dịch đối soát...</h6>
             </div>
 
+            <!-- Trạng thái rỗng -->
             <div *ngIf="!isLoading && transactions.length === 0" class="text-center p-5 text-muted fst-italic">
-                Không phát sinh dữ liệu giao dịch nào thỏa mãn bộ lọc hiện tại.
+                Không phát sinh giao dịch nào thỏa mãn bộ lọc hiện tại.
             </div>
 
+            <!-- Bảng dữ liệu -->
             <div *ngIf="!isLoading && transactions.length > 0" class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-muted small uppercase">
+                <table class="table table-hover align-middle mb-0 transaction-table">
+                    <thead class="table-light text-muted small text-uppercase">
                         <tr>
-                            <th class="ps-4">Mã Đơn / Thời gian</th>
-                            <th>Khách hàng</th>
-                            <th class="text-center">Hình thức / Trạng thái</th>
-                            <!-- 👉 Cập nhật Header Bảng -->
-                            <th class="text-end text-dark">Gốc (Khách quẹt)</th>
-                            <th class="text-end text-warning">Đã Hoàn</th>
-                            <th class="text-center">Tỉ lệ</th>
-                            <th class="text-end text-danger">Phí Sàn thu (-)</th>
-                            <th class="text-end text-success pe-4">Tiền thực nhận</th>
+                            <th class="ps-4" style="min-width: 170px;">Mã Đơn / Thời gian</th>
+                            <th style="min-width: 160px;">Khách hàng</th>
+                            <th class="text-center" style="min-width: 140px;">Hình thức / Trạng thái</th>
+                            <th class="text-end text-dark" style="min-width: 130px;">Khách thanh toán</th>
+                            <th class="text-end text-warning" style="min-width: 100px;">Hoàn tiền</th>
+                            <th class="text-end text-muted" style="min-width: 110px;">Thuế VAT (KS nộp)</th>
+                            <th class="text-center" style="min-width: 85px;">Hoa hồng</th>
+                            <th class="text-end text-danger" style="min-width: 135px;">Phí Sàn thu (-)</th>
+                            <th class="text-end text-success" style="min-width: 155px;">Thực nhận KS (=)</th>
+                            <th class="text-center pe-3" style="min-width: 60px;">Chi tiết</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let item of transactions">
+                            <!-- Mã Đơn & Thời gian -->
                             <td class="ps-4">
-                                <span class="d-block fw-bold text-primary">{{ item.booking_code || '---' }}</span>
-                                <span class="small text-muted">{{ item.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                                <a [routerLink]="['/dashboard/bookings', item.booking_id]"
+                                   title="Bấm để xem chi tiết đơn đặt phòng"
+                                   class="booking-code-badge mb-1">
+                                    {{ item.booking_code || '---' }}
+                                </a>
+                                <div class="small text-muted" style="font-size: 11px;">
+                                    {{ item.created_at | date:'dd/MM/yyyy HH:mm' }}
+                                </div>
                             </td>
+
+                            <!-- Khách hàng -->
                             <td>
-                                <div class="fw-bold text-dark">{{ item.guest_name }}</div>
+                                <div class="fw-bold text-dark text-nowrap">{{ item.guest_name || 'Khách vãng lai' }}</div>
+                                <div class="small text-muted text-nowrap" *ngIf="item.guest_phone">{{ item.guest_phone }}</div>
                             </td>
+
+                            <!-- Hình thức & Trạng thái -->
                             <td class="text-center">
-                                <span class="badge bg-light text-dark border d-block mb-1">{{
-                                    getMethodName(item.payment_method) }}</span>
-                                <span *ngIf="item.payment_status === 1" class="text-success small fw-bold">✅ Thành
-                                    công</span>
-                                <span *ngIf="item.payment_status !== 1" class="text-warning small fw-bold">⏳ Xử
-                                    lý</span>
+                                <span class="badge d-inline-flex align-items-center gap-1 mb-1 px-2.5 py-1"
+                                      [class.method-vnpay]="item.payment_method === 4"
+                                      [class.method-cash]="item.payment_method === 1"
+                                      [class.method-pos]="item.payment_method === 2"
+                                      [class.method-transfer]="item.payment_method === 3">
+                                    {{ getMethodName(item.payment_method) }}
+                                </span>
+                                <div>
+                                    <span *ngIf="item.payment_status === 1" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5" style="font-size: 10.5px;">
+                                        ● Thành công
+                                    </span>
+                                    <span *ngIf="item.payment_status === 0" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-0.5" style="font-size: 10.5px;">
+                                        ⏳ Chờ thanh toán
+                                    </span>
+                                    <span *ngIf="item.payment_status === 2" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5" style="font-size: 10.5px;">
+                                        ● Đã hoàn tiền
+                                    </span>
+                                </div>
                             </td>
-                            <!-- 👉 Dữ liệu số tiền gốc -->
-                            <td class="text-end fw-bold text-dark fs-6">{{ item.amount | number }} đ</td>
 
-                            <!-- 👉 Dữ liệu số tiền hoàn (NẾU CÓ) -->
-                            <td class="text-end fw-bold text-warning fs-6">
+                            <!-- Số tiền khách thanh toán -->
+                            <td class="text-end fw-bold text-dark fs-6 text-nowrap">
+                                {{ item.amount | number }} đ
+                            </td>
+
+                            <!-- Hoàn tiền khách (nếu có) -->
+                            <td class="text-end fw-bold text-warning text-nowrap">
                                 <span *ngIf="item.refund_deducted > 0">-{{ item.refund_deducted | number }} đ</span>
-                                <span *ngIf="!item.refund_deducted || item.refund_deducted === 0">0 đ</span>
+                                <span *ngIf="!item.refund_deducted || item.refund_deducted === 0" class="text-muted fw-normal">0 đ</span>
                             </td>
 
-                            <td class="text-center fw-bold text-muted">{{ item.applied_rate }}%</td>
-                            <td class="text-end fw-bold text-danger">- {{ item.commission_fee | number }} đ</td>
-                            <td class="text-end fw-bold text-success pe-4 fs-6">{{ item.payout_amount | number }} đ</td>
+                            <!-- Thuế VAT đợt này (Khách sạn chịu trách nhiệm nộp) -->
+                            <td class="text-end text-nowrap">
+                                <div class="fw-semibold text-muted" style="font-size: 12.5px;">
+                                    {{ (item.payment_vat || 0) | number }} đ
+                                </div>
+                                <div class="text-muted" style="font-size: 10.5px;">{{ item.vat_rate || 10 }}% (KS nộp)</div>
+                            </td>
+
+                            <!-- Tỷ lệ hoa hồng -->
+                            <td class="text-center fw-bold text-secondary">
+                                {{ item.applied_rate }}%
+                            </td>
+
+                            <!-- Phí trả Sàn StayHub (-) -->
+                            <td class="text-end fw-bold text-danger text-nowrap">
+                                -{{ item.commission_fee | number }} đ
+                            </td>
+
+                            <!-- Thực nhận của Khách Sạn (=) -->
+                            <td class="text-end text-nowrap">
+                                <div class="fw-bold text-success fs-6">{{ item.payout_amount | number }} đ</div>
+                                <div class="text-muted" style="font-size: 10.5px;">Gồm VAT nộp thuế</div>
+                            </td>
+
+                            <!-- Nút mở Modal xem chi tiết -->
+                            <td class="text-center pe-3">
+                                <button (click)="openDetail(item)"
+                                        class="btn btn-sm btn-outline-primary border-0 rounded-circle p-1.5"
+                                        title="Bấm xem bóc tách chi tiết dòng tiền">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
+            <!-- Ghi chú giải thích công thức đối soát & Bản quyền nghiệp vụ -->
+            <div class="p-3 bg-light-subtle border-top d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 small text-muted">
+                <div>
+                    ⭐ <strong>Quy chế tài chính:</strong> Sàn StayHub <strong>chỉ thu phí hoa hồng sàn</strong>. Tiền phòng và thuế VAT do <strong>Khách sạn trực tiếp tiếp nhận</strong> và chịu trách nhiệm xuất hóa đơn GTGT, kê khai nộp thuế.
+                </div>
+                <div class="fw-medium text-nowrap">
+                    Tổng số: <strong>{{ totalRecords }}</strong> giao dịch
+                </div>
+            </div>
+
             <!-- PHÂN TRANG -->
             <div *ngIf="!isLoading && totalRecords > 0"
-                class="d-flex justify-content-between align-items-center p-3 border-top bg-light rounded-bottom-3">
-                <span class="text-muted small">Hiển thị trang <strong>{{ currentPage }}</strong> / {{ lastPage }}</span>
+                class="d-flex justify-content-between align-items-center p-3 border-top bg-white rounded-bottom-3 flex-wrap gap-2">
+                <span class="text-muted small">
+                    Trang <strong>{{ currentPage }}</strong> / {{ lastPage }} ({{ totalRecords }} giao dịch)
+                </span>
                 <ul class="pagination pagination-sm mb-0">
-                    <li class="page-item" [class.disabled]="currentPage === 1"><button class="page-link"
-                            (click)="goToPage(currentPage - 1)">« Trước</button></li>
-                    <li class="page-item disabled"><span class="page-link text-dark fw-bold">{{ currentPage }}</span>
+                    <li class="page-item" [class.disabled]="currentPage === 1">
+                        <button class="page-link" (click)="goToPage(1)" title="Trang đầu">««</button>
                     </li>
-                    <li class="page-item" [class.disabled]="currentPage === lastPage"><button class="page-link"
-                            (click)="goToPage(currentPage + 1)">Sau »</button></li>
+                    <li class="page-item" [class.disabled]="currentPage === 1">
+                        <button class="page-link" (click)="goToPage(currentPage - 1)" title="Trang trước">‹ Trước</button>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link text-primary fw-bold">{{ currentPage }} / {{ lastPage }}</span>
+                    </li>
+                    <li class="page-item" [class.disabled]="currentPage === lastPage">
+                        <button class="page-link" (click)="goToPage(currentPage + 1)" title="Trang sau">Sau ›</button>
+                    </li>
+                    <li class="page-item" [class.disabled]="currentPage === lastPage">
+                        <button class="page-link" (click)="goToPage(lastPage)" title="Trang cuối">»»</button>
+                    </li>
                 </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CHI TIẾT BÓC TÁCH DÒNG TIỀN GIAO DỊCH -->
+    <div *ngIf="showDetailModal && selectedItem" class="modal-backdrop-custom" (click)="closeDetail()">
+        <div class="modal-content-custom p-4" (click)="$event.stopPropagation()">
+            <!-- Header Modal -->
+            <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="booking-code-badge">{{ selectedItem.booking_code }}</span>
+                        <span class="badge"
+                              [class.bg-success-subtle]="selectedItem.payment_status === 1"
+                              [class.text-success]="selectedItem.payment_status === 1"
+                              [class.bg-warning-subtle]="selectedItem.payment_status === 0"
+                              [class.text-warning-emphasis]="selectedItem.payment_status === 0"
+                              [class.bg-danger-subtle]="selectedItem.payment_status === 2"
+                              [class.text-danger]="selectedItem.payment_status === 2">
+                            {{ selectedItem.payment_status === 1 ? 'Thành công' : (selectedItem.payment_status === 0 ? 'Chờ thanh toán' : 'Đã hoàn tiền') }}
+                        </span>
+                    </div>
+                    <div class="text-muted small">Thời gian GD: {{ selectedItem.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</div>
+                </div>
+                <button (click)="closeDetail()" class="btn btn-sm btn-light rounded-circle p-1.5 text-muted" title="Đóng modal">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Body Modal -->
+            <div class="space-y-3">
+                <!-- Thông tin khách hàng & Phương thức -->
+                <div class="bg-light p-3 rounded-3 mb-3">
+                    <div class="row g-2 small">
+                        <div class="col-6">
+                            <span class="text-muted d-block">Khách hàng:</span>
+                            <span class="fw-bold text-dark">{{ selectedItem.guest_name }}</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted d-block">Số điện thoại:</span>
+                            <span class="fw-bold text-dark">{{ selectedItem.guest_phone || '---' }}</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted d-block">Hình thức thanh toán:</span>
+                            <span class="fw-bold text-indigo-600">{{ getMethodName(selectedItem.payment_method) }}</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted d-block">Mã cổng giao dịch:</span>
+                            <span class="fw-semibold text-secondary">{{ selectedItem.transaction_id || 'Thanh toán tại quầy' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng bóc tách phân bổ dòng tiền -->
+                <div class="border rounded-3 p-3 mb-3">
+                    <h6 class="fw-bold text-dark mb-2" style="font-size: 13px;">Bóc tách phân bổ dòng tiền</h6>
+                    <table class="table table-sm table-borderless mb-0 small">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted">Tổng tiền khách thanh toán (GMV):</td>
+                                <td class="text-end fw-bold text-dark fs-6">{{ selectedItem.amount | number }} đ</td>
+                            </tr>
+                            <tr *ngIf="selectedItem.refund_deducted > 0">
+                                <td class="text-muted">Hoàn tiền khách:</td>
+                                <td class="text-end fw-bold text-warning">-{{ selectedItem.refund_deducted | number }} đ</td>
+                            </tr>
+                            <tr class="border-top">
+                                <td class="text-danger fw-semibold pt-2">
+                                    Chiết khấu phí Sàn StayHub ({{ selectedItem.applied_rate }}%):
+                                    <div class="text-muted" style="font-size: 10.5px;">⭐ Khoản thu duy nhất Sàn nhận</div>
+                                </td>
+                                <td class="text-end fw-bold text-danger pt-2 fs-6">-{{ selectedItem.commission_fee | number }} đ</td>
+                            </tr>
+                            <tr class="border-top">
+                                <td class="text-success fw-bold pt-2">
+                                    Thực nhận của Khách Sạn:
+                                    <div class="text-muted fw-normal" style="font-size: 10.5px;">Khách sạn giữ lại gồm VAT để nộp thuế</div>
+                                </td>
+                                <td class="text-end fw-bold text-success pt-2 fs-5">{{ selectedItem.payout_amount | number }} đ</td>
+                            </tr>
+                            <tr class="bg-light-subtle">
+                                <td class="ps-3 text-muted" style="font-size: 11.5px;">↳ Trong đó: Doanh thu tiền phòng thuần:</td>
+                                <td class="text-end text-muted fw-semibold" style="font-size: 11.5px;">{{ (selectedItem.hotel_net_room || 0) | number }} đ</td>
+                            </tr>
+                            <tr class="bg-light-subtle">
+                                <td class="ps-3 text-muted" style="font-size: 11.5px;">↳ Trong đó: Thuế VAT {{ selectedItem.vat_rate || 10 }}% (KS kê khai nộp thuế):</td>
+                                <td class="text-end text-muted fw-semibold" style="font-size: 11.5px;">{{ (selectedItem.payment_vat || 0) | number }} đ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Chú thích quy định tài chính -->
+                <div class="alert alert-info py-2 px-3 small mb-0 rounded-3" style="font-size: 11.5px;">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <strong>Lưu ý nghĩa vụ thuế:</strong> Sàn StayHub chỉ thu phí dịch vụ sàn theo tỷ lệ hợp đồng thỏa thuận ({{ selectedItem.applied_rate }}%). Khách sạn trực tiếp tiếp nhận tiền thanh toán và có nghĩa vụ xuất hóa đơn GTGT cho khách hàng cũng như kê khai nộp thuế theo luật định.
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-3">
+                <a [routerLink]="['/dashboard/bookings', selectedItem.booking_id]" (click)="closeDetail()" class="btn btn-sm btn-outline-primary">
+                    Xem hồ sơ đơn đặt phòng
+                </a>
+                <button (click)="closeDetail()" class="btn btn-sm btn-secondary px-3">
+                    Đóng
+                </button>
             </div>
         </div>
     </div>

@@ -64,9 +64,21 @@
                                 </div>
                             </td>
 
-                            <!-- Cột 3: Số tiền -->
-                            <td class="text-end fw-bold text-danger fs-6">
-                                {{ item.refund_amount | number }} đ
+                            <!-- Cột 3: Chi tiết số tiền -->
+                            <td class="text-end">
+                                <div class="small text-muted mb-1">Khách đã trả: {{ item.original_payment | number }} đ
+                                </div>
+                                <div class="small text-success mb-1" *ngIf="item.original_payment > item.refund_amount">
+                                    Khách sạn thu phí hủy: + {{ (item.original_payment - item.refund_amount) | number }}
+                                    đ
+                                </div>
+                                <div class="fw-bold text-danger fs-6 border-top pt-1 mt-1">
+                                    Cần hoàn: {{ item.refund_amount | number }} đ
+                                </div>
+                                <div class="text-info mt-1" style="font-size: 11px;">
+                                    💡 {{ getCancelPolicyText(item.free_cancel_hours, item.partial_refund_hours,
+                                    item.partial_refund_percent) }}
+                                </div>
                             </td>
 
                             <!-- Cột 4: Trạng thái -->

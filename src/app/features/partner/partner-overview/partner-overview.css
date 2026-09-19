@@ -1,108 +1,33 @@
-:host {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
+/* Đã chuyển sang Tailwind và Glassmorphism */
+
+/* Custom Scrollbar cho danh sách hạng phòng */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.6);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
-.fade-in-up {
-    background-color: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    animation: fadeInUp 0.4s ease-out;
+/* Hiệu ứng hiển thị thẻ chi tiết khi hover lát cắt Donut */
+@keyframes fadeInTooltip {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.page-title {
-    margin-top: 0;
-    color: #1e1b4b;
-    margin-bottom: 5px;
-}
-
-.page-subtitle {
-    color: #64748b;
-    margin-bottom: 30px;
-}
-
-.stats-grid {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.stat-card {
-    flex: 1;
-    min-width: 250px;
-    border-radius: 12px;
-    padding: 25px;
-    transition: transform 0.2s ease-out;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
-/* Thẻ thống kê màu Xanh lá */
-.stat-card-green {
-    background-color: #ecfdf5;
-    border: 1px solid #a7f3d0;
-}
-
-.stat-card-green h4 {
-    margin: 0 0 15px 0;
-    color: #065f46;
-    font-size: 16px;
-}
-
-.stat-card-green .stat-value {
-    font-size: 40px;
-    font-weight: 800;
-    color: #10b981;
-}
-
-/* Thẻ thống kê màu Xanh dương */
-.stat-card-blue {
-    background-color: #eff6ff;
-    border: 1px solid #bfdbfe;
-}
-
-.stat-card-blue h4 {
-    margin: 0 0 15px 0;
-    color: #1e40af;
-    font-size: 16px;
-}
-
-.stat-card-blue .stat-value {
-    font-size: 40px;
-    font-weight: 800;
-    color: #3b82f6;
-}
-
-/* Thẻ thống kê màu Cam/Vàng */
-.stat-card-yellow {
-    background-color: #fffbeb;
-    border: 1px solid #fde68a;
-}
-
-.stat-card-yellow h4 {
-    margin: 0 0 15px 0;
-    color: #92400e;
-    font-size: 16px;
-}
-
-.stat-card-yellow .stat-value {
-    font-size: 40px;
-    font-weight: 800;
-    color: #f59e0b;
+.animate-fadeIn {
+  animation: fadeInTooltip 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

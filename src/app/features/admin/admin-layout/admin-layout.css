@@ -9,27 +9,83 @@
 
 /* Thanh điều hướng bên trái */
 .admin-sidebar {
-    width: 280px;
-    /* Mở rộng một chút để chữ không bị chèn ép */
+    width: 260px;
     background-color: #1e293b;
-    /* Màu xanh đen hiện đại */
     color: #fff;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
     z-index: 10;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-sidebar.collapsed {
+    width: 80px;
 }
 
 .brand {
-    padding: 30px 20px;
+    padding: 22px 18px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.admin-sidebar.collapsed .brand {
+    padding: 20px 10px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+}
+
+.sidebar-toggle-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #cbd5e1;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    transform: scale(1.08);
+}
+
+.toggle-icon {
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.admin-sidebar.collapsed .menu-item {
+    justify-content: center;
+    padding: 14px 0;
+}
+
+.admin-sidebar.collapsed .menu-item .icon {
+    margin-right: 0;
+    font-size: 20px;
+}
+
+.admin-sidebar.collapsed .menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 12px 10px;
 }
 
 .brand h3 {
     margin: 0;
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 800;
     letter-spacing: 1.5px;
     color: #ffffff;
@@ -37,8 +93,8 @@
 
 .brand h3 span {
     color: #0ea5e9;
-    /* Xanh dương sáng, nổi bật */
 }
+
 
 .brand small {
     color: #94a3b8;
@@ -76,16 +132,79 @@
     letter-spacing: 1px;
 }
 
+.menu-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    padding: 8px 12px 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.menu-section-header:hover {
+    background-color: rgba(250, 204, 21, 0.08);
+    color: #facc15;
+}
+
+.section-title-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 1.1px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    transition: color 0.2s ease;
+}
+
+.menu-section-header:hover .section-title-text {
+    color: #facc15;
+}
+
+.section-chevron {
+    width: 18px;
+    height: 18px;
+    color: #ffffff;
+    stroke: #ffffff;
+    stroke-width: 2.5;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease, stroke 0.2s ease, opacity 0.2s ease;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.section-chevron.collapsed-chevron {
+    transform: rotate(-90deg);
+    opacity: 0.9;
+}
+
+.menu-section-header:hover .section-chevron {
+    color: #facc15;
+    stroke: #facc15;
+    transform: scale(1.15);
+}
+
+.menu-section-header:hover .section-chevron.collapsed-chevron {
+    transform: rotate(-90deg) scale(1.15);
+}
+
 .group-spacing {
-    margin-top: 30px;
-    /* Thay thế inline style */
+    margin-top: 24px;
 }
 
 .menu-item {
     display: flex;
     align-items: center;
     padding: 12px 16px;
-    color: #cbd5e1;
+    color: #ffffff;
     text-decoration: none;
     border-radius: 8px;
     font-size: 14px;
@@ -95,15 +214,15 @@
 }
 
 .menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
+    background-color: rgba(250, 204, 21, 0.12);
+    color: #facc15;
     transform: translateX(4px);
     /* Hiệu ứng trượt nhẹ sang phải khi hover */
 }
 
 .menu-item.active {
     background-color: #0ea5e9;
-    color: #ffffff;
+    color: #ffffff !important;
     font-weight: 600;
     box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
     /* Bóng đổ cho nút đang chọn */
@@ -111,10 +230,42 @@
 
 .menu-item .icon {
     margin-right: 14px;
-    font-size: 18px;
-    width: 24px;
-    /* Cố định chiều rộng icon để chữ thẳng hàng */
-    text-align: center;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.svg-icon {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.2s ease;
+}
+
+.menu-item:hover .svg-icon {
+    transform: scale(1.12);
+    stroke: #facc15;
+}
+
+.menu-item.active .svg-icon {
+    stroke: #ffffff !important;
+}
+
+.admin-sidebar.collapsed .menu-item .icon {
+    margin-right: 0;
+}
+
+.admin-sidebar.collapsed .menu-item .svg-icon {
+    width: 22px;
+    height: 22px;
 }
 
 /* Khu vực nội dung chính */
@@ -184,4 +335,72 @@
     flex: 1;
     overflow-y: auto;
     /* Cho phép cuộn nội dung chính */
+}
+
+/* 1. Kìm hãm toàn trang: Không cho phép trình duyệt cuộn tổng */
+.admin-wrapper {
+    display: flex;
+    height: 100vh;
+    /* Giới hạn chiều cao bằng đúng 100% màn hình */
+    width: 100%;
+    overflow: hidden;
+    /* Cắt bỏ mọi thứ tràn ra ngoài khung 100vh này */
+}
+
+/* 2. Cột Sidebar: Cố định bên trái */
+.admin-sidebar {
+    width: 260px;
+    height: 100vh;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.admin-sidebar.collapsed {
+    width: 80px !important;
+}
+
+
+/* 3. Cột Nội dung: Chiếm phần diện tích còn lại */
+.admin-content-area {
+    flex-grow: 1;
+    /* Giãn ra lấp đầy khoảng trống bên phải */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    /* Đảm bảo vùng này cũng không bị tràn */
+}
+
+/* 4. Khóa Header đứng im */
+.admin-header {
+    flex-shrink: 0;
+    /* Giữ nguyên kích thước header, không bị ép nhỏ */
+    /* Giữ nguyên các thuộc tính padding, background hiện tại của bạn */
+}
+
+/* 5. Vùng cuộn độc lập (Mấu chốt của vấn đề) */
+.admin-main {
+    flex-grow: 1;
+    overflow-y: auto;
+    /* Lệnh này sẽ tạo ra thanh cuộn dọc chỉ nằm trong vùng Main này */
+    padding: 24px;
+    /* Căn lề cho đẹp */
+    background-color: #f8f9fa;
+    /* Màu nền nhẹ cho vùng dữ liệu (có thể tùy chỉnh) */
+}
+
+/* Tùy chọn: Làm đẹp thanh cuộn cho khu vực admin-main (Chỉ hoạt động trên Chrome/Edge/Safari) */
+.admin-main::-webkit-scrollbar {
+    width: 8px;
+}
+
+.admin-main::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1;
+    border-radius: 4px;
+}
+
+.admin-main::-webkit-scrollbar-track {
+    background-color: transparent;
 }

@@ -1,117 +1,199 @@
-/* Container bọc ngoài cùng, tạo không gian thoáng đãng */
+:host {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .profile-container {
-    padding: 10px 20px 40px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+  max-width: 100%;
 }
 
-/* Định dạng cho cột Menu bên trái của trang Profile */
-.profile-menu-card {
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+/* ========================================================================= */
+/* TAGS & SHADOWS                                                            */
+/* ========================================================================= */
+.portal-tag {
+  background-color: #e0e7ff !important;
+  color: #3730a3 !important;
+  border: 1px solid #c7d2fe !important;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
-.profile-tab-btn {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 16px 20px;
-    background: transparent;
-    border: none;
-    border-left: 4px solid transparent;
-    color: #475569;
-    font-size: 15px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid #f1f5f9;
+.shadow-xs {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
 }
 
-.profile-tab-btn:hover {
-    background-color: #f8fafc;
-    color: #1e293b;
+.shadow-2xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
-/* Trạng thái nút Menu ĐANG CHỌN */
-.profile-tab-btn.active-tab {
-    background-color: #eef2ff;
-    color: #4f46e5;
-    border-left: 4px solid #4f46e5;
+.border-slate-100 { border-color: #f1f5f9 !important; }
+.border-slate-200 { border-color: #e2e8f0 !important; }
+.bg-slate-50 { background-color: #f8fafc !important; }
+.text-slate-900 { color: #0f172a !important; }
+.text-slate-800 { color: #1e293b !important; }
+.text-slate-700 { color: #334155 !important; }
+.text-slate-600 { color: #475569 !important; }
+.text-slate-400 { color: #94a3b8 !important; }
+.text-slate-300 { color: #cbd5e1 !important; }
+.text-nowrap { white-space: nowrap !important; }
+
+/* ========================================================================= */
+/* COLOR PALETTE TOKENS                                                      */
+/* ========================================================================= */
+.bg-indigo-50 { background-color: #eef2ff !important; }
+.text-indigo-600 { color: #4f46e5 !important; }
+.text-indigo-700 { color: #4338ca !important; }
+.border-indigo-100 { border-color: #e0e7ff !important; }
+.border-indigo-200 { border-color: #c7d2fe !important; }
+
+.bg-emerald-50 { background-color: #ecfdf5 !important; }
+.text-emerald-600 { color: #059669 !important; }
+.text-emerald-700 { color: #047857 !important; }
+.border-emerald-200 { border-color: #a7f3d0 !important; }
+
+.bg-amber-50 { background-color: #fffbeb !important; }
+.text-amber-500 { color: #f59e0b !important; }
+.text-amber-600 { color: #d97706 !important; }
+.border-amber-200 { border-color: #fde68a !important; }
+
+/* ========================================================================= */
+/* PROFILE BANNER & AVATAR                                                  */
+/* ========================================================================= */
+.profile-identity-card {
+  background: linear-gradient(to right, #ffffff, #fcfdff);
+  border: 1px solid #f1f5f9 !important;
 }
 
-/* Định dạng cho Form nhập liệu bên phải */
-.profile-content-card {
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-    padding: 30px;
+.profile-avatar-large {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  font-size: 20px;
+  letter-spacing: 1px;
+  user-select: none;
 }
 
-.profile-content-card h4 {
-    color: #1e1b4b;
-    margin-bottom: 8px;
+.font-mono-sm {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-.form-label {
-    color: #334155;
-    margin-bottom: 8px;
-    display: block;
+.fs-7 {
+  font-size: 0.85rem;
 }
 
+/* ========================================================================= */
+/* NAVIGATION TABS                                                           */
+/* ========================================================================= */
+.profile-nav-tab-btn {
+  background: transparent;
+  border: none;
+  color: #475569;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.profile-nav-tab-btn:hover {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+.profile-nav-tab-btn.active-nav-tab {
+  background-color: #eef2ff !important;
+  color: #4338ca !important;
+  font-weight: 700 !important;
+}
+
+/* Status Indicator */
+.status-indicator-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 10px !important;
+  border-radius: 9999px !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot-active {
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: dotPulse 2s infinite ease-in-out;
+}
+
+@keyframes dotPulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* ========================================================================= */
+/* FORM CONTROLS                                                             */
+/* ========================================================================= */
 .form-control {
-    width: 100%;
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    background-color: #fff;
-    font-size: 14px;
-    transition: border-color 0.2s;
-    box-sizing: border-box;
+  font-size: 13.5px;
+  padding: 8px 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-control:focus {
-    outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
 }
 
 .form-control:read-only {
-    background-color: #f1f5f9;
-    color: #64748b;
-    cursor: not-allowed;
+  cursor: not-allowed;
 }
 
-/* Định dạng nút bấm Lưu/Cập nhật */
-.btn-save {
-    background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    margin-top: 10px;
+.input-group-text {
+  font-size: 13.5px;
 }
 
-.btn-save:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+/* Primary Button */
+.btn-primary {
+  background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
+  border: none;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.btn-dark {
-    background: #1e293b;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 10px;
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
 }
 
-.btn-dark:hover {
-    background: #0f172a;
+/* ========================================================================= */
+/* RESPONSIVE DESIGN                                                         */
+/* ========================================================================= */
+@media (max-width: 991.98px) {
+  .profile-nav-tab-btn {
+    padding: 8px 12px;
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .profile-container {
+    padding: 8px !important;
+  }
+
+  .profile-avatar-large {
+    width: 48px;
+    height: 48px;
+    font-size: 16px;
+  }
 }

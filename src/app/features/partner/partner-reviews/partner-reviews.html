@@ -1,0 +1,487 @@
+<div class="reviews-container p-2 p-md-3 fade-in-up">
+  <!-- 1. HEADER -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-star-half me-1"></i> Quản Lý Đánh Giá & Phản Hồi
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Quản Lý Đánh Giá</h2>
+      <p class="text-muted mb-0 small">Theo dõi cảm nhận của khách hàng, phân tích chất lượng dịch vụ và gửi phản hồi chuyên nghiệp.</p>
+    </div>
+    
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 shadow-2xs d-inline-flex align-items-center gap-1.5" (click)="loadReviews()" [disabled]="isLoading">
+        <i class="bi bi-arrow-clockwise" [class.spin]="isLoading"></i>
+        <span>Làm Mới</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. KPI SUMMARY CARDS (4 CARDS) -->
+  <div class="row g-2 mb-3">
+    <!-- Card 1: Điểm Đánh Giá Trung Bình -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-amber-50 text-amber-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Điểm Đánh Giá TB</div>
+            <div class="fs-6 fw-bold text-slate-800">
+              {{ stats.avg_rating || 0 }} <span class="text-amber-500 fs-7 fw-normal">/ 5.0 ⭐</span>
+            </div>
+            <div class="text-muted" style="font-size: 10px;">{{ stats.total_reviews }} lượt đánh giá</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Tổng Lượt Đánh Giá -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-chat-heart-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Tổng Lượt Đánh Giá</div>
+            <div class="fs-6 fw-bold text-indigo-600">
+              {{ stats.total_reviews }} <span class="text-muted small fw-normal">lượt</span>
+            </div>
+            <div class="text-muted" style="font-size: 10px;">Toàn bộ phản hồi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Chưa Phản Hồi -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-rose-50 text-rose-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-exclamation-diamond-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Chưa Phản Hồi</div>
+            <div class="fs-6 fw-bold text-rose-600">
+              {{ stats.unreplied_count }} <span class="text-muted small fw-normal">cần xử lý</span>
+            </div>
+            <div class="text-muted" style="font-size: 10px;">
+              {{ stats.unreplied_count > 0 ? 'Cần ưu tiên trả lời' : 'Đã phản hồi 100%' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Đánh Giá 5 Sao -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-award-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Đánh Giá Tuyệt Đối (5⭐)</div>
+            <div class="fs-6 fw-bold text-emerald-600">
+              {{ stats.five_star_count }} <span class="text-muted small fw-normal">({{ stats.five_star_rate }}%)</span>
+            </div>
+            <div class="text-muted" style="font-size: 10px;">Khách rất hài lòng</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TOOLBAR: TÌM KIẾM & BỘ LỌC ĐA NĂNG -->
+  <div class="card border-0 shadow-xs mb-3">
+    <div class="card-body p-2.5 p-md-3">
+      <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center justify-content-between gap-2.5">
+        
+        <!-- Ô tìm kiếm từ khóa -->
+        <div class="search-input-wrapper position-relative flex-grow-1">
+          <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+          <input 
+            type="text" 
+            class="form-control form-control-sm ps-5 pe-5 py-2 rounded-3 border-slate-200" 
+            placeholder="Tìm theo tên khách, mã booking, nội dung đánh giá..." 
+            [(ngModel)]="searchTerm" 
+            (input)="onSearchInput()">
+          <button 
+            *ngIf="searchTerm" 
+            class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-1 text-muted p-0 border-0" 
+            (click)="clearSearch()" 
+            title="Xóa tìm kiếm">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        </div>
+
+        <!-- Nhóm lọc: Trạng thái phản hồi & Số sao -->
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <!-- Filter Tabs Trạng Thái -->
+          <div class="btn-group btn-group-sm shadow-2xs" role="group">
+            <button 
+              type="button" 
+              class="btn btn-filter" 
+              [class.active]="selectedStatus === 'all'"
+              (click)="selectStatus('all')">
+              Tất cả ({{ stats.total_reviews }})
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-filter" 
+              [class.active]="selectedStatus === 'unreplied'"
+              (click)="selectStatus('unreplied')">
+              Chưa trả lời 
+              <span class="badge bg-rose-500 ms-1" *ngIf="stats.unreplied_count > 0">{{ stats.unreplied_count }}</span>
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-filter" 
+              [class.active]="selectedStatus === 'replied'"
+              (click)="selectStatus('replied')">
+              Đã trả lời
+            </button>
+          </div>
+
+          <!-- Lọc theo số sao -->
+          <div class="d-flex align-items-center gap-1">
+            <select class="form-select form-select-sm shadow-2xs border-slate-200 rounded-3" 
+                    [(ngModel)]="selectedRating" 
+                    (change)="selectRating(selectedRating)"
+                    style="min-width: 130px;">
+              <option value="all">⭐ Tất cả sao</option>
+              <option value="5">⭐⭐⭐⭐⭐ (5 sao)</option>
+              <option value="4">⭐⭐⭐⭐ (4 sao)</option>
+              <option value="3">⭐⭐⭐ (3 sao)</option>
+              <option value="2">⭐⭐ (2 sao)</option>
+              <option value="1">⭐ (1 sao)</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. TRẠNG THÁI LOADING -->
+  <div *ngIf="isLoading" class="text-center py-5 bg-white rounded-3 shadow-xs border">
+    <div class="spinner-border text-primary" role="status" style="width: 2.5rem; height: 2.5rem;"></div>
+    <div class="mt-3 fw-semibold text-slate-700">Đang tải danh sách đánh giá...</div>
+    <small class="text-muted">Vui lòng chờ trong giây lát</small>
+  </div>
+
+  <!-- 5. DANH SÁCH ĐÁNH GIÁ (KHI CÓ DỮ LIỆU) -->
+  <div *ngIf="!isLoading">
+    
+    <!-- Trường hợp không có dữ liệu -->
+    <div *ngIf="reviews.length === 0" class="card border-0 shadow-xs text-center py-5">
+      <div class="card-body">
+        <div class="empty-icon-box mb-3 text-slate-400">
+          <i class="bi bi-chat-square-text fs-1"></i>
+        </div>
+        <h5 class="fw-bold text-slate-800 mb-1">Không tìm thấy đánh giá nào</h5>
+        <p class="text-muted small mb-3">Thử thay đổi từ khóa tìm kiếm hoặc bỏ các bộ lọc để xem đầy đủ.</p>
+        <button class="btn btn-sm btn-outline-primary px-3 rounded-pill" (click)="resetAllFilters()">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại bộ lọc
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid Card Đánh giá -->
+    <div class="row g-3" *ngIf="reviews.length > 0">
+      <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch" *ngFor="let review of reviews">
+        <div class="card review-card w-100 border-0 shadow-xs rounded-3 h-100 position-relative">
+          
+          <div class="card-body p-3.5 d-flex flex-column">
+            
+            <!-- Hàng thông tin khách + Trạng thái -->
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2.5">
+              <div class="d-flex align-items-center gap-2.5">
+                <div class="avatar-circle-sm bg-indigo-50 text-indigo-700 fw-bold shadow-2xs">
+                  {{ getInitials(review.guest_name) }}
+                </div>
+                <div>
+                  <h6 class="mb-0 fw-bold text-slate-900 fs-7 text-truncate" style="max-width: 150px;">
+                    {{ review.guest_name || 'Khách vãng lai' }}
+                  </h6>
+                  <div class="text-muted small" style="font-size: 11px;">
+                    {{ review.created_at | date:'dd/MM/yyyy HH:mm' }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Badge trạng thái -->
+              <span class="badge py-1 px-2 rounded-pill font-mono-sm" 
+                    [ngClass]="review.partner_reply ? 'badge-replied' : 'badge-unreplied'">
+                <i class="bi" [ngClass]="review.partner_reply ? 'bi-check-circle-fill me-1' : 'bi-clock-fill me-1'"></i>
+                {{ review.partner_reply ? 'Đã phản hồi' : 'Chưa phản hồi' }}
+              </span>
+            </div>
+
+            <!-- Dòng đánh giá số sao (Hiển thị CHUẨN XÁC 5 SAO, KHÔNG TRÙNG LẶP) -->
+            <div class="stars-rating-wrapper d-inline-flex align-items-center mb-2.5">
+              <div class="stars-group text-amber d-inline-flex gap-1">
+                <i *ngFor="let star of [1, 2, 3, 4, 5]" 
+                   class="bi" 
+                   [ngClass]="star <= review.rating ? 'bi-star-fill text-amber' : 'bi-star text-slate-300'"></i>
+              </div>
+              <span class="rating-score-badge ms-2" 
+                    [ngClass]="review.rating >= 4 ? 'score-high' : (review.rating === 3 ? 'score-mid' : 'score-low')">
+                {{ review.rating }}/5
+              </span>
+            </div>
+
+            <!-- Khung trích dẫn nội dung bình luận -->
+            <div class="review-comment-box p-2.5 rounded-3 mb-2.5 bg-slate-50 border border-slate-100 flex-grow-1">
+              <div class="d-flex align-items-start gap-1">
+                <i class="bi bi-quote text-slate-400 fs-6 lh-1"></i>
+                <div class="review-text text-slate-700 small fst-italic">
+                  "{{ review.comment || 'Khách hàng không để lại nhận xét bằng lời.' }}"
+                </div>
+              </div>
+            </div>
+            
+            <!-- Danh sách ảnh đính kèm của khách -->
+            <div class="review-images-row d-flex flex-wrap gap-1.5 mb-2.5" *ngIf="review.review_images && review.review_images.length > 0">
+              <div *ngFor="let img of review.review_images" class="position-relative thumb-wrap">
+                <img [src]="img.image_url" 
+                     alt="Ảnh đánh giá" 
+                     class="review-thumb-img" 
+                     (click)="openImage(img.image_url)" 
+                     title="Bấm để xem ảnh lớn">
+              </div>
+            </div>
+
+            <!-- Phản hồi của khách sạn (nếu đã có) -->
+            <div class="hotel-reply-box p-2.5 rounded-3 mb-3 bg-indigo-50-soft border border-indigo-100" *ngIf="review.partner_reply">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <span class="text-indigo-700 fw-bold small d-inline-flex align-items-center gap-1" style="font-size: 11px;">
+                  <i class="bi bi-reply-fill"></i> Phản hồi từ Khách sạn:
+                </span>
+                <span class="text-muted" style="font-size: 10px;">{{ review.replied_at | date:'dd/MM HH:mm' }}</span>
+              </div>
+              <p class="mb-0 text-slate-700 small reply-text-clamp">
+                "{{ review.partner_reply }}"
+              </p>
+            </div>
+            
+            <!-- Footer Card -->
+            <div class="card-footer-action mt-auto pt-2.5 border-top border-slate-100 d-flex justify-content-between align-items-center">
+              <div class="d-flex flex-column">
+                <span class="text-muted" style="font-size: 10px;">Mã đặt phòng:</span>
+                <strong class="text-slate-800 font-monospace fs-7">#{{ review.booking_code }}</strong>
+              </div>
+              <button 
+                class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-2xs"
+                [ngClass]="review.partner_reply ? 'btn-outline-indigo' : 'btn-primary'"
+                (click)="viewDetail(review)" 
+                data-bs-toggle="modal" 
+                data-bs-target="#reviewDetailModal">
+                <i class="bi" [ngClass]="review.partner_reply ? 'bi-chat-left-dots' : 'bi-reply-fill'"></i>
+                <span>{{ review.partner_reply ? 'Xem & Sửa' : 'Phản hồi ngay' }}</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. PHÂN TRANG -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-4 pt-2" *ngIf="totalItems > 0">
+      <div class="text-muted small">
+        Hiển thị trang <strong>{{ currentPage }}</strong> / <strong>{{ lastPage }}</strong> (Tổng số <strong>{{ totalItems }}</strong> đánh giá)
+      </div>
+
+      <nav aria-label="Phân trang đánh giá" *ngIf="lastPage > 1">
+        <ul class="pagination pagination-sm shadow-2xs mb-0">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">
+              <i class="bi bi-chevron-left"></i> Trước
+            </button>
+          </li>
+          
+          <li class="page-item" *ngFor="let p of [].constructor(lastPage); let i = index" [class.active]="currentPage === i + 1">
+            <button class="page-link" (click)="changePage(i + 1)">{{ i + 1 }}</button>
+          </li>
+
+          <li class="page-item" [class.disabled]="currentPage === lastPage">
+            <button class="page-link" (click)="changePage(currentPage + 1)" [disabled]="currentPage === lastPage">
+              Sau <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+
+  <!-- 7. MODAL CHI TIẾT & SOẠN PHẢN HỒI -->
+  <div class="modal fade" id="reviewDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        
+        <!-- Modal Header -->
+        <div class="modal-header bg-slate-900 text-white px-4 py-3 border-0">
+          <div class="d-flex align-items-center gap-2">
+            <div class="modal-header-icon bg-indigo-500 text-white rounded-3 p-1.5 d-flex align-items-center justify-content-center">
+              <i class="bi bi-chat-square-quote-fill"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold fs-6 mb-0 text-white">Chi Tiết Đánh Giá & Phản Hồi</h5>
+              <small class="text-slate-300" style="font-size: 11px;">Mã Đặt Phòng: <strong class="text-amber-400">#{{ selectedReview?.booking_code }}</strong></small>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="modal-body p-3.5 p-md-4 bg-slate-50" *ngIf="selectedReview">
+          <div class="row g-3">
+            
+            <!-- Cột trái: Đánh giá của khách hàng -->
+            <div class="col-12 col-md-6">
+              <div class="card border-0 shadow-2xs rounded-3 h-100 bg-white">
+                <div class="card-body p-3.5">
+                  <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-slate-100">
+                    <div class="avatar-circle bg-indigo-50 text-indigo-700 fw-bold fs-5 shadow-2xs">
+                      {{ getInitials(selectedReview.guest_name) }}
+                    </div>
+                    <div>
+                      <h6 class="mb-0 fw-bold text-slate-900">{{ selectedReview.guest_name || 'Khách vãng lai' }}</h6>
+                      <div class="text-muted small" style="font-size: 11.5px;">
+                        <i class="bi bi-calendar3 me-1"></i>{{ selectedReview.created_at | date:'dd/MM/yyyy HH:mm' }}
+                      </div>
+                      <div *ngIf="selectedReview.guest_phone" class="text-muted small" style="font-size: 11.5px;">
+                        <i class="bi bi-telephone me-1"></i>{{ selectedReview.guest_phone }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Điểm sao & Badge -->
+                  <div class="mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="stars-group text-amber d-inline-flex gap-1">
+                        <i *ngFor="let s of [1, 2, 3, 4, 5]" 
+                           class="bi fs-5" 
+                           [ngClass]="s <= selectedReview.rating ? 'bi-star-fill text-amber' : 'bi-star text-slate-300'"></i>
+                      </div>
+                      <span class="badge px-2.5 py-1 rounded-pill fw-bold"
+                            [ngClass]="selectedReview.rating >= 4 ? 'score-high' : (selectedReview.rating === 3 ? 'score-mid' : 'score-low')">
+                        {{ selectedReview.rating }} / 5 Điểm
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Nội dung bình luận -->
+                  <div class="mb-3">
+                    <label class="form-label text-muted small fw-semibold mb-1">Nhận xét của khách hàng:</label>
+                    <div class="p-3 bg-slate-50 rounded-3 border border-slate-200 text-slate-800 fst-italic" style="line-height: 1.6; font-size: 13.5px;">
+                      "{{ selectedReview.comment || 'Khách hàng không để lại nhận xét bằng lời.' }}"
+                    </div>
+                  </div>
+                  
+                  <!-- Hình ảnh thực tế khách chụp -->
+                  <div *ngIf="selectedReview.review_images && selectedReview.review_images.length > 0">
+                    <label class="form-label text-muted small fw-semibold mb-1.5">
+                      Hình ảnh khách đính kèm ({{ selectedReview.review_images.length }} ảnh):
+                    </label>
+                    <div class="d-flex flex-wrap gap-2">
+                      <div *ngFor="let img of selectedReview.review_images" class="modal-thumb-box">
+                        <img [src]="img.image_url" 
+                             alt="Ảnh đính kèm" 
+                             class="rounded-3 shadow-2xs cursor-pointer modal-img-zoom" 
+                             (click)="openImage(img.image_url)" 
+                             title="Bấm phóng to">
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Cột phải: Khung gửi phản hồi của khách sạn -->
+            <div class="col-12 col-md-6">
+              <div class="card border-0 shadow-2xs rounded-3 h-100 bg-white">
+                <div class="card-body p-3.5 d-flex flex-column">
+                  
+                  <div class="d-flex align-items-center justify-content-between mb-2.5 pb-2 border-bottom border-slate-100">
+                    <h6 class="fw-bold text-slate-900 mb-0 d-inline-flex align-items-center gap-1.5">
+                      <i class="bi bi-reply-all-fill text-indigo-600"></i> Phản Hồi Từ Khách Sạn
+                    </h6>
+                    <span class="badge py-1 px-2 rounded-pill font-mono-sm" 
+                          [ngClass]="selectedReview.partner_reply ? 'badge-replied' : 'badge-unreplied'">
+                      {{ selectedReview.partner_reply ? 'Đã phản hồi' : 'Chưa phản hồi' }}
+                    </span>
+                  </div>
+
+                  <!-- Thông báo phản hồi cũ (nếu có) -->
+                  <div *ngIf="selectedReview.partner_reply" class="alert alert-success border-0 bg-emerald-50 text-emerald-900 p-2.5 rounded-3 mb-2.5 small">
+                    <div class="d-flex align-items-center gap-1 text-emerald-800 fw-bold mb-1">
+                      <i class="bi bi-check2-circle"></i> Đã gửi lúc: {{ selectedReview.replied_at | date:'dd/MM/yyyy HH:mm' }}
+                    </div>
+                    <div class="fst-italic text-slate-700">"{{ selectedReview.partner_reply }}"</div>
+                  </div>
+
+                  <!-- Gợi ý mẫu câu trả lời nhanh -->
+                  <div class="mb-2">
+                    <label class="form-label text-muted small fw-semibold mb-1" style="font-size: 11px;">
+                      <i class="bi bi-lightning-charge-fill text-amber-500"></i> Mẫu câu trả lời nhanh:
+                    </label>
+                    <div class="d-flex flex-column gap-1">
+                      <button 
+                        *ngFor="let t of quickTemplates" 
+                        type="button" 
+                        class="btn btn-outline-secondary btn-sm text-start py-1 px-2 rounded-2 quick-template-chip"
+                        (click)="applyTemplate(t)">
+                        {{ t }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Textarea soạn nội dung -->
+                  <div class="form-group mb-2.5 flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <label class="form-label text-muted small fw-semibold mb-0">
+                        {{ selectedReview.partner_reply ? 'Chỉnh sửa lại nội dung:' : 'Soạn câu trả lời:' }}
+                      </label>
+                      <span class="text-muted" style="font-size: 11px;">
+                        {{ (replyInputs[selectedReview.id] || '').length }}/1000
+                      </span>
+                    </div>
+                    <textarea 
+                      class="form-control rounded-3 border-slate-200" 
+                      rows="4" 
+                      maxlength="1000"
+                      placeholder="Kính chào quý khách, cảm ơn quý khách đã dành thời gian đánh giá trải nghiệm tại khách sạn..." 
+                      [(ngModel)]="replyInputs[selectedReview.id]"></textarea>
+                  </div>
+                  
+                  <!-- Nút bấm gửi -->
+                  <button 
+                    class="btn w-100 fw-bold py-2 rounded-3 shadow-2xs d-inline-flex align-items-center justify-content-center gap-2" 
+                    [ngClass]="selectedReview.partner_reply ? 'btn-outline-indigo' : 'btn-primary'"
+                    [disabled]="isSubmitting === selectedReview.id"
+                    (click)="sendReply(selectedReview.id)">
+                    <span *ngIf="isSubmitting === selectedReview.id" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <i *ngIf="isSubmitting !== selectedReview.id" class="bi" [ngClass]="selectedReview.partner_reply ? 'bi-check-lg' : 'bi-send-fill'"></i>
+                    <span>{{ selectedReview.partner_reply ? 'Cập Nhật Phản Hồi' : 'Gửi Phản Hồi Cho Khách' }}</span>
+                  </button>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

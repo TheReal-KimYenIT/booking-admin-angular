@@ -1,21 +1,339 @@
-<div class="fade-in-up">
-    <h2 class="page-title">Tổng quan hoạt động</h2>
-    <p class="page-subtitle">Chào mừng bạn quay trở lại hệ thống quản lý Khách sạn!</p>
+<div class="animate-fade-in-up space-y-8">
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-rose-900 mb-2">Tổng quan hoạt động</h2>
+        <p class="text-slate-600">Chào mừng bạn quay trở lại hệ thống quản lý Khách sạn!</p>
+    </div>
 
-    <div class="stats-grid">
-        <div class="stat-card stat-card-green">
-            <h4>Đơn hàng mới chờ duyệt</h4>
-            <div class="stat-value">{{ stats.pending_orders }}</div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Tổng Doanh thu -->
+        <div routerLink="/dashboard/transactions" class="glass-card relative overflow-hidden group cursor-pointer">
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-200 rounded-full blur-2xl opacity-50 group-hover:bg-amber-300 transition-colors"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="text-slate-500 font-medium mb-1">Tổng Doanh thu</h4>
+                        <div class="text-2xl font-bold text-slate-800">{{ stats.total_revenue | number }} đ</div>
+                    </div>
+                    <div class="p-3 bg-amber-100 text-amber-600 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="text-sm text-amber-600 font-medium">
+                    Doanh thu tích lũy
+                </div>
+            </div>
         </div>
 
-        <div class="stat-card stat-card-blue">
-            <h4>Tổng số loại phòng</h4>
-            <div class="stat-value">{{ stats.total_room_types }}</div>
+        <!-- Công suất phòng -->
+        <div routerLink="/dashboard/room-matrix" class="glass-card relative overflow-hidden group cursor-pointer">
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-200 rounded-full blur-2xl opacity-50 group-hover:bg-blue-300 transition-colors"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="text-slate-500 font-medium mb-1">Công suất phòng</h4>
+                        <div class="text-3xl font-bold text-slate-800">{{ stats.occupancy_rate || 0 }}%</div>
+                    </div>
+                    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    </div>
+                </div>
+                <div class="text-sm text-blue-600 font-medium">
+                    Tỉ lệ lấp đầy hôm nay
+                </div>
+            </div>
         </div>
 
-        <div class="stat-card stat-card-yellow">
-            <h4>Tổng Doanh thu</h4>
-            <div class="stat-value">{{ stats.total_revenue | number }} đ</div>
+        <!-- Check-in hôm nay -->
+        <div routerLink="/dashboard/bookings" class="glass-card relative overflow-hidden group cursor-pointer">
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-200 rounded-full blur-2xl opacity-50 group-hover:bg-emerald-300 transition-colors"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="text-slate-500 font-medium mb-1">Check-in hôm nay</h4>
+                        <div class="text-3xl font-bold text-slate-800">{{ stats.check_ins_today || 0 }}</div>
+                    </div>
+                    <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    </div>
+                </div>
+                <div class="text-sm text-emerald-600 font-medium">
+                    Khách đang chờ nhận phòng
+                </div>
+            </div>
+        </div>
+
+        <!-- Check-out hôm nay -->
+        <div routerLink="/dashboard/bookings" class="glass-card relative overflow-hidden group cursor-pointer">
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-rose-200 rounded-full blur-2xl opacity-50 group-hover:bg-rose-300 transition-colors"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="text-slate-500 font-medium mb-1">Check-out hôm nay</h4>
+                        <div class="text-3xl font-bold text-slate-800">{{ stats.check_outs_today || 0 }}</div>
+                    </div>
+                    <div class="p-3 bg-rose-100 text-rose-600 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </div>
+                </div>
+                <div class="text-sm text-rose-600 font-medium flex items-center gap-1">
+                    <span>Khách đến hạn trả phòng</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hàng 2: Biểu đồ doanh thu (Chiếm nguyên hàng) -->
+    <div class="glass-card relative overflow-hidden mb-8 group p-6 sm:p-8">
+        <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-200 rounded-full blur-3xl opacity-30 group-hover:opacity-40 transition-opacity"></div>
+        <div class="relative z-10">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6 pb-4 border-b border-slate-100 gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                        Hiệu suất Doanh thu
+                    </h3>
+                    <p class="text-sm text-slate-500 mt-1 font-medium">Xu hướng tăng trưởng doanh thu theo chu kỳ</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="bg-indigo-50/90 border border-indigo-100 rounded-xl px-4 py-2 flex items-center gap-2">
+                        <span class="text-xs text-indigo-700 font-medium">{{ periodTitle }}:</span>
+                        <span class="text-sm font-extrabold text-indigo-900">{{ totalPeriodRevenue | number }} đ</span>
+                    </div>
+
+                    <div class="flex flex-wrap items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200/60 shadow-inner gap-0.5">
+                        <button (click)="setPeriod('7days')" 
+                                [class.bg-white]="filterPeriod === '7days' || filterPeriod === 'day'" 
+                                [class.text-indigo-600]="filterPeriod === '7days' || filterPeriod === 'day'" 
+                                [class.shadow-sm]="filterPeriod === '7days' || filterPeriod === 'day'" 
+                                class="px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 transition-all hover:text-slate-900 cursor-pointer">
+                            7 ngày (1 tuần)
+                        </button>
+
+                        <button (click)="setPeriod('14days')" 
+                                [class.bg-white]="filterPeriod === '14days'" 
+                                [class.text-indigo-600]="filterPeriod === '14days'" 
+                                [class.shadow-sm]="filterPeriod === '14days'" 
+                                class="px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 transition-all hover:text-slate-900 cursor-pointer">
+                            14 ngày (2 tuần)
+                        </button>
+
+                        <button (click)="setPeriod('30days')" 
+                                [class.bg-white]="filterPeriod === '30days'" 
+                                [class.text-indigo-600]="filterPeriod === '30days'" 
+                                [class.shadow-sm]="filterPeriod === '30days'" 
+                                class="px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 transition-all hover:text-slate-900 cursor-pointer">
+                            30 ngày qua
+                        </button>
+
+                        <button (click)="setPeriod('month')" 
+                                [class.bg-white]="filterPeriod === 'month'" 
+                                [class.text-indigo-600]="filterPeriod === 'month'" 
+                                [class.shadow-sm]="filterPeriod === 'month'" 
+                                class="px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 transition-all hover:text-slate-900 cursor-pointer">
+                            Theo Tháng
+                        </button>
+
+                        <button (click)="setPeriod('year')" 
+                                [class.bg-white]="filterPeriod === 'year'" 
+                                [class.text-indigo-600]="filterPeriod === 'year'" 
+                                [class.shadow-sm]="filterPeriod === 'year'" 
+                                class="px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 transition-all hover:text-slate-900 cursor-pointer">
+                            Theo Năm
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="h-[320px] w-full relative">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hàng 3: Biểu đồ trạng thái Đơn hàng & Biểu đồ Loại phòng -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <!-- 1. Biểu đồ trạng thái Đơn hàng -->
+        <div class="glass-card relative overflow-hidden group p-6 sm:p-8 flex flex-col justify-between">
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-purple-200 rounded-full blur-3xl opacity-30 group-hover:opacity-40 transition-opacity"></div>
+            <div class="relative z-10 flex flex-col h-full">
+                <div class="flex items-center justify-between mb-6 pb-3 border-b border-slate-100">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                            Tỉ lệ Trạng thái Đơn hàng
+                        </h3>
+                        <p class="text-sm text-slate-500 mt-0.5 font-medium">Phân bổ tình trạng xử lý các đơn đặt phòng</p>
+                    </div>
+                    <div class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-100">
+                        {{ totalStatusCount }} đơn tổng
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-6 my-auto">
+                    <!-- Donut Chart with Center Number -->
+                    <div class="relative w-[190px] h-[190px] sm:w-[210px] sm:h-[210px] flex-shrink-0 flex items-center justify-center">
+                        <canvas id="statusChart"></canvas>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ totalStatusCount }}</span>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Đơn hàng</span>
+                        </div>
+                    </div>
+
+                    <!-- Custom Interactive Legend with Detailed Metrics -->
+                    <div class="flex-1 w-full space-y-2">
+                        <div *ngFor="let item of statusBreakdown" class="flex flex-col p-2 rounded-xl hover:bg-slate-50/80 transition-colors">
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm" [style.backgroundColor]="item.color"></span>
+                                    <span class="text-sm font-semibold text-slate-700 truncate">{{ item.label }}</span>
+                                </div>
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    <span class="text-xs font-bold text-slate-800">{{ item.count }} đơn</span>
+                                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full" [style.backgroundColor]="item.color + '18'" [style.color]="item.color">
+                                        {{ item.percentage }}%
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-500" [style.width.%]="item.percentage" [style.backgroundColor]="item.color"></div>
+                            </div>
+                        </div>
+                        <div *ngIf="statusBreakdown.length === 0" class="text-sm text-slate-400 text-center py-6">
+                            Chưa có dữ liệu đơn hàng
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Biểu đồ phân tích Hạng phòng -->
+        <div class="glass-card relative overflow-hidden group p-6 sm:p-8 flex flex-col justify-between">
+            <div class="absolute -left-10 -top-10 w-48 h-48 bg-sky-200 rounded-full blur-3xl opacity-30 group-hover:opacity-40 transition-opacity"></div>
+            <div class="relative z-10 flex flex-col h-full">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                            Phân tích Hạng phòng
+                        </h3>
+                        <p class="text-sm text-slate-500 mt-0.5 font-medium">Xếp hạng hiệu quả tất cả hạng phòng ({{ roomTypeBreakdown.length }} hạng phòng)</p>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <!-- Bộ lọc tiêu chí sắp xếp -->
+                        <div class="flex items-center bg-slate-100/90 p-0.5 rounded-xl border border-slate-200/80 text-xs shadow-inner">
+                            <button (click)="setRoomSort('count')"
+                                    [class.bg-white]="roomSortBy === 'count'"
+                                    [class.text-sky-600]="roomSortBy === 'count'"
+                                    [class.shadow-sm]="roomSortBy === 'count'"
+                                    class="px-2.5 py-1 font-bold rounded-lg text-slate-600 transition-all cursor-pointer">
+                                Đơn đặt
+                            </button>
+                            <button (click)="setRoomSort('revenue')"
+                                    [class.bg-white]="roomSortBy === 'revenue'"
+                                    [class.text-sky-600]="roomSortBy === 'revenue'"
+                                    [class.shadow-sm]="roomSortBy === 'revenue'"
+                                    class="px-2.5 py-1 font-bold rounded-lg text-slate-600 transition-all cursor-pointer">
+                                Doanh thu
+                            </button>
+                        </div>
+                        <div class="px-3 py-1 bg-sky-50 text-sky-700 text-xs font-bold rounded-lg border border-sky-100">
+                            {{ totalRoomBookings }} đơn đặt
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2 Hộp tóm tắt: Đặt nhiều nhất / ít nhất - Thiết kế tinh gọn, hài hòa -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-5">
+                    <div class="bg-amber-50/70 border border-amber-200/60 rounded-xl px-3 py-2 flex items-center justify-between gap-2 min-w-0 shadow-2xs">
+                        <div class="min-w-0 flex-1">
+                            <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wide block">🔥 Đặt nhiều nhất</span>
+                            <p class="text-xs font-bold text-slate-800 truncate" [title]="stats.most_booked_room">
+                                {{ stats.most_booked_room || 'Chưa có dữ liệu' }}
+                            </p>
+                        </div>
+                        <span *ngIf="roomTypeBreakdown.length > 0" class="text-xs font-extrabold px-2 py-0.5 bg-amber-200/80 text-amber-900 rounded-lg flex-shrink-0 shadow-2xs">
+                            {{ roomTypeBreakdown[0]?.count }} đơn
+                        </span>
+                    </div>
+
+                    <div class="bg-slate-50/70 border border-slate-200/60 rounded-xl px-3 py-2 flex items-center justify-between gap-2 min-w-0 shadow-2xs">
+                        <div class="min-w-0 flex-1">
+                            <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wide block">🧊 Đặt ít nhất</span>
+                            <p class="text-xs font-bold text-slate-700 truncate" [title]="stats.least_booked_room">
+                                {{ stats.least_booked_room || 'Chưa có dữ liệu' }}
+                            </p>
+                        </div>
+                        <span *ngIf="roomTypeBreakdown.length > 1" class="text-xs font-extrabold px-2 py-0.5 bg-slate-200/80 text-slate-700 rounded-lg flex-shrink-0 shadow-2xs">
+                            {{ roomTypeBreakdown[roomTypeBreakdown.length - 1]?.count }} đơn
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Donut Chart & Danh sách xếp hạng Tất cả hạng phòng: Tỉ lệ 210px đồng bộ hoàn hảo với Card Trạng thái bên trái -->
+                <div class="flex flex-col sm:flex-row items-center gap-6 my-auto">
+                    <!-- Donut Chart with Center Total: w-[190px] h-[190px] sm:w-[210px] sm:h-[210px] y hệt Card 1 -->
+                    <div class="relative w-[190px] h-[190px] sm:w-[210px] sm:h-[210px] flex-shrink-0 flex items-center justify-center"
+                         (mouseleave)="onLeaveRoomChart()">
+                        <canvas id="roomTypeChart"></canvas>
+                        
+                        <!-- Tâm Donut: Mặc định hiển thị tổng số đơn y hệt Card 1. Khi hover lát cắt, tự động ẩn đi để số 39 không đè lên tooltip -->
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-150"
+                             [class.opacity-0]="isRoomChartHovered">
+                            <span class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ totalRoomBookings }}</span>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Đơn đặt</span>
+                        </div>
+                    </div>
+
+                    <!-- Custom Interactive Legend matching Card 1's sleek design rhythm -->
+                    <div class="flex-1 w-full space-y-2 max-h-[260px] overflow-y-auto pr-1.5 custom-scrollbar">
+                        <div *ngFor="let item of roomTypeBreakdown; let idx = index" 
+                             (mouseenter)="onHoverRoomItem(idx)"
+                             (mouseleave)="onLeaveRoomItem()"
+                             [class.bg-slate-100/80]="hoveredRoomIndex === idx"
+                             class="flex flex-col p-2 rounded-xl hover:bg-slate-50/80 transition-colors">
+                            
+                            <!-- Dòng 1: Thứ hạng, Tên phòng và Số đơn đặt -->
+                            <div class="flex items-start justify-between gap-2 mb-1">
+                                <div class="flex items-start gap-1.5 min-w-0 flex-1">
+                                    <span class="w-4 h-4 rounded text-[9px] font-extrabold text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs" 
+                                          [style.backgroundColor]="item.color">
+                                        {{ idx + 1 }}
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-700 leading-snug break-words" [title]="item.name">
+                                        {{ item.name }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-1.5 flex-shrink-0 pt-0.5">
+                                    <span class="text-xs font-bold text-slate-800">{{ item.count }} đơn</span>
+                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" 
+                                          [style.backgroundColor]="item.color + '18'" 
+                                          [style.color]="item.color">
+                                        {{ item.countPercent }}%
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Dòng 2: Doanh thu & Tỉ lệ DT -->
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1 pl-5.5">
+                                <span>Doanh thu: <strong class="text-slate-600 font-semibold">{{ item.revenue | number }} đ</strong></span>
+                                <span class="font-semibold" [style.color]="item.color">{{ item.revenuePercent }}% DT</span>
+                            </div>
+
+                            <!-- Dòng 3: Thanh tiến trình -->
+                            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-500" 
+                                     [style.width.%]="roomSortBy === 'revenue' ? item.revenuePercent : item.countPercent" 
+                                     [style.backgroundColor]="item.color"></div>
+                            </div>
+                        </div>
+
+                        <div *ngIf="roomTypeBreakdown.length === 0" class="text-sm text-slate-400 text-center py-6">
+                            Chưa có dữ liệu hạng phòng
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

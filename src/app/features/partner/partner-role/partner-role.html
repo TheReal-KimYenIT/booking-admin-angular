@@ -1,76 +1,382 @@
-<div class="staff-container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 style="color: #1e1b4b; margin: 0; font-weight: 800;">Nhóm Quyền & Vai Trò</h2>
-            <p style="color: #64748b;">Tạo các nhóm quyền để cấp cho Nhân viên (Lễ tân, Kế toán...)</p>
+<div class="roles-container p-2 p-md-3 fade-in-up">
+  <!-- 1. HEADER -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-shield-lock-fill me-1"></i> Phân Quyền & Vai Trò Nhân Sự
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Nhóm Quyền & Vai Trò</h2>
+      <p class="text-muted mb-0 small">Thiết lập các nhóm vai trò và phân quyền chức năng chi tiết cho từng bộ phận nhân viên (Lễ tân, Buồng phòng, Kế toán...).</p>
+    </div>
+    
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 shadow-2xs d-inline-flex align-items-center gap-1.5" (click)="loadRoles()">
+        <i class="bi bi-arrow-clockwise"></i>
+        <span>Làm Mới</span>
+      </button>
+      <button class="btn btn-primary fw-semibold px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-2" (click)="openAddModal()">
+        <i class="bi bi-plus-lg"></i>
+        <span>Tạo Nhóm Mới</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. KPI SUMMARY CARDS (4 CARDS) -->
+  <div class="row g-2 mb-3">
+    <!-- Card 1: Tổng Nhóm Quyền -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-shield-shaded"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold text-nowrap" style="font-size: 11px;">Tổng Nhóm Vai Trò</div>
+            <div class="fs-6 fw-bold text-slate-800">{{ roles.length }} <span class="text-muted small fw-normal">nhóm</span></div>
+            <div class="text-muted" style="font-size: 10px;">Đang áp dụng</div>
+          </div>
         </div>
-        <button class="btn btn-primary fw-bold"
-            style="background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%); border: none;"
-            (click)="openAddModal()">
-            Tạo Nhóm Mới
-        </button>
+      </div>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0">
-                <thead style="background-color: #f8fafc;">
-                    <tr>
-                        <th class="p-3">Tên Nhóm</th>
-                        <th>Số lượng quyền hạn</th>
-                        <th>Ngày tạo</th>
-                        <th class="text-center">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngIf="isLoading">
-                        <td colspan="4" class="text-center p-4">Đang tải...</td>
-                    </tr>
-                    <tr *ngIf="!isLoading && roles.length === 0">
-                        <td colspan="4" class="text-center p-4 text-muted">Chưa có nhóm quyền nào.</td>
-                    </tr>
-
-                    <tr *ngFor="let role of roles">
-                        <td class="p-3 fw-bold text-primary">{{ role.name }}</td>
-                        <td><span class="badge bg-secondary">{{ role.permissions?.length || 0 }} quyền</span></td>
-                        <td>{{ role.created_at | date:'dd/MM/yyyy' }}</td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(role)">✏️
-                                Sửa</button>
-                            <button class="btn btn-sm btn-light text-danger" (click)="deleteRole(role.id)">🗑️
-                                Xóa</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Card 2: Nhân Viên Đã Gán -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-person-check-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold text-nowrap" style="font-size: 11px;">Nhân Viên Đã Gán</div>
+            <div class="fs-6 fw-bold text-emerald-600">{{ totalStaffAssigned }} <span class="text-muted small fw-normal">nhân sự</span></div>
+            <div class="text-muted" style="font-size: 10px;">Thuộc các nhóm</div>
+          </div>
         </div>
+      </div>
     </div>
+
+    <!-- Card 3: Chức Năng Hệ Thống -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-blue-50 text-blue-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-grid-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold text-nowrap" style="font-size: 11px;">Chức Năng Hệ Thống</div>
+            <div class="fs-6 fw-bold text-blue-600">17 <span class="text-muted small fw-normal">quyền hạn</span></div>
+            <div class="text-muted" style="font-size: 10px;">4 phân hệ chính</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Cơ Chế Bảo Mật -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-amber-50 text-amber-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold text-nowrap" style="font-size: 11px;">Bảo Mật Phân Quyền</div>
+            <div class="fs-6 fw-bold text-amber-600">100% <span class="text-muted small fw-normal">an toàn</span></div>
+            <div class="text-muted" style="font-size: 10px;">Kiểm soát truy cập</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TOOLBAR TÌM KIẾM -->
+  <div class="card border-0 shadow-xs mb-3">
+    <div class="card-body p-2.5 p-md-3">
+      <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-2">
+        <div class="search-input-wrapper position-relative flex-grow-1" style="max-width: 380px;">
+          <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+          <input 
+            type="text" 
+            class="form-control form-control-sm ps-5 pe-4 py-2 rounded-3 border-slate-200" 
+            placeholder="Tìm theo tên nhóm quyền..." 
+            [(ngModel)]="searchKeyword">
+          <button *ngIf="searchKeyword" class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-1 text-muted p-0" (click)="searchKeyword = ''">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        </div>
+
+        <div class="text-muted small">
+          Hiển thị <strong>{{ filteredRoles.length }}</strong> / <strong>{{ roles.length }}</strong> nhóm quyền
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. DANH SÁCH BẢNG / CARDS -->
+  <div class="card border-0 shadow-xs rounded-3 overflow-hidden">
+    <!-- Desktop Table View -->
+    <div class="table-responsive d-none d-md-block">
+      <table class="table table-hover align-middle mb-0 custom-role-table">
+        <thead class="bg-slate-50 border-bottom border-slate-200">
+          <tr>
+            <th class="py-3 px-3 text-slate-700 font-semibold" style="font-size: 13px;">Tên Nhóm Vai Trò</th>
+            <th class="py-3 px-3 text-slate-700 font-semibold" style="font-size: 13px;">Quyền Hạn Được Cấp</th>
+            <th class="py-3 px-3 text-slate-700 font-semibold" style="font-size: 13px;">Nhân Sự Áp Dụng</th>
+            <th class="py-3 px-3 text-slate-700 font-semibold" style="font-size: 13px;">Ngày Tạo</th>
+            <th class="py-3 px-3 text-end text-slate-700 font-semibold" style="font-size: 13px;">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Loading state -->
+          <tr *ngIf="isLoading">
+            <td colspan="5" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;"></div>
+              <div class="text-muted mt-2 small">Đang tải danh sách nhóm quyền...</div>
+            </td>
+          </tr>
+
+          <!-- Empty state -->
+          <tr *ngIf="!isLoading && filteredRoles.length === 0">
+            <td colspan="5" class="text-center py-5">
+              <i class="bi bi-shield-x fs-1 text-slate-300 d-block mb-2"></i>
+              <div class="fw-bold text-slate-700">Không tìm thấy nhóm quyền nào</div>
+              <div class="text-muted small">Thử xóa bộ lọc tìm kiếm hoặc tạo nhóm quyền mới.</div>
+            </td>
+          </tr>
+
+          <!-- Data rows -->
+          <tr *ngFor="let role of filteredRoles" class="transition-all">
+            <!-- Tên nhóm -->
+            <td class="py-3 px-3">
+              <div class="d-flex align-items-center gap-2.5">
+                <div class="role-icon-box bg-indigo-50 text-indigo-600 rounded-3 d-flex align-items-center justify-content-center shadow-2xs">
+                  <i class="bi bi-shield-shaded fs-5"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0 fw-bold text-slate-900 fs-7">{{ role.name }}</h6>
+                  <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-100" *ngIf="role.permissions?.length >= 15" style="font-size: 10px;">
+                    <i class="bi bi-star-fill me-0.5 text-amber-500"></i> Toàn quyền
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Quyền hạn -->
+            <td class="py-3 px-3">
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge py-1.5 px-2.5 rounded-pill font-mono-sm" 
+                      style="cursor: help;"
+                      [title]="getRolePermissionsList(role)"
+                      [ngClass]="role.permissions?.length >= 10 ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-700 border border-slate-200'">
+                  <i class="bi bi-key-fill me-1 text-amber-500"></i>
+                  {{ role.permissions?.length || 0 }} / 17 quyền
+                </span>
+              </div>
+            </td>
+
+            <!-- Nhân sự áp dụng -->
+            <td class="py-3 px-3">
+              <span class="badge py-1.5 px-2.5 rounded-pill" 
+                    [ngClass]="role.staffs_count > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-muted border border-slate-200'">
+                <i class="bi" [ngClass]="role.staffs_count > 0 ? 'bi-people-fill me-1' : 'bi-person-dash me-1'"></i>
+                {{ role.staffs_count > 0 ? role.staffs_count + ' nhân viên' : 'Chưa có nhân viên' }}
+              </span>
+            </td>
+
+            <!-- Ngày tạo -->
+            <td class="py-3 px-3 text-muted small">
+              <i class="bi bi-calendar3 me-1"></i>{{ role.created_at | date:'dd/MM/yyyy' }}
+            </td>
+
+            <!-- Thao tác -->
+            <td class="py-3 px-3 text-end">
+              <div class="d-inline-flex align-items-center gap-1.5">
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 shadow-2xs d-inline-flex align-items-center gap-1" (click)="openEditModal(role)">
+                  <i class="bi bi-pencil"></i> Sửa
+                </button>
+                <button 
+                  class="btn btn-sm rounded-pill px-3 py-1 shadow-2xs d-inline-flex align-items-center gap-1"
+                  [ngClass]="role.staffs_count > 0 ? 'btn-outline-secondary opacity-60' : 'btn-outline-danger'"
+                  [disabled]="role.staffs_count > 0"
+                  [title]="role.staffs_count > 0 ? 'Không thể xóa: Nhóm này đang có ' + role.staffs_count + ' nhân viên sử dụng' : 'Xóa nhóm quyền'"
+                  (click)="deleteRole(role)">
+                  <i class="bi bi-trash3"></i> Xóa
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards View -->
+    <div class="d-md-none p-2.5 bg-slate-50">
+      <!-- Loading state -->
+      <div *ngIf="isLoading" class="text-center py-4 bg-white rounded-3">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="text-muted mt-2 small">Đang tải danh sách nhóm quyền...</div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!isLoading && filteredRoles.length === 0" class="text-center py-4 bg-white rounded-3">
+        <i class="bi bi-shield-x fs-1 text-slate-300 d-block mb-1"></i>
+        <div class="fw-bold text-slate-700">Không tìm thấy nhóm quyền nào</div>
+      </div>
+
+      <!-- Cards List -->
+      <div *ngFor="let role of filteredRoles" class="card border-0 shadow-xs rounded-3 mb-2.5 bg-white">
+        <div class="card-body p-3">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="role-icon-box bg-indigo-50 text-indigo-600 rounded-3 d-flex align-items-center justify-content-center">
+                <i class="bi bi-shield-shaded fs-5"></i>
+              </div>
+              <div>
+                <h6 class="mb-0 fw-bold text-slate-900">{{ role.name }}</h6>
+                <small class="text-muted" style="font-size: 11px;">Tạo: {{ role.created_at | date:'dd/MM/yyyy' }}</small>
+              </div>
+            </div>
+            <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200" style="font-size: 11px;">
+              {{ role.permissions?.length || 0 }} / 17 quyền
+            </span>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pt-2.5 border-top border-slate-100 mt-2">
+            <span class="badge" [ngClass]="role.staffs_count > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-muted'">
+              {{ role.staffs_count > 0 ? role.staffs_count + ' nhân viên sử dụng' : 'Chưa có nhân viên' }}
+            </span>
+
+            <div class="d-flex align-items-center gap-1.5">
+              <button class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1" (click)="openEditModal(role)">
+                <i class="bi bi-pencil"></i> Sửa
+              </button>
+              <button 
+                class="btn btn-sm rounded-pill px-2.5 py-1"
+                [ngClass]="role.staffs_count > 0 ? 'btn-outline-secondary opacity-60' : 'btn-outline-danger'"
+                [disabled]="role.staffs_count > 0"
+                (click)="deleteRole(role)">
+                <i class="bi bi-trash3"></i> Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- 5. MODAL TẠO & CẬP NHẬT NHÓM QUYỀN -->
 <div class="custom-modal-overlay" *ngIf="showModal" (click)="closeModal()">
-    <div class="custom-modal-content" (click)="$event.stopPropagation()" style="max-width: 600px;">
-        <div class="modal-header border-bottom p-4 d-flex justify-content-between align-items-center bg-light">
-            <h4 class="mb-0 fw-bold">{{ isEditMode ? 'Cập nhật Nhóm' : 'Tạo Nhóm quyền' }}</h4>
-            <button class="btn-close" (click)="closeModal()"></button>
+  <div class="custom-modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="modal-header px-4 py-3 bg-slate-900 text-white d-flex justify-content-between align-items-center border-0">
+      <div class="d-flex align-items-center gap-2">
+        <div class="modal-header-icon bg-indigo-500 text-white rounded-3 p-1.5 d-flex align-items-center justify-content-center">
+          <i class="bi bi-shield-lock-fill"></i>
         </div>
-        <div class="modal-body p-4">
-            <div class="mb-4">
-                <label class="form-label fw-bold">Tên nhóm quyền (VD: Lễ tân ca đêm) *</label>
-                <input type="text" class="form-control" [(ngModel)]="formData.name">
-            </div>
-
-            <label class="form-label fw-bold">Chọn các quyền cho phép truy cập:</label>
-            <div class="permissions-grid">
-                <div class="form-check" *ngFor="let p of availablePermissions">
-                    <input class="form-check-input" type="checkbox" [id]="p.key" [checked]="hasPermission(p.key)"
-                        (change)="togglePermission(p.key, $event)">
-                    <label class="form-check-label" [for]="p.key">{{ p.name }}</label>
-                </div>
-            </div>
+        <div>
+          <h5 class="modal-title fw-bold fs-6 mb-0 text-white">{{ isEditMode ? 'Cập Nhật Nhóm Quyền' : 'Tạo Nhóm Quyền Mới' }}</h5>
+          <small class="text-slate-300" style="font-size: 11px;">Thiết lập các quyền hạn nhân viên được phép truy cập trên hệ thống</small>
         </div>
-        <div class="modal-footer p-3 bg-light border-top text-end">
-            <button class="btn btn-secondary me-2" (click)="closeModal()">Hủy</button>
-            <button class="btn btn-primary" (click)="saveRole()">Lưu Nhóm</button>
-        </div>
+      </div>
+      <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
     </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body p-4 bg-slate-50" style="max-height: 72vh; overflow-y: auto;">
+      <!-- Tên nhóm quyền -->
+      <div class="card border-0 shadow-2xs rounded-3 mb-3 bg-white">
+        <div class="card-body p-3">
+          <label class="form-label fw-bold text-slate-800 mb-1">
+            Tên nhóm vai trò <span class="text-danger">*</span>
+          </label>
+          <input 
+            type="text" 
+            class="form-control rounded-3 border-slate-200" 
+            placeholder="Ví dụ: Lễ tân ca ngày, Kế toán trưởng, Buồng phòng..." 
+            [(ngModel)]="formData.name">
+        </div>
+      </div>
+
+      <!-- Danh mục phân quyền -->
+      <div class="card border-0 shadow-2xs rounded-3 bg-white">
+        <div class="card-body p-3">
+          
+          <!-- Thanh điều khiển: Chọn tất cả / Bỏ chọn & Bộ đếm -->
+          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3 pb-2.5 border-bottom border-slate-100">
+            <div>
+              <span class="fw-bold text-slate-900 fs-7">Danh sách quyền hạn cho phép:</span>
+              <div class="text-muted" style="font-size: 11px;">Đã chọn: <strong class="text-indigo-600">{{ formData.permissions.length }}</strong> / {{ allPermissions.length }} quyền</div>
+            </div>
+            <div class="d-flex align-items-center gap-1.5">
+              <button type="button" class="btn btn-sm btn-outline-indigo rounded-pill py-1 px-2.5" (click)="selectAllPermissions()">
+                <i class="bi bi-check-all"></i> Chọn tất cả
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-1 px-2.5" (click)="deselectAllPermissions()">
+                <i class="bi bi-x-lg"></i> Bỏ chọn
+              </button>
+            </div>
+          </div>
+
+          <!-- Các nhóm quyền phân loại theo phân hệ -->
+          <div class="d-flex flex-column gap-3">
+            <div *ngFor="let cat of permissionCategories" class="category-permission-block p-3 rounded-3 bg-slate-50 border border-slate-200">
+              
+              <!-- Tiêu đề nhóm quyền -->
+              <div class="d-flex justify-content-between align-items-center mb-2.5 pb-2 border-bottom border-slate-200">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge p-1.5 rounded-2" [ngClass]="cat.badgeClass">
+                    <i class="bi" [ngClass]="cat.icon"></i>
+                  </span>
+                  <strong class="text-slate-800 fs-7">{{ cat.name }}</strong>
+                </div>
+                <button type="button" class="btn btn-link btn-sm p-0 text-indigo-600 text-decoration-none fw-semibold" style="font-size: 11px;" (click)="toggleCategory(cat)">
+                  {{ isCategoryAllSelected(cat) ? 'Bỏ chọn nhóm' : 'Chọn cả nhóm' }}
+                </button>
+              </div>
+
+              <!-- Danh sách checkbox từng quyền -->
+              <div class="row g-2">
+                <div class="col-12 col-sm-6" *ngFor="let p of cat.permissions">
+                  <label class="permission-checkbox-card d-flex align-items-start gap-2.5 p-2 rounded-2 border border-slate-200 bg-white cursor-pointer transition-all h-100" [class.selected]="hasPermission(p.key)">
+                    <input 
+                      class="form-check-input mt-0.5 flex-shrink-0" 
+                      type="checkbox" 
+                      [id]="p.key" 
+                      [checked]="hasPermission(p.key)" 
+                      (change)="togglePermission(p.key, $event)">
+                    <div class="flex-grow-1">
+                      <div class="fw-bold text-slate-800" style="font-size: 12.5px;">{{ p.name }}</div>
+                      <div class="text-muted" style="font-size: 10.5px;">{{ p.desc }}</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer px-4 py-3 bg-white border-top border-slate-200 d-flex justify-content-between align-items-center">
+      <span class="text-muted small">
+        <i class="bi bi-info-circle me-1"></i> Các quyền được cấp sẽ có hiệu lực ngay sau khi lưu.
+      </span>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-outline-secondary rounded-3 px-3 py-1.5" (click)="closeModal()">
+          Hủy bỏ
+        </button>
+        <button type="button" class="btn btn-primary rounded-3 px-4 py-1.5 fw-bold shadow-xs" (click)="saveRole()">
+          <i class="bi bi-check-lg me-1"></i>
+          <span>{{ isEditMode ? 'Lưu Thay Đổi' : 'Tạo Nhóm Quyền' }}</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
 </div>

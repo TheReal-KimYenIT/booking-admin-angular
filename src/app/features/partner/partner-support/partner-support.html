@@ -1,69 +1,354 @@
-<div class="support-container fade-in-up">
-    <div class="inbox-sidebar">
-        <div class="inbox-header">
-            <h3>Hộp thư hỗ trợ</h3>
+<div class="support-page-container p-2 p-md-2.5 fade-in-up">
+  <!-- 1. HEADER CHÍNH -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-2">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-chat-dots-fill me-1"></i> Trung Tâm Tin Nhắn Khách Hàng
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Xử Lý Tin Nhắn Trực Tuyến</h2>
+      <p class="text-muted mb-0 small">Hỗ trợ giải đáp thắc mắc, tư vấn dịch vụ và trao đổi với khách lưu trú theo thời gian thực.</p>
+    </div>
+    
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-secondary btn-sm px-3 py-1.5 rounded-3 shadow-2xs d-inline-flex align-items-center gap-1.5" (click)="loadThreads()">
+        <i class="bi bi-arrow-clockwise"></i>
+        <span>Làm Mới</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. KPI THỐNG KÊ NHANH (4 CARDS) -->
+  <div class="row g-2 mb-2">
+    <!-- Card 1: Tổng Hội Thoại -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-chat-left-text-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Tổng Cuộc Trò Chuyện</div>
+            <div class="fs-6 fw-bold text-slate-800">{{ contacts.length }} <span class="text-muted small fw-normal">khách</span></div>
+          </div>
         </div>
-        <div class="contact-list">
-            <div *ngIf="contacts.length === 0" class="empty-list">Không có tin nhắn nào.</div>
-
-            <div *ngFor="let item of contacts" class="contact-item" [class.active]="selectedContact?.id === item.id"
-                (click)="openChat(item)">
-
-                <div class="avatar">{{ item?.full_name?.charAt(0) || 'K' }}</div>
-
-                <div class="contact-info">
-                    <div class="contact-top">
-                        <span class="name">{{ item?.full_name || 'Khách hàng' }}</span>
-                        <span class="status-dot" *ngIf="item?.status === 0"></span>
-                    </div>
-                    <div class="contact-msg">{{ item?.message }}</div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <div class="chat-area">
-        <div *ngIf="!selectedContact" class="empty-chat">
-            <div class="empty-icon">💬</div>
-            <p>Chọn một tin nhắn để xem và phản hồi</p>
+    <!-- Card 2: Chờ Phản Hồi -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-rose-50 text-rose-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-exclamation-circle-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Chờ Phản Hồi</div>
+            <div class="fs-6 fw-bold text-rose-600 d-inline-flex align-items-center gap-1.5">
+              {{ unreadCount }}
+              <span *ngIf="unreadCount > 0" class="pulse-indicator"></span>
+            </div>
+          </div>
         </div>
-
-        <div *ngIf="selectedContact" class="chat-box">
-            <div class="chat-header">
-                <div class="chat-title">
-                    <h4>Đang chat với: {{ selectedContact?.full_name || 'Khách hàng' }}</h4>
-                    <span class="booking-tag clickable-tag" *ngIf="selectedContact?.booking_id"
-                        (click)="goToBooking(selectedContact.booking_id)" title="Nhấp vào để đi đến hóa đơn chi tiết">
-                        Mã đơn: {{ selectedContact?.booking_code || '#' + selectedContact?.booking_id }} <span
-                            class="icon-link">🔗</span>
-                    </span>
-                </div>
-                <button class="btn-close-chat" (click)="selectedContact = null">✕</button>
-            </div>
-
-            <div class="chat-history" #scrollMe>
-                <div *ngFor="let msg of messages" class="chat-bubble"
-                    [class.guest-bubble]="msg?.sender_type === 'customer'"
-                    [class.host-bubble]="msg?.sender_type === 'partner'">
-
-                    <div class="bubble-content">{{ msg?.message }}</div>
-                    <div class="bubble-time">{{ msg?.created_at | date:'dd/MM HH:mm' }}</div>
-                </div>
-            </div>
-
-            <div class="chat-input-area" *ngIf="selectedContact?.status !== 2">
-                <textarea [(ngModel)]="replyMessage" placeholder="Nhập tin nhắn phản hồi cho khách..." rows="3"
-                    (keydown.enter)="sendReply(); $event.preventDefault()"></textarea>
-                <div class="chat-actions">
-                    <button class="btn-send" (click)="sendReply()" [disabled]="!replyMessage.trim()">
-                        Gửi phản hồi 🚀
-                    </button>
-                </div>
-            </div>
-
-            <div class="chat-resolved" *ngIf="selectedContact?.status === 2">
-                ✅ Yêu cầu này đã được giải quyết và đóng lại.
-            </div>
-        </div>
+      </div>
     </div>
+
+    <!-- Card 3: Đang Trao Đổi -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-blue-50 text-blue-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-arrow-repeat"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Đang Tương Tác</div>
+            <div class="fs-6 fw-bold text-blue-600">{{ repliedCount }} <span class="text-muted small fw-normal">hội thoại</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Đã Giải Quyết -->
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Đã Xong / Đóng</div>
+            <div class="fs-6 fw-bold text-emerald-600">{{ resolvedCount }} <span class="text-muted small fw-normal">yêu cầu</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. KHUNG GIAO DIỆN CHAT 2 CỘT HIỆN ĐẠI -->
+  <div class="chat-main-card card border-0 shadow-xs rounded-4 overflow-hidden">
+    <div class="card-body p-0 d-flex flex-column flex-md-row chat-card-body">
+      
+      <!-- CỘT TRÁI: DANH SÁCH TIN NHẮN (INBOX LIST) -->
+      <div class="inbox-panel border-end border-slate-200 d-flex flex-column" 
+           [class.d-none]="selectedContact && isMobileView" 
+           [class.d-flex]="!selectedContact || !isMobileView">
+        
+        <!-- Thanh Tìm kiếm và Lọc -->
+        <div class="inbox-header-search p-3 border-bottom border-slate-200 bg-white">
+          <div class="search-input-wrapper position-relative mb-2.5">
+            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+            <input 
+              type="text" 
+              class="form-control form-control-sm ps-5 pe-4 py-2 rounded-3 border-slate-200" 
+              placeholder="Tìm khách, mã đơn, nội dung..." 
+              [(ngModel)]="searchKeyword">
+            <button *ngIf="searchKeyword" class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-1 text-muted p-0" (click)="searchKeyword = ''">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
+          </div>
+
+          <!-- Tabs Lọc Trạng Thái -->
+          <div class="btn-group btn-group-sm w-100 shadow-2xs" role="group">
+            <button 
+              type="button" 
+              class="btn btn-inbox-tab" 
+              [class.active]="filterStatus === 'all'"
+              (click)="filterStatus = 'all'">
+              Tất cả ({{ contacts.length }})
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-inbox-tab" 
+              [class.active]="filterStatus === 'unread'"
+              (click)="filterStatus = 'unread'">
+              Chờ trả lời 
+              <span class="badge bg-rose-500 ms-1" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-inbox-tab" 
+              [class.active]="filterStatus === 'resolved'"
+              (click)="filterStatus = 'resolved'">
+              Đã xong
+            </button>
+          </div>
+        </div>
+
+        <!-- Danh sách liên hệ -->
+        <div class="inbox-list-scroll flex-grow-1 overflow-y-auto bg-slate-50">
+          <div *ngIf="filteredContacts.length === 0" class="text-center py-5 text-muted">
+            <i class="bi bi-chat-square-dots fs-2 text-slate-300 mb-2 d-block"></i>
+            <div class="fw-semibold small">Không tìm thấy hội thoại nào</div>
+            <div style="font-size: 11px;">Thử xóa từ khóa tìm kiếm để xem tất cả</div>
+          </div>
+
+          <div 
+            *ngFor="let item of filteredContacts" 
+            class="contact-item p-3 border-bottom border-slate-100 cursor-pointer transition-all"
+            [class.active]="selectedContact?.id === item.id"
+            [class.item-unread]="item.status === 0"
+            (click)="openChat(item)">
+            
+            <div class="d-flex align-items-start gap-2.5">
+              <!-- Avatar -->
+              <div class="position-relative">
+                <div class="contact-avatar shadow-2xs">
+                  {{ getInitials(item.full_name) }}
+                </div>
+                <span class="unread-dot position-absolute top-0 start-100 translate-middle" *ngIf="item.status === 0"></span>
+              </div>
+
+              <!-- Chi tiết thông tin -->
+              <div class="contact-meta flex-grow-1 overflow-hidden">
+                <div class="d-flex justify-content-between align-items-center mb-0.5">
+                  <h6 class="contact-name mb-0 text-truncate fw-bold text-slate-900" style="font-size: 13.5px;">
+                    {{ item.full_name || 'Khách hàng' }}
+                  </h6>
+                  <span class="contact-time text-muted" style="font-size: 11px;">
+                    {{ item.created_at | date:'HH:mm dd/MM' }}
+                  </span>
+                </div>
+
+                <!-- Dòng tin nhắn cuối -->
+                <div class="contact-last-msg text-truncate small" [class.fw-bold]="item.status === 0" [class.text-slate-800]="item.status === 0" [class.text-muted]="item.status !== 0">
+                  <span *ngIf="item.last_sender_type === 'partner'" class="text-indigo-600 fw-semibold">Bạn: </span>
+                  {{ item.message || 'Chưa có tin nhắn' }}
+                </div>
+
+                <!-- Thẻ mã đơn và trạng thái -->
+                <div class="d-flex align-items-center gap-1.5 mt-1.5 flex-wrap">
+                  <span class="badge bg-amber-50 text-amber-700 border border-amber-200" *ngIf="item.booking_code" style="font-size: 10px;">
+                    <i class="bi bi-bookmark-fill me-0.5"></i> #{{ item.booking_code }}
+                  </span>
+                  <span class="badge py-0.5 px-1.5" [ngClass]="item.status === 2 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (item.status === 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600')" style="font-size: 10px;">
+                    {{ item.status === 2 ? 'Đã xong' : (item.status === 0 ? 'Chờ trả lời' : 'Đang xử lý') }}
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CỘT PHẢI: KHUNG CHAT (CHAT AREA) -->
+      <div class="chat-area-panel flex-grow-1 d-flex flex-column bg-white" 
+           [class.d-none]="!selectedContact && isMobileView" 
+           [class.d-flex]="selectedContact || !isMobileView">
+        
+        <!-- TRẠNG THÁI TRỐNG KHI CHƯA CHỌN KHÁCH -->
+        <div *ngIf="!selectedContact" class="empty-chat-state d-flex flex-column align-items-center justify-content-center h-100 p-4 text-center bg-slate-50-soft">
+          <div class="empty-chat-icon-wrapper mb-3 bg-indigo-50 text-indigo-600 rounded-circle d-flex align-items-center justify-content-center shadow-xs">
+            <i class="bi bi-chat-heart fs-1"></i>
+          </div>
+          <h5 class="fw-bold text-slate-800 mb-1">Chọn một cuộc hội thoại</h5>
+          <p class="text-muted small mb-3" style="max-width: 360px;">
+            Nhấp vào bất kỳ khách hàng nào trong danh sách bên trái để bắt đầu đọc tin nhắn và gửi phản hồi.
+          </p>
+          <div class="badge bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1.5 rounded-pill small">
+            <i class="bi bi-info-circle me-1"></i> Hệ thống tự động làm mới tin nhắn mới mỗi 3.5 giây
+          </div>
+        </div>
+
+        <!-- KHUNG CHAT ĐANG MỞ -->
+        <div *ngIf="selectedContact" class="active-chat-container d-flex flex-column h-100">
+          
+          <!-- Chat Header -->
+          <div class="chat-box-header px-3.5 py-2.5 border-bottom border-slate-200 d-flex justify-content-between align-items-center bg-white">
+            <div class="d-flex align-items-center gap-2.5">
+              <!-- Nút quay lại trên Mobile -->
+              <button class="btn btn-sm btn-light border d-md-none p-1 px-2" (click)="closeChat()" title="Quay lại danh sách">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+
+              <div class="contact-avatar-sm shadow-2xs">
+                {{ getInitials(selectedContact.full_name) }}
+              </div>
+
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <h6 class="mb-0 fw-bold text-slate-900 fs-7">{{ selectedContact.full_name || 'Khách hàng' }}</h6>
+                  <span class="badge py-0.5 px-2 rounded-pill" [ngClass]="selectedContact.status === 2 ? 'badge-resolved' : (selectedContact.status === 0 ? 'badge-waiting' : 'badge-active')">
+                    {{ selectedContact.status === 2 ? 'Đã giải quyết' : (selectedContact.status === 0 ? 'Chờ trả lời' : 'Đang trao đổi') }}
+                  </span>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2 text-muted small mt-0.5" style="font-size: 11.5px;">
+                  <span *ngIf="selectedContact.phone">
+                    <i class="bi bi-telephone me-0.5"></i> {{ selectedContact.phone }}
+                  </span>
+                  <span *ngIf="selectedContact.booking_id" class="booking-link-chip cursor-pointer" (click)="goToBooking(selectedContact.booking_id)" title="Xem chi tiết đơn đặt phòng">
+                    <i class="bi bi-receipt me-0.5"></i> Đơn: <strong>#{{ selectedContact.booking_code || selectedContact.booking_id }}</strong>
+                    <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 9px;"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Các nút hành động trên Header -->
+            <div class="d-flex align-items-center gap-1.5">
+              <button 
+                class="btn btn-sm shadow-2xs d-inline-flex align-items-center gap-1.5"
+                [ngClass]="selectedContact.status === 2 ? 'btn-outline-indigo' : 'btn-outline-success'"
+                (click)="toggleResolveStatus()"
+                title="Thay đổi trạng thái hoàn tất">
+                <i class="bi" [ngClass]="selectedContact.status === 2 ? 'bi-arrow-counterclockwise' : 'bi-check-all'"></i>
+                <span class="d-none d-sm-inline">{{ selectedContact.status === 2 ? 'Mở lại hội thoại' : 'Hoàn tất hỗ trợ' }}</span>
+              </button>
+
+              <button class="btn btn-sm btn-light border text-muted p-1 px-2" (click)="closeChat()" title="Đóng khung chat">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Lịch sử tin nhắn (Chat Messages) -->
+          <div class="chat-messages-scroll flex-grow-1 p-3.5 overflow-y-auto bg-slate-50-soft d-flex flex-column gap-3" #scrollMe>
+            
+            <div *ngIf="messages.length === 0" class="text-center py-4 text-muted small">
+              <i class="bi bi-chat-dots fs-3 text-slate-300 d-block mb-1"></i>
+              Chưa có tin nhắn trong cuộc trò chuyện này. Hãy gửi lời chào đầu tiên!
+            </div>
+
+            <div *ngFor="let msg of messages" 
+                 class="chat-bubble-row d-flex"
+                 [class.justify-content-start]="msg?.sender_type === 'customer'"
+                 [class.justify-content-end]="msg?.sender_type === 'partner'">
+              
+              <!-- Avatar khách bên trái nếu là customer -->
+              <div *ngIf="msg?.sender_type === 'customer'" class="bubble-avatar me-2 align-self-end">
+                {{ getInitials(selectedContact.full_name) }}
+              </div>
+
+              <!-- Nội dung tin nhắn -->
+              <div class="bubble-wrapper" [ngClass]="msg?.sender_type === 'customer' ? 'customer-bubble' : 'partner-bubble'">
+                <div class="bubble-body">
+                  {{ msg?.message }}
+                </div>
+                <div class="bubble-timestamp d-flex align-items-center gap-1" [class.justify-content-end]="msg?.sender_type === 'partner'">
+                  <span>{{ msg?.created_at | date:'HH:mm' }}</span>
+                  <i class="bi bi-check2 text-indigo-200" *ngIf="msg?.sender_type === 'partner'"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Khung gợi ý câu trả lời nhanh (Quick reply templates) -->
+          <div class="quick-templates-bar px-3 py-1.5 bg-white border-top border-slate-100 d-flex align-items-center gap-1.5 overflow-x-auto" *ngIf="selectedContact.status !== 2">
+            <span class="text-muted small fw-semibold flex-shrink-0" style="font-size: 11px;">
+              <i class="bi bi-lightning-charge-fill text-amber-500"></i> Trả lời nhanh:
+            </span>
+            <button 
+              *ngFor="let t of quickTemplates" 
+              type="button" 
+              class="btn btn-sm btn-quick-chip text-nowrap rounded-pill py-0.5 px-2.5"
+              (click)="insertTemplate(t)">
+              {{ t }}
+            </button>
+          </div>
+
+          <!-- Khung nhập liệu & Gửi tin nhắn -->
+          <div class="chat-input-toolbar p-3 bg-white border-top border-slate-200" *ngIf="selectedContact.status !== 2">
+            <div class="d-flex align-items-end gap-2">
+              <div class="flex-grow-1 position-relative">
+                <textarea 
+                  class="form-control rounded-3 border-slate-200 chat-textarea" 
+                  rows="2" 
+                  placeholder="Nhập nội dung tin nhắn (Nhấn Enter để gửi, Shift+Enter xuống dòng)..."
+                  [(ngModel)]="replyMessage"
+                  (keydown)="onKeyDown($event)"></textarea>
+              </div>
+              <button 
+                class="btn btn-primary rounded-3 px-3.5 py-2.5 fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 shadow-xs"
+                [disabled]="!replyMessage.trim() || isSending"
+                (click)="sendReply()">
+                <span *ngIf="isSending" class="spinner-border spinner-border-sm" role="status"></span>
+                <i *ngIf="!isSending" class="bi bi-send-fill"></i>
+                <span class="d-none d-sm-inline">Gửi</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Thông báo khi cuộc hội thoại đã được đóng -->
+          <div class="resolved-banner p-3 bg-emerald-50 border-top border-emerald-200 d-flex justify-content-between align-items-center" *ngIf="selectedContact.status === 2">
+            <div class="d-flex align-items-center gap-2 text-emerald-800 fw-semibold small">
+              <i class="bi bi-check-circle-fill fs-5 text-emerald-600"></i>
+              <span>Yêu cầu hỗ trợ này đã được đánh dấu hoàn tất và đóng lại.</span>
+            </div>
+            <button class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-bold" (click)="toggleResolveStatus()">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Mở lại cuộc trò chuyện
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
 </div>

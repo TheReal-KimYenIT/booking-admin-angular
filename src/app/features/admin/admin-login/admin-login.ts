@@ -16,6 +16,7 @@ import { AuthService } from '../../../services/auth.service';
 export class AdminLoginComponent {
   email = '';
   password = '';
+  showPassword = false;
   errorMessage = '';
   isLoading = false;
 

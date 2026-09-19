@@ -1,70 +1,310 @@
-<div class="partner-container">
-    <div class="header-action">
-        <div>
-            <h2>Quản Lý Loại Phụ Thu</h2>
-            <p>Thiết lập các loại phí phát sinh để Lễ tân chọn khi thanh toán.</p>
+<div class="surcharge-container p-2 p-md-3">
+  <!-- 1. HEADER -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-receipt-cutoff me-1"></i> Danh Mục Phụ Thu Khách Sạn
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Quản Lý Loại Phụ Thu</h2>
+      <p class="text-muted mb-0 small">Thiết lập các loại phí phát sinh để Lễ tân chọn khi thanh toán đơn đặt phòng.</p>
+    </div>
+    <button class="btn btn-primary fw-semibold px-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 rounded-3 btn-header-action" (click)="openModal()">
+      <i class="bi bi-plus-lg"></i>
+      <span>Thêm Loại Phụ Thu</span>
+    </button>
+  </div>
+
+  <!-- 2. KPI SUMMARY CARDS (ĐỒNG BỘ CHUẨN XÁC VỚI DỮ LIỆU CSDL) -->
+  <div class="row g-2 mb-3">
+    <!-- Card 1: Tổng Loại Phụ Thu -->
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-receipt-cutoff"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Tổng Loại Phụ Thu</div>
+            <div class="fs-6 fw-bold text-slate-800">{{ totalCategories }} <span class="text-muted small fw-normal">danh mục</span></div>
+          </div>
         </div>
-        <button class="btn btn-primary" (click)="openModal()">+ Thêm Loại Mới</button>
+      </div>
     </div>
 
-    <div *ngIf="isLoading" class="loading">Đang tải dữ liệu...</div>
-
-    <div class="table-responsive" *ngIf="!isLoading">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th style="width: 80px;">STT</th>
-                    <th>Tên Loại Phụ Thu</th>
-                    <th>Mô tả chi tiết</th>
-                    <th style="width: 180px; text-align: center;">Thao Tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let cat of list; let i = index">
-                    <td>#{{ i + 1 }}</td>
-                    <td style="font-weight: bold; color: #334155;">{{ cat.name }}</td>
-                    <td style="color: #64748b; font-size: 13px;">{{ cat.description || '---' }}</td>
-                    <td style="text-align: center;">
-                        <button class="mini-btn text-edit" (click)="openModal(cat)">Sửa</button>
-                        <button class="mini-btn text-delete" (click)="delete(cat.id)">Xóa</button>
-                    </td>
-                </tr>
-                <tr *ngIf="list.length === 0">
-                    <td colspan="4" style="text-align: center; padding: 30px; color: #94a3b8;">
-                        Chưa có dữ liệu. Hãy bấm "Thêm Loại Mới".
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="modal" *ngIf="showModal">
-        <div class="modal-content">
-            <h3 style="margin-top: 0; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-                {{ isEdit ? 'Cập Nhật Loại Phụ Thu' : 'Thêm Loại Phụ Thu Mới' }}
-            </h3>
-
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px;">Tên Loại Phụ Thu
-                    (*)</label>
-                <input type="text" class="form-control" [(ngModel)]="item.name"
-                    placeholder="VD: Check-out trễ, Phụ thu thêm người...">
-            </div>
-
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px;">Mô tả chi
-                    tiết</label>
-                <textarea class="form-control" [(ngModel)]="item.description" rows="3"
-                    placeholder="Ghi chú thêm nếu cần..."></textarea>
-            </div>
-
-            <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button class="btn btn-secondary" (click)="closeModal()">Hủy</button>
-                <button class="btn btn-primary" (click)="save()" [disabled]="isSaving"
-                    [style.opacity]="isSaving ? '0.6' : '1'">
-                    {{ isSaving ? '⏳ Đang lưu...' : 'Lưu Lại' }}
-                </button>
-            </div>
+    <!-- Card 2: Có Quy Định / Biểu Phí -->
+    <div class="col-6 col-md-4">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-card-checklist"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Đã Có Quy Định Chi Tiết</div>
+            <div class="fs-6 fw-bold text-emerald-600">{{ withDescCount }} <span class="text-muted small fw-normal">khoản phí</span></div>
+          </div>
         </div>
+      </div>
     </div>
+
+    <!-- Card 3: Khả Dụng Cho Lễ Tân -->
+    <div class="col-6 col-md-4">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-blue-50 text-blue-600 rounded-3 p-2 fs-5">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Áp Dụng Cho Lễ Tân</div>
+            <div class="fs-6 fw-bold text-blue-600">100% <span class="text-muted small fw-normal">sẵn sàng</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. CONTROLS & SEARCH TOOLBAR (KHÔNG CHIA LOẠI GIẢ TẠO) -->
+  <div class="card border-0 shadow-xs mb-3 bg-white rounded-3">
+    <div class="card-body py-2 px-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
+      <!-- Info badge -->
+      <div class="d-flex align-items-center gap-2">
+        <span class="info-count-badge">
+          <i class="bi bi-receipt-cutoff me-1.5 text-indigo-600"></i>
+          Danh mục hiện hành: <b>{{ filteredList.length }}</b> / {{ totalCategories }} loại
+        </span>
+      </div>
+
+      <!-- Search input -->
+      <div class="d-flex align-items-center gap-2 w-100 w-md-auto" style="min-width: 320px;">
+        <div class="input-group input-group-sm search-group flex-grow-1">
+          <span class="input-group-text bg-slate-50 border-end-0 text-muted">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="text" class="form-control border-start-0 bg-slate-50" 
+            [(ngModel)]="searchTerm" placeholder="Tìm kiếm tên loại phụ thu hoặc mô tả...">
+          <button *ngIf="searchTerm" class="btn btn-outline-secondary border-start-0 bg-slate-50 text-muted" type="button" (click)="searchTerm = ''">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary rounded-3 flex-shrink-0" (click)="loadData()" title="Tải lại danh sách">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. TABLE & MOBILE CARDS CONTAINER -->
+  <div class="card border-0 shadow-xs bg-white rounded-3 overflow-hidden">
+    <!-- 4.1 DESKTOP & TABLET TABLE VIEW (>= 768px) -->
+    <div class="table-responsive mb-0 d-none d-md-block">
+      <table class="table align-middle table-hover mb-0 surcharge-table">
+        <thead>
+          <tr class="table-header-row">
+            <th class="ps-3 py-3" style="width: 70px;">STT</th>
+            <th class="py-3" style="min-width: 260px;">TÊN LOẠI PHỤ THU</th>
+            <th class="py-3" style="min-width: 380px;">MÔ TẢ CHI TIẾT & CÁCH TÍNH</th>
+            <th class="text-end pe-3 py-3" style="min-width: 140px; white-space: nowrap;">THAO TÁC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- LOADING STATE -->
+          <tr *ngIf="isLoading">
+            <td colspan="4" class="text-center p-5">
+              <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+              <span class="text-muted fw-semibold">Đang tải danh mục phụ thu khách sạn...</span>
+            </td>
+          </tr>
+
+          <!-- EMPTY STATE -->
+          <tr *ngIf="!isLoading && filteredList.length === 0">
+            <td colspan="4" class="text-center py-5 text-muted">
+              <i class="bi bi-receipt-cutoff fs-1 text-slate-300 d-block mb-2"></i>
+              <div class="fw-semibold text-slate-700 mb-1">
+                {{ searchTerm ? 'Không tìm thấy loại phụ thu phù hợp với từ khóa "' + searchTerm + '"' : 'Khách sạn chưa thiết lập loại phụ thu nào.' }}
+              </div>
+              <p class="small text-muted mb-3" *ngIf="!searchTerm">
+                Thêm các khoản phụ thu phát sinh để Lễ tân chọn nhanh khi xuất hóa đơn thanh toán!
+              </p>
+              <button *ngIf="!searchTerm" class="btn btn-sm btn-primary rounded-pill px-3" (click)="openModal()">
+                <i class="bi bi-plus-lg me-1"></i> Thêm Loại Phụ Thu Đầu Tiên
+              </button>
+            </td>
+          </tr>
+
+          <!-- DATA ROWS -->
+          <ng-container *ngIf="!isLoading">
+            <tr *ngFor="let cat of filteredList; let i = index" class="surcharge-row">
+              <!-- Cột 1: STT -->
+              <td class="ps-3 py-3 text-muted fw-semibold" style="font-size: 13px;">
+                <span class="stt-badge">#{{ i + 1 }}</span>
+              </td>
+
+              <!-- Cột 2: Tên Loại Phụ Thu -->
+              <td class="py-3">
+                <div class="d-flex align-items-center gap-2.5">
+                  <div class="category-icon-box shadow-2xs bg-indigo-50 text-indigo-600">
+                    <i class="bi bi-receipt-cutoff"></i>
+                  </div>
+                  <div>
+                    <div class="fw-bold text-slate-900 category-name">{{ cat.name }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Cột 3: Mô tả chi tiết -->
+              <td class="py-3">
+                <div class="category-desc text-slate-600 small" [title]="cat.description || ''">
+                  {{ cat.description || 'Chưa có mô tả chi tiết.' }}
+                </div>
+              </td>
+
+              <!-- Cột 4: Thao tác (Hàng ngang gọn gàng) -->
+              <td class="text-end pe-3 py-3">
+                <div class="d-flex justify-content-end align-items-center gap-1.5">
+                  <!-- Nút Sửa -->
+                  <button type="button" class="btn btn-sm btn-action-btn btn-action-edit"
+                    (click)="openModal(cat)" title="Chỉnh sửa loại phụ thu">
+                    <i class="bi bi-pencil-fill me-1"></i> Sửa
+                  </button>
+
+                  <!-- Nút Xóa -->
+                  <button type="button" class="btn btn-sm btn-action-btn btn-action-delete"
+                    (click)="delete(cat)" title="Xóa loại phụ thu">
+                    <i class="bi bi-trash3-fill me-1"></i> Xóa
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4.2 MOBILE CARD LIST VIEW (< 768px - TỐI ƯU TRÊN ĐIỆN THOẠI) -->
+    <div class="d-block d-md-none p-2 p-sm-3">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="text-center py-4">
+        <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+        <span class="text-muted small fw-semibold">Đang tải danh mục phụ thu...</span>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredList.length === 0" class="text-center py-4 text-muted">
+        <i class="bi bi-receipt-cutoff fs-2 text-slate-300 d-block mb-2"></i>
+        <div class="fw-semibold text-slate-700 small mb-1">
+          {{ searchTerm ? 'Không tìm thấy loại phụ thu phù hợp' : 'Chưa có loại phụ thu nào.' }}
+        </div>
+        <button *ngIf="!searchTerm" class="btn btn-xs btn-primary rounded-pill px-3 mt-2" (click)="openModal()">
+          <i class="bi bi-plus-lg me-1"></i> Thêm loại mới
+        </button>
+      </div>
+
+      <!-- Card List -->
+      <div *ngIf="!isLoading" class="d-flex flex-column gap-2.5">
+        <div *ngFor="let cat of filteredList; let i = index" class="card border rounded-3 p-2.5 shadow-2xs surcharge-mobile-card">
+          <!-- Top Row: Icon + Tên + STT -->
+          <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="category-icon-box shadow-2xs bg-indigo-50 text-indigo-600">
+                <i class="bi bi-receipt-cutoff"></i>
+              </div>
+              <div class="fw-bold text-slate-900 fs-6 category-name">{{ cat.name }}</div>
+            </div>
+            <span class="stt-badge">#{{ i + 1 }}</span>
+          </div>
+
+          <!-- Middle Row: Mô tả chi tiết -->
+          <div class="bg-slate-50 p-2.5 rounded-2 mb-2 border">
+            <div class="text-muted small d-block mb-0.5" style="font-size: 10.5px;">Mô tả chi tiết & Cách tính:</div>
+            <div class="text-slate-700 small" style="font-size: 12.5px; line-height: 1.4;">
+              {{ cat.description || 'Chưa có mô tả chi tiết.' }}
+            </div>
+          </div>
+
+          <!-- Bottom Row: 2 nút thao tác full width -->
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-action-btn btn-action-edit flex-fill justify-content-center py-1.5"
+              (click)="openModal(cat)">
+              <i class="bi bi-pencil-fill me-1"></i> Sửa Thông Tin
+            </button>
+
+            <button type="button" class="btn btn-sm btn-action-btn btn-action-delete flex-fill justify-content-center py-1.5"
+              (click)="delete(cat)">
+              <i class="bi bi-trash3-fill me-1"></i> Xóa
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL THÊM / CẬP NHẬT LOẠI PHỤ THU (KÈM GỢI Ý MẪU ĐIỀN NHANH)            -->
+<!-- ========================================================================= -->
+<div class="custom-modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="custom-modal-content" (click)="$event.stopPropagation()" style="max-width: 560px;">
+    <!-- Header -->
+    <div class="modal-header p-3 px-4 bg-slate-50 border-bottom d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="modal-title fw-bold text-slate-900 mb-0">
+          <i class="bi" [ngClass]="isEdit ? 'bi-pencil-square text-primary' : 'bi-plus-circle-fill text-primary'" class="me-1.5"></i>
+          {{ isEdit ? 'Cập Nhật Loại Phụ Thu' : 'Thêm Loại Phụ Thu Mới' }}
+        </h5>
+        <div class="text-muted small mt-0.5">
+          {{ isEdit ? 'Điều chỉnh tên gọi và mô tả chi tiết của loại phụ thu.' : 'Tạo loại phí phát sinh để Lễ tân chọn khi thanh toán đơn đặt phòng.' }}
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="closeModal()"></button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body p-3 px-sm-4 text-slate-800">
+      <!-- Mẫu gợi ý nhanh (Chỉ hiển thị khi thêm mới để hỗ trợ gõ nhanh) -->
+      <div class="mb-3" *ngIf="!isEdit">
+        <label class="form-label fw-bold text-slate-800 small mb-1.5 d-flex justify-content-between">
+          <span><i class="bi bi-lightning-charge-fill text-amber-500 me-1"></i>Mẫu gợi ý phổ biến:</span>
+          <span class="text-muted fw-normal small">Bấm để tự động điền</span>
+        </label>
+        <div class="d-flex flex-wrap gap-1.5 p-2 bg-slate-50 border rounded-3 preset-box">
+          <button *ngFor="let p of presets" type="button" 
+            class="btn btn-sm btn-preset" (click)="applyPreset(p)">
+            {{ p.name }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Tên loại phụ thu -->
+      <div class="mb-3">
+        <label class="form-label fw-bold text-slate-800 small mb-1">
+          Tên loại phụ thu <span class="text-danger">*</span>:
+        </label>
+        <div class="input-group">
+          <span class="input-group-text bg-white text-primary"><i class="bi bi-receipt-cutoff"></i></span>
+          <input type="text" class="form-control form-control-solid fw-semibold" [(ngModel)]="item.name"
+            placeholder="VD: Check-out trễ, Phí thêm người, Phí đỗ xe...">
+        </div>
+        <small class="text-muted">Tên này sẽ hiển thị cho Lễ tân chọn khi thêm phụ thu vào đơn phòng.</small>
+      </div>
+
+      <!-- Mô tả quy định chi tiết -->
+      <div class="mb-3">
+        <label class="form-label fw-bold text-slate-800 small mb-1">
+          Mô tả chi tiết & Cách tính tiền:
+        </label>
+        <textarea class="form-control form-control-solid" rows="3" [(ngModel)]="item.description"
+          placeholder="VD: Phụ thu 100.000đ/giờ đến 15:00. Sau 18:00 tính 100% giá phòng một đêm..."></textarea>
+        <small class="text-muted">Ghi rõ biểu phí mẫu hoặc hướng dẫn tính tiền để Lễ tân áp dụng chính xác.</small>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer p-3 px-4 bg-slate-50 border-top d-flex justify-content-between">
+      <button type="button" class="btn btn-sm btn-secondary px-3" (click)="closeModal()">Đóng</button>
+      <button type="button" class="btn btn-sm btn-primary fw-bold px-4 shadow-sm" (click)="save()" [disabled]="isSaving">
+        <i class="bi bi-check2-circle me-1"></i> {{ isSaving ? 'Đang lưu...' : (isEdit ? 'Lưu Thay Đổi' : 'Thêm Loại Mới') }}
+      </button>
+    </div>
+  </div>
 </div>

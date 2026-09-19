@@ -1,0 +1,332 @@
+:host {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.staff-container {
+  max-width: 100%;
+}
+
+/* ========================================================================= */
+/* TAGS & SHADOWS                                                            */
+/* ========================================================================= */
+.portal-tag {
+  background-color: #e0e7ff !important;
+  color: #3730a3 !important;
+  border: 1px solid #c7d2fe !important;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-2xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+.border-slate-100 { border-color: #f1f5f9 !important; }
+.border-slate-200 { border-color: #e2e8f0 !important; }
+.bg-slate-50 { background-color: #f8fafc !important; }
+.text-slate-900 { color: #0f172a !important; }
+.text-slate-800 { color: #1e293b !important; }
+.text-slate-700 { color: #334155 !important; }
+.text-slate-600 { color: #475569 !important; }
+.text-slate-400 { color: #94a3b8 !important; }
+.text-slate-300 { color: #cbd5e1 !important; }
+.text-nowrap { white-space: nowrap !important; }
+
+/* ========================================================================= */
+/* COLOR PALETTE TOKENS                                                      */
+/* ========================================================================= */
+.bg-indigo-50 { background-color: #eef2ff !important; }
+.text-indigo-600 { color: #4f46e5 !important; }
+.text-indigo-700 { color: #4338ca !important; }
+.border-indigo-100 { border-color: #e0e7ff !important; }
+.border-indigo-200 { border-color: #c7d2fe !important; }
+
+.bg-emerald-50 { background-color: #ecfdf5 !important; }
+.text-emerald-600 { color: #059669 !important; }
+.text-emerald-700 { color: #047857 !important; }
+.border-emerald-200 { border-color: #a7f3d0 !important; }
+
+.bg-amber-50 { background-color: #fffbeb !important; }
+.text-amber-600 { color: #d97706 !important; }
+.border-amber-200 { border-color: #fde68a !important; }
+
+.bg-blue-50 { background-color: #eff6ff !important; }
+.text-blue-600 { color: #2563eb !important; }
+
+.bg-rose-50 { background-color: #fff1f2 !important; }
+.text-rose-700 { color: #be123c !important; }
+.border-rose-200 { border-color: #fecdd3 !important; }
+
+/* ========================================================================= */
+/* KPI CARDS                                                                 */
+/* ========================================================================= */
+.kpi-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid #f1f5f9;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.kpi-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+/* ========================================================================= */
+/* SEARCH & TABLE                                                            */
+/* ========================================================================= */
+.search-input-wrapper input {
+  font-size: 13px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input-wrapper input:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+}
+
+/* Custom Table Layout */
+.custom-staff-table {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.custom-staff-table th {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  padding: 12px 14px !important;
+  white-space: nowrap !important;
+  vertical-align: middle;
+}
+
+.custom-staff-table td {
+  padding: 12px 14px !important;
+  vertical-align: middle;
+  font-size: 13px;
+  white-space: nowrap !important;
+}
+
+.custom-staff-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.custom-staff-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Responsive Table Scrollbar */
+.table-responsive {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 5px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+/* Avatar Circle */
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.font-mono-sm {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.fs-7 {
+  font-size: 0.85rem;
+}
+
+.transition-all {
+  transition: all 0.15s ease-in-out;
+}
+
+/* Role Badge & Permission Count */
+.role-badge {
+  background-color: #eef2ff !important;
+  color: #4338ca !important;
+  border: 1px solid #c7d2fe !important;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap !important;
+}
+
+.badge-permission-count {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap !important;
+}
+
+/* Status Indicator */
+.status-indicator-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 10px !important;
+  border-radius: 9999px !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot-active {
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: dotPulse 2s infinite ease-in-out;
+}
+
+.dot-inactive {
+  background-color: #f43f5e;
+}
+
+@keyframes dotPulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Custom action buttons */
+.btn-outline-emerald {
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  background-color: #ecfdf5;
+}
+.btn-outline-emerald:hover {
+  background-color: #059669;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.btn-outline-amber {
+  color: #d97706;
+  border: 1px solid #fde68a;
+  background-color: #fffbeb;
+}
+.btn-outline-amber:hover {
+  background-color: #d97706;
+  color: #ffffff;
+  border-color: #d97706;
+}
+
+/* ========================================================================= */
+/* MODAL DIALOG                                                              */
+/* ========================================================================= */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1060;
+  padding: 15px;
+  animation: fadeIn 0.2s ease;
+}
+
+.custom-modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 620px;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.3);
+  overflow: hidden;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================================================= */
+/* RESPONSIVE DESIGN                                                         */
+/* ========================================================================= */
+@media (max-width: 991.98px) {
+  .custom-modal-overlay {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .custom-modal-content {
+    max-height: 92vh;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .staff-container {
+    padding: 8px !important;
+  }
+
+  .kpi-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem !important;
+  }
+}

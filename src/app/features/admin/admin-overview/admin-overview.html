@@ -1,0 +1,628 @@
+<!-- Giao diện Admin Overview - Executive Operations Center -->
+<div class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen font-sans relative overflow-hidden">
+    
+    <!-- Hiệu ứng nền ánh sáng tinh tế -->
+    <div class="absolute top-0 right-0 -mr-28 -mt-28 w-[500px] h-[500px] rounded-full bg-rose-200/20 blur-[120px] pointer-events-none"></div>
+    <div class="absolute top-1/3 left-0 -ml-28 w-[400px] h-[400px] rounded-full bg-teal-200/20 blur-[100px] pointer-events-none"></div>
+    <div class="absolute bottom-10 right-1/4 w-[450px] h-[450px] rounded-full bg-blue-200/15 blur-[120px] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-[1600px] mx-auto space-y-6 sm:space-y-8">
+        
+        <!-- HEADER TRUNG TÂM ĐIỀU HÀNH -->
+        <div class="bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Hệ thống hoạt động ổn định
+                    </span>
+                    <span *ngIf="lastUpdated" class="text-xs text-slate-400 font-medium">
+                        Cập nhật lúc: {{ lastUpdated }}
+                    </span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">
+                    Trung Tâm Điều Hành StayHub
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 font-medium max-w-2xl">
+                    Báo cáo phân tích dòng tiền GMV, doanh thu phí sàn 15%, mạng lưới khách sạn đối tác và hành vi đặt phòng toàn nền tảng.
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <button
+                    type="button"
+                    (click)="fetchDashboardStats()"
+                    [disabled]="isLoading"
+                    class="w-full md:w-auto bg-slate-900 text-white hover:bg-slate-800 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" [class.animate-spin]="isLoading" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>{{ isLoading ? 'Đang cập nhật...' : 'Làm mới số liệu' }}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- HÀNG 1: 6 THẺ KPI EXECUTIVE CHÍNH (GRID 3 CỘT RỘNG RÃI, KHÔNG BAO GIỜ BỊ CẮT SỐ) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            
+            <!-- KPI 1: HOA HỒNG STAYHUB (THẺ NỔI BẬT DARK LUXURY) -->
+            <div [routerLink]="['/admin/transactions']" class="group bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white rounded-3xl p-5 sm:p-6 shadow-[0_12px_30px_rgba(15,23,42,0.25)] hover:shadow-[0_16px_40px_rgba(244,63,94,0.3)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden cursor-pointer flex flex-col justify-between min-h-[160px]">
+                <div class="absolute -right-12 -top-12 w-44 h-44 bg-[#F43F5E] rounded-full opacity-20 blur-3xl group-hover:opacity-40 transition-opacity duration-700"></div>
+                
+                <div class="relative z-10 flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-white/10 text-[#F43F5E] flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span *ngIf="stats.growth_rate !== null && stats.growth_rate !== undefined"
+                          class="text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"
+                          [ngClass]="stats.growth_rate >= 0 ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/35' : 'bg-rose-500/25 text-rose-300 border border-rose-500/35'">
+                        <span>{{ stats.growth_rate >= 0 ? '↑ +' : '↓ ' }}{{ stats.growth_rate }}%</span>
+                        <span class="text-[10px] opacity-80">MoM</span>
+                    </span>
+                    <span *ngIf="stats.growth_rate === null || stats.growth_rate === undefined"
+                          class="text-xs font-bold px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        15% Phí Sàn
+                    </span>
+                </div>
+                
+                <div class="relative z-10">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Hoa Hồng StayHub (Doanh Thu Sàn)</p>
+                    <div class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-rose-100 to-[#F43F5E] tracking-tight whitespace-nowrap">
+                        {{ (stats.total_platform_revenue || 0) | number }}đ
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Doanh thu phí dịch vụ thực sàn nhận sau đối soát</p>
+                </div>
+            </div>
+
+            <!-- KPI 2: TỔNG GMV PHÒNG TOÀN SÀN -->
+            <div class="bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between min-h-[160px]">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-1 rounded-full">
+                        Tổng GMV Toàn Sàn
+                    </span>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Quy Mô Giao Dịch Phòng</p>
+                    <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight whitespace-nowrap">
+                        {{ (stats.total_gmv || 0) | number }}đ
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Tổng giá trị thanh toán phòng toàn hệ sinh thái</p>
+                </div>
+            </div>
+
+            <!-- KPI 3: GIÁ TRỊ ĐƠN TRUNG BÌNH (AOV) -->
+            <div class="bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between min-h-[160px]">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+                        AOV Thước Đo
+                    </span>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Chi Tiêu Trung Bình / Đơn</p>
+                    <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight whitespace-nowrap">
+                        {{ (stats.avg_booking_value || 0) | number }}đ
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Quy mô giỏ hàng trung bình mỗi lượt đặt phòng</p>
+                </div>
+            </div>
+
+            <!-- KPI 4: MẠNG LƯỚI ĐỐI TÁC KHÁCH SẠN -->
+            <div [routerLink]="['/admin/partners']" class="bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px]">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </div>
+                    <span class="text-xs font-bold px-3 py-1 rounded-full"
+                          [ngClass]="stats.pending_partners > 0 ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-blue-50 text-blue-700 border border-blue-200'">
+                        {{ stats.pending_partners > 0 ? (stats.pending_partners + ' hồ sơ chờ duyệt') : 'Chuẩn hóa' }}
+                    </span>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Mạng Lưới Khách Sạn Đối Tác</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-2xl sm:text-3xl font-black text-slate-800">{{ stats.total_partners }}</span>
+                        <span class="text-sm text-slate-400 font-semibold">khách sạn đã duyệt</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Cơ sở lưu trú đã kiểm duyệt hoạt động chính thức</p>
+                </div>
+            </div>
+
+            <!-- KPI 5: KHÁCH HÀNG THÀNH VIÊN -->
+            <div [routerLink]="['/admin/customers']" class="bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px]">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full">
+                        Cộng Đồng Du Khách
+                    </span>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Khách Hàng Thành Viên</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-2xl sm:text-3xl font-black text-slate-800">{{ stats.total_customers }}</span>
+                        <span class="text-sm text-slate-400 font-semibold">tài khoản</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Người dùng đã đăng ký tài khoản trên nền tảng</p>
+                </div>
+            </div>
+
+            <!-- KPI 6: TỶ LỆ ĐƠN HOÀN TẤT THÀNH CÔNG -->
+            <div [routerLink]="['/admin/transactions']" class="bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px]">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                        {{ stats.success_rate }}% thành công
+                    </span>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Hiệu Suất Đơn Đặt Phòng</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-2xl sm:text-3xl font-black text-slate-800">{{ stats.total_bookings }}</span>
+                        <span class="text-sm text-slate-400 font-semibold">/ {{ stats.total_all_bookings }} đơn toàn hệ thống</span>
+                    </div>
+                    <!-- Thanh tiến độ hoàn tất -->
+                    <div class="w-full bg-slate-100 rounded-full h-2 mt-2.5 overflow-hidden">
+                        <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" [style.width.%]="stats.success_rate || 0"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- HÀNG 2: SƠ ĐỒ DÒNG TIỀN SONG HÀNH (DUAL AREA LINE CHART) -->
+        <div class="bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-7 shadow-[0_10px_35px_rgb(0,0,0,0.03)] space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-800">
+                            Hiệu Suất Dòng Tiền Song Hành: GMV Phòng vs Hoa Hồng StayHub
+                        </h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
+                        Đối chiếu trực quan giữa tổng quy mô giao dịch phòng lưu trú và doanh thu hoa hồng 15% của nền tảng
+                    </p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Legend trực quan -->
+                    <div class="flex items-center gap-4 text-xs font-semibold text-slate-600 bg-slate-50 px-3.5 py-1.5 rounded-xl border border-slate-200/60">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-[#14B8A6] shadow-sm"></span>
+                            <span>Tổng GMV Phòng</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-[#F43F5E] shadow-sm"></span>
+                            <span>Hoa Hồng StayHub (15%)</span>
+                        </div>
+                    </div>
+
+                    <!-- Filter chu kỳ -->
+                    <div class="bg-slate-100 p-1 rounded-xl flex text-xs font-semibold">
+                        <button type="button" (click)="setPeriod('day')" [class.bg-white]="selectedPeriod === 'day'" [class.text-slate-900]="selectedPeriod === 'day'" [class.shadow-xs]="selectedPeriod === 'day'" class="px-3 py-1.5 rounded-lg transition-all text-slate-600 hover:text-slate-900 cursor-pointer">10 Ngày</button>
+                        <button type="button" (click)="setPeriod('month')" [class.bg-white]="selectedPeriod === 'month'" [class.text-slate-900]="selectedPeriod === 'month'" [class.shadow-xs]="selectedPeriod === 'month'" class="px-3 py-1.5 rounded-lg transition-all text-slate-600 hover:text-slate-900 cursor-pointer">6 Tháng</button>
+                        <button type="button" (click)="setPeriod('year')" [class.bg-white]="selectedPeriod === 'year'" [class.text-slate-900]="selectedPeriod === 'year'" [class.shadow-xs]="selectedPeriod === 'year'" class="px-3 py-1.5 rounded-lg transition-all text-slate-600 hover:text-slate-900 cursor-pointer">5 Năm</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Biểu đồ -->
+            <div class="h-[300px] sm:h-[360px] w-full relative">
+                <canvas id="revenueChart"></canvas>
+            </div>
+
+            <!-- Banner giải thích mô hình kinh doanh sàn -->
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-start gap-3">
+                <span class="text-lg">💡</span>
+                <p class="text-xs text-amber-900 leading-relaxed font-medium">
+                    <strong class="font-bold">Quy chuẩn tài chính StayHub:</strong> Nền tảng chỉ ghi nhận 15% phí dịch vụ môi giới vào doanh thu vận hành. 85% giá trị phòng thực tế cùng thuế VAT phòng được chuyển trực tiếp cho khách sạn đối tác xuất hóa đơn cho du khách.
+                </p>
+            </div>
+        </div>
+
+        <!-- HÀNG 3: TOP ĐỐI TÁC (HORIZONTAL BAR) & CƠ CẤU THANH TOÁN (DOUGHNUT) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            
+            <!-- CỘT TRÁI (7 CỘT): TOP 5 ĐỐI TÁC THEO HOA HỒNG (THANH NGANG) -->
+            <div class="lg:col-span-7 bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-7 shadow-[0_10px_35px_rgb(0,0,0,0.03)] flex flex-col justify-between space-y-5">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <span>🏨</span> Top 5 Khách Sạn Đóng Góp Hoa Hồng Cao Nhất
+                        </h3>
+                        <span class="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200/50">
+                            Phí sàn 15%
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium">
+                        Biểu đồ thanh ngang trực quan, tên khách sạn hiển thị rõ ràng không bị cắt ngắn hay nghiêng chữ.
+                    </p>
+                </div>
+
+                <div class="h-[270px] sm:h-[300px] w-full relative">
+                    <canvas id="revenueByHotelChart"></canvas>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                    <div class="p-3 bg-amber-50/60 rounded-2xl border border-amber-100 flex items-center gap-3">
+                        <span class="text-2xl">🏆</span>
+                        <div class="overflow-hidden">
+                            <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">Quán Quân Doanh Thu</span>
+                            <span class="text-xs sm:text-sm font-bold text-slate-800 truncate block" [title]="stats.top_hotel?.name">
+                                {{ stats.top_hotel?.name || 'Đang cập nhật' }}
+                            </span>
+                            <span class="text-[11px] font-extrabold text-amber-600 block">
+                                {{ (stats.top_hotel?.total_commission || 0) | number }}đ
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/70 flex items-center gap-3">
+                        <span class="text-2xl">📈</span>
+                        <div class="overflow-hidden">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Cần Hỗ Trợ Tăng Trưởng</span>
+                            <span class="text-xs sm:text-sm font-bold text-slate-700 truncate block" [title]="stats.bottom_hotel?.name">
+                                {{ stats.bottom_hotel?.name || 'Đối tác mới' }}
+                            </span>
+                            <span class="text-[11px] font-bold text-slate-600 block">
+                                {{ (stats.bottom_hotel?.total_commission || 0) | number }}đ
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI (5 CỘT): CƠ CẤU PHƯƠNG THỨC THANH TOÁN (DOUGHNUT) -->
+            <div class="lg:col-span-5 bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-7 shadow-[0_10px_35px_rgb(0,0,0,0.03)] flex flex-col justify-between space-y-5">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <span>💳</span> Cơ Cấu Phương Thức Thanh Toán
+                        </h3>
+                        <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                            3 Kênh Chính
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium">
+                        Tỷ trọng dòng tiền thực nhận qua cổng VNPAY, chuyển khoản ngân hàng và tiền mặt tại quầy.
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-5">
+                    <!-- Doughnut Canvas -->
+                    <div class="w-48 h-48 sm:w-52 sm:h-52 relative flex-shrink-0 flex items-center justify-center">
+                        <canvas id="paymentMethodsChart"></canvas>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cổng TT</span>
+                            <span class="text-sm font-black text-slate-800">3 Kênh</span>
+                        </div>
+                    </div>
+
+                    <!-- Legend chi tiết -->
+                    <div class="w-full space-y-3">
+                        <div *ngFor="let m of stats.payment_methods_chart" class="p-3 rounded-2xl bg-slate-50 border border-slate-200/60 hover:bg-slate-100/70 transition-colors">
+                            <div class="flex items-center justify-between text-xs mb-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full" [style.backgroundColor]="m.color"></span>
+                                    <span class="font-bold text-slate-700">{{ m.name }}</span>
+                                </div>
+                                <span class="font-extrabold text-slate-800 text-sm">{{ m.percent }}%</span>
+                            </div>
+                            <div class="w-full bg-slate-200/70 rounded-full h-2 overflow-hidden">
+                                <div class="h-2 rounded-full transition-all duration-500" [style.width.%]="m.percent" [style.backgroundColor]="m.color"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-[11px] text-slate-400 mt-1.5">
+                                <span>{{ m.count }} giao dịch</span>
+                                <span class="font-bold text-slate-700">{{ (m.total || 0) | number }}đ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- HÀNG 4: TRẠNG THÁI ĐƠN HÀNG & PHÂN BỐ TỈNH/THÀNH PHỐ -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+            
+            <!-- CỘT TRÁI (5 CỘT): TRẠNG THÁI ĐƠN HÀNG (CONVERSION DONUT) -->
+            <div class="lg:col-span-5 bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-7 shadow-[0_10px_35px_rgb(0,0,0,0.03)] flex flex-col justify-between space-y-5">
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2 mb-1">
+                        <span>🎯</span> Chuyển Đổi & Trạng Thái Đơn Hàng
+                    </h3>
+                    <p class="text-xs text-slate-500 font-medium">
+                        Tỷ lệ đơn lưu trú thành công so với tỷ lệ khách hủy và vắng mặt (No-show).
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-5">
+                    <div class="w-44 h-44 sm:w-48 sm:h-48 relative flex-shrink-0 flex items-center justify-center">
+                        <canvas id="systemStatusChart"></canvas>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span class="text-xs font-bold text-slate-400">Thành công</span>
+                            <span class="text-base font-black text-emerald-600">{{ stats.success_rate }}%</span>
+                        </div>
+                    </div>
+
+                    <div class="w-full space-y-2">
+                        <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#10B981]"></span>
+                                <span class="text-xs font-bold text-emerald-900">Thành công</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-black text-emerald-700">{{ stats.system_status_chart?.[0]?.count || 0 }} đơn</span>
+                                <span class="text-[10px] text-emerald-600 block">({{ stats.system_status_chart?.[0]?.percent || 0 }}%)</span>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#EF4444]"></span>
+                                <span class="text-xs font-bold text-rose-900">Đã hủy</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-black text-rose-700">{{ stats.system_status_chart?.[1]?.count || 0 }} đơn</span>
+                                <span class="text-[10px] text-rose-600 block">({{ stats.system_status_chart?.[1]?.percent || 0 }}%)</span>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#64748B]"></span>
+                                <span class="text-xs font-bold text-slate-800">No-show (Vắng mặt)</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-black text-slate-700">{{ stats.system_status_chart?.[2]?.count || 0 }} đơn</span>
+                                <span class="text-[10px] text-slate-500 block">({{ stats.system_status_chart?.[2]?.percent || 0 }}%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-400 bg-slate-50 p-2 rounded-xl text-center">
+                    Tỷ lệ hoàn tất đạt <strong>{{ stats.success_rate }}%</strong> trên tổng số <strong>{{ stats.total_all_bookings }}</strong> đơn đặt phòng.
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI (7 CỘT): PHÂN BỐ THEO TỈNH / THÀNH PHỐ (CITY STATS) -->
+            <div class="lg:col-span-7 bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-7 shadow-[0_10px_35px_rgb(0,0,0,0.03)] flex flex-col justify-between space-y-5">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <span>📍</span> Phân Bố Mạng Lưới Khách Sạn Theo Thị Trường Trọng Điểm
+                        </h3>
+                        <span class="text-xs font-semibold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-md border border-purple-100">
+                            Địa bàn du lịch
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium">
+                        Số lượng khách sạn đối tác đã kiểm duyệt theo từng tỉnh, thành phố du lịch lớn.
+                    </p>
+                </div>
+
+                <div class="h-[220px] sm:h-[240px] w-full relative">
+                    <canvas id="cityChart"></canvas>
+                </div>
+
+                <!-- Danh sách badge các thành phố -->
+                <div class="flex items-center flex-wrap gap-2 pt-2 border-t border-slate-100">
+                    <span *ngFor="let c of stats.city_stats" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200/70 hover:border-slate-300 transition-colors">
+                        <span class="text-slate-400">🏙️</span>
+                        <span>{{ c.city }}:</span>
+                        <strong class="text-indigo-600 font-bold">{{ c.count }} KS</strong>
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- HÀNG 5: BỤC VINH DANH TOP 3 ĐỐI TÁC XUẤT SẮC NHẤT (PODIUM RANKING) -->
+        <div class="bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-7 shadow-[0_10px_35px_rgb(0,0,0,0.03)] space-y-5">
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span>👑</span> Bục Vinh Danh Top 3 Khách Sạn Xuất Sắc Nhất Toàn Nền Tảng
+                    </h3>
+                    <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                        StayHub Prestige Awards
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 font-medium">
+                    Các đối tác có hiệu suất kinh doanh hàng đầu, mang lại doanh thu phòng và hoa hồng lớn nhất.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                <!-- HẠNG 1: GOLD (QUÁN QUÂN) -->
+                <div *ngIf="stats.top_3_hotels?.[0]" class="relative bg-gradient-to-b from-amber-50/90 to-white border-2 border-amber-300/80 rounded-3xl p-5 shadow-lg shadow-amber-500/10 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-200 rounded-full opacity-30 blur-xl"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-3xl">🥇</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-400 text-amber-950 shadow-sm">
+                            Hạng 1 Toàn Sàn
+                        </span>
+                    </div>
+                    <h4 class="text-base font-extrabold text-slate-800 truncate mb-1" [title]="stats.top_3_hotels[0].name">
+                        {{ stats.top_3_hotels[0].name }}
+                    </h4>
+                    <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                        <span>📍 {{ stats.top_3_hotels[0].city }}</span>
+                        <span>•</span>
+                        <span class="text-amber-500 font-bold">⭐ {{ stats.top_3_hotels[0].star_rating || 5 }} sao</span>
+                    </div>
+                    <div class="p-3 bg-white rounded-2xl border border-amber-200/60 space-y-1.5 shadow-2xs">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">Hoa hồng sàn:</span>
+                            <strong class="text-rose-600 font-extrabold">{{ (stats.top_3_hotels[0].total_commission || 0) | number }}đ</strong>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">Tổng GMV phòng:</span>
+                            <span class="text-slate-800 font-bold">{{ (stats.top_3_hotels[0].total_gmv || 0) | number }}đ</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">Đơn hoàn tất:</span>
+                            <span class="text-slate-700 font-semibold">{{ stats.top_3_hotels[0].booking_count }} đơn</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HẠNG 2: SILVER (Á QUÂN) -->
+                <div *ngIf="stats.top_3_hotels?.[1]" class="relative bg-gradient-to-b from-slate-100/90 to-white border-2 border-slate-300/80 rounded-3xl p-5 shadow-sm hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-3xl">🥈</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-slate-300 text-slate-800 shadow-sm">
+                            Hạng 2 Toàn Sàn
+                        </span>
+                    </div>
+                    <h4 class="text-base font-extrabold text-slate-800 truncate mb-1" [title]="stats.top_3_hotels[1].name">
+                        {{ stats.top_3_hotels[1].name }}
+                    </h4>
+                    <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                        <span>📍 {{ stats.top_3_hotels[1].city }}</span>
+                        <span>•</span>
+                        <span class="text-amber-500 font-bold">⭐ {{ stats.top_3_hotels[1].star_rating || 4 }} sao</span>
+                    </div>
+                    <div class="p-3 bg-white rounded-2xl border border-slate-200 space-y-1.5 shadow-2xs">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">Hoa hồng sàn:</span>
+                            <strong class="text-rose-600 font-extrabold">{{ (stats.top_3_hotels[1].total_commission || 0) | number }}đ</strong>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">Tổng GMV phòng:</span>
+                            <span class="text-slate-800 font-bold">{{ (stats.top_3_hotels[1].total_gmv || 0) | number }}đ</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">Đơn hoàn tất:</span>
+                            <span class="text-slate-700 font-semibold">{{ stats.top_3_hotels[1].booking_count }} đơn</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HẠNG 3: BRONZE (QUÝ QUÂN) -->
+                <div *ngIf="stats.top_3_hotels?.[2]" class="relative bg-gradient-to-b from-orange-50/80 to-white border-2 border-orange-300/80 rounded-3xl p-5 shadow-sm hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-3xl">🥉</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-orange-300 text-orange-950 shadow-sm">
+                            Hạng 3 Toàn Sàn
+                        </span>
+                    </div>
+                    <h4 class="text-base font-extrabold text-slate-800 truncate mb-1" [title]="stats.top_3_hotels[2].name">
+                        {{ stats.top_3_hotels[2].name }}
+                    </h4>
+                    <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                        <span>📍 {{ stats.top_3_hotels[2].city }}</span>
+                        <span>•</span>
+                        <span class="text-amber-500 font-bold">⭐ {{ stats.top_3_hotels[2].star_rating || 4 }} sao</span>
+                    </div>
+                    <div class="p-3 bg-white rounded-2xl border border-orange-200/60 space-y-1.5 shadow-2xs">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">Hoa hồng sàn:</span>
+                            <strong class="text-rose-600 font-extrabold">{{ (stats.top_3_hotels[2].total_commission || 0) | number }}đ</strong>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">Tổng GMV phòng:</span>
+                            <span class="text-slate-800 font-bold">{{ (stats.top_3_hotels[2].total_gmv || 0) | number }}đ</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-500">Đơn hoàn tất:</span>
+                            <span class="text-slate-700 font-semibold">{{ stats.top_3_hotels[2].booking_count }} đơn</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HÀNG 6: DÒNG GIAO DỊCH ĐẶT PHÒNG MỚI NHẤT (LIVE ACTIVITY FEED) -->
+        <div class="bg-white/85 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-5 sm:p-7 shadow-[0_10px_35px_rgb(0,0,0,0.03)] space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2 mb-1">
+                        <span>⚡</span> Giao Dịch Đặt Phòng Gần Nhất
+                    </h3>
+                    <p class="text-xs text-slate-500 font-medium">
+                        5 giao dịch phòng mới nhất vừa phát sinh trên hệ sinh thái StayHub
+                    </p>
+                </div>
+                <a [routerLink]="['/admin/transactions']" class="text-xs sm:text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 group cursor-pointer">
+                    <span>Xem tất cả giao dịch</span>
+                    <span class="group-hover:translate-x-1 transition-transform">→</span>
+                </a>
+            </div>
+
+            <!-- Bảng giao dịch tinh gọn -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-200/70 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th class="py-3 px-4">Mã đơn</th>
+                            <th class="py-3 px-4">Khách hàng</th>
+                            <th class="py-3 px-4">Khách sạn</th>
+                            <th class="py-3 px-4 text-right">Tổng GMV</th>
+                            <th class="py-3 px-4 text-right">Hoa hồng (15%)</th>
+                            <th class="py-3 px-4 text-center">Trạng thái</th>
+                            <th class="py-3 px-4 text-right">Thời gian</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+                        <tr *ngFor="let b of stats.recent_bookings" class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-3.5 px-4 font-mono font-bold text-indigo-600">
+                                #{{ b.booking_code }}
+                            </td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-800">{{ b.guest_name || 'Khách vãng lai' }}</div>
+                                <div class="text-[11px] text-slate-400 font-mono">{{ b.guest_phone || '---' }}</div>
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700 truncate max-w-[200px]" [title]="b.hotel_name">
+                                {{ b.hotel_name }}
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-extrabold text-slate-800">
+                                {{ (b.total_amount || 0) | number }}đ
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-black text-rose-600">
+                                {{ (b.platform_fee || 0) | number }}đ
+                            </td>
+                            <td class="py-3.5 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border"
+                                      [ngClass]="getBookingStatusBadge(b.status).badgeClass">
+                                    {{ getBookingStatusBadge(b.status).label }}
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 text-right text-slate-400 text-[11px]">
+                                {{ b.created_at | date:'HH:mm - dd/MM/yyyy' }}
+                            </td>
+                        </tr>
+                        <tr *ngIf="!stats.recent_bookings || stats.recent_bookings.length === 0">
+                            <td colspan="7" class="py-8 text-center text-slate-400 text-xs">
+                                Chưa có giao dịch nào được ghi nhận.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -27,9 +27,8 @@ export class HotelService {
   // ==========================================
   // TỔNG QUAN (DASHBOARD)
   // ==========================================
-  getDashboardStats(): Observable<any> {
-    // Siêu gọn: Bỏ luôn tham số thứ 2
-    return this.http.get(`${this.apiUrl}/partner/dashboard-stats`);
+  getDashboardStats(period: string = 'month'): Observable<any> {
+    return this.http.get(`${this.apiUrl}/partner/dashboard-stats?period=${period}`);
   }
 
   // ==========================================

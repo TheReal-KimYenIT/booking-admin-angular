@@ -1,107 +1,743 @@
-<div class="admin-container">
-  <h2>Danh Sách Đối Tác Đang Hoạt Động</h2>
-  <p>Quản lý các khách sạn đang mở bán trên hệ thống.</p>
+<div class="partners-container p-2 p-md-3 fade-in-up">
+  <!-- 1. HEADER -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-buildings-fill me-1"></i> Quản Trị Hệ Thống &bull; Đối Tác Khách Sạn
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Danh Sách Đối Tác Đang Hoạt Động</h2>
+      <p class="text-muted mb-0 small">Quản lý các cơ sở lưu trú đang mở bán phòng, cấu hình tỷ lệ hoa hồng và giám sát đối tác trên StayHub.</p>
+    </div>
 
-  <div *ngIf="isLoading" class="loading">Đang tải danh sách...</div>
-
-  <table class="table" *ngIf="!isLoading && partnerList.length > 0">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Tên Khách Sạn</th>
-        <th>Chủ Sở Hữu</th>
-        <th>Email</th>
-        <th>Số Điện Thoại</th>
-        <th class="text-center">Hoa hồng (%)</th>
-        <th style="width: 250px;" class="text-center">Thao Tác</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of partnerList">
-        <td>{{ item.id }}</td>
-        <td><strong>{{ item.name }}</strong><br /><small>{{ item.address }}, {{ item.city }}</small></td>
-        <td>{{ item.partner?.last_name }} {{ item.partner?.first_name }}</td>
-        <td>{{ item.partner?.email }}</td>
-        <td>{{ item.partner?.phone }}</td>
-        <td class="text-center">
-          <span class="badge bg-light text-dark border fs-6 d-block mb-1">
-            {{ item.commission_rate || 15 }}%
-          </span>
-          <button (click)="editCommission(item.id, item.commission_rate, item.name)"
-            class="btn btn-sm btn-outline-primary" style="font-size: 11px;">
-            ✏️ Chỉnh sửa
-          </button>
-        </td>
-        <td class="text-center">
-          <button class="btn btn-info btn-sm text-white" style="margin-right: 5px;" (click)="openDetailsModal(item)">👁️
-            Xem</button>
-          <button class="btn btn-danger btn-sm" (click)="openSuspendModal(item.id)">🔒 Khóa</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div *ngIf="!isLoading && partnerList.length === 0" class="empty-state">
-    Không có đối tác nào đang hoạt động.
+    <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end">
+      <button class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 shadow-2xs d-inline-flex align-items-center gap-1.5 text-nowrap" (click)="loadData()" [disabled]="isLoading">
+        <i class="bi bi-arrow-clockwise" [class.spin-icon]="isLoading"></i>
+        <span>Làm Mới</span>
+      </button>
+    </div>
   </div>
 
-  <div class="modal" *ngIf="showSuspendModal">
-    <div class="modal-content">
-      <h3>Lý do khóa tài khoản?</h3>
-      <textarea [(ngModel)]="suspendReason" placeholder="Nhập lý do vi phạm (Bắt buộc)..."></textarea>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" (click)="closeSuspendModal()">Hủy</button>
-        <button class="btn btn-danger" (click)="submitSuspend()">Xác nhận Khóa</button>
+  <!-- 2. KPI SUMMARY CARDS (4 CARDS) -->
+  <div class="row g-2 mb-3">
+    <!-- Card 1: Tổng Đối Tác Hoạt Động -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-building-check"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Đối Tác Đang Mở Bán</div>
+            <div class="fs-6 fw-bold text-emerald-600 text-truncate">{{ totalActive }} <span class="text-muted small fw-normal">khách sạn</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Đang hoạt động trên sàn</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Tỉnh / Thành Phủ Sóng -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-geo-alt-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Tỉnh / Thành Phủ Sóng</div>
+            <div class="fs-6 fw-bold text-slate-800 text-truncate">{{ uniqueCitiesCount }} <span class="text-muted small fw-normal">khu vực</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Địa bàn có khách sạn</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Hoa Hồng Trung Bình -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-blue-50 text-blue-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-percent"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Hoa Hồng Bình Quân</div>
+            <div class="fs-6 fw-bold text-blue-600 text-truncate">{{ avgCommissionRate }}</div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Chiết khấu trung bình sàn</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Có Giấy Phép Đính Kèm -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-teal-50 text-teal-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-file-earmark-check-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Có Giấy Phép KD</div>
+            <div class="fs-6 fw-bold text-slate-800 text-truncate">{{ withLicenseCount }} <span class="text-muted small fw-normal">hồ sơ</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Đã xác minh hồ sơ pháp lý</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="modal" *ngIf="showDetailsModal">
-    <div class="modal-content modal-lg">
-      <div class="modal-header d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-        <h3 class="mb-0 text-primary fw-bold">Thông tin chi tiết</h3>
-        <button class="btn btn-sm btn-secondary" (click)="closeDetailsModal()">Đóng ✖</button>
-      </div>
-
-      <div class="modal-body" *ngIf="selectedHotelDetails">
-        <div class="row">
-          <div class="col-md-7">
-            <h5 class="fw-bold mb-3 border-bottom pb-1">🏨 Thông tin Khách sạn</h5>
-            <p><strong>Tên Khách sạn:</strong> {{ selectedHotelDetails.name }}</p>
-            <p><strong>Xếp hạng:</strong> {{ selectedHotelDetails.star_rating }} ⭐</p>
-            <p><strong>Địa chỉ:</strong> {{ selectedHotelDetails.address }}, {{ selectedHotelDetails.city }}</p>
-            <p><strong>Mô tả:</strong> <span class="text-muted">{{ selectedHotelDetails.description || 'Chưa cập nhật'
-                }}</span></p>
-
-            <h5 class="fw-bold mt-4 mb-3 border-bottom pb-1">💼 Hồ sơ Pháp lý & Hoạt động</h5>
-            <p><strong>Mã số thuế:</strong> <span class="text-danger fw-bold">{{ selectedHotelDetails.tax_code || '---'
-                }}</span></p>
-            <p><strong>Giờ Nhận phòng:</strong> {{ selectedHotelDetails.standard_check_in_time }}</p>
-            <p><strong>Giờ Trả phòng:</strong> {{ selectedHotelDetails.standard_check_out_time }}</p>
-            <p><strong>Chính sách hủy:</strong> <span class="text-muted">{{ selectedHotelDetails.cancellation_policy ||
-                'Chưa cập nhật' }}</span></p>
-
-            <h5 class="fw-bold mt-4 mb-3 border-bottom pb-1">👤 Thông tin Chủ sở hữu</h5>
-            <p><strong>Họ Tên:</strong> {{ selectedHotelDetails.partner?.last_name }} {{
-              selectedHotelDetails.partner?.first_name }}</p>
-            <p><strong>Email:</strong> {{ selectedHotelDetails.partner?.email }}</p>
-            <p><strong>SĐT Liên hệ:</strong> {{ selectedHotelDetails.partner?.phone }}</p>
+  <!-- 3. TOOLBAR & FILTERS -->
+  <div class="card border-0 shadow-xs mb-3">
+    <div class="card-body p-3">
+      <div class="row g-2 align-items-center">
+        <!-- Search input -->
+        <div class="col-12 col-md-4 col-lg-3">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0 text-muted">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control border-start-0 ps-0"
+              placeholder="Tìm khách sạn, chủ sở hữu, SĐT, MST..."
+              [(ngModel)]="searchKeyword"
+              (input)="applyFilter()"
+            />
+            <button *ngIf="searchKeyword" class="btn btn-outline-secondary border-start-0 border-end" (click)="searchKeyword=''; applyFilter()">
+              <i class="bi bi-x-lg"></i>
+            </button>
           </div>
+        </div>
 
-          <div class="col-md-5">
-            <h5 class="fw-bold mb-3 border-bottom pb-1">📜 Giấy phép kinh doanh</h5>
-            <div class="text-center p-2 border rounded" style="background: #f8f9fa;">
-              <img *ngIf="selectedHotelDetails.business_license_url"
-                [src]="getImageUrl(selectedHotelDetails.business_license_url)" alt="Giấy phép kinh doanh"
-                class="img-fluid rounded" style="max-height: 400px; object-fit: contain;">
-              <p *ngIf="!selectedHotelDetails.business_license_url" class="text-muted mt-3 fst-italic">Không có ảnh giấy
-                phép.</p>
+        <!-- Filter by City -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="selectedCity" (change)="applyFilter()">
+            <option value="ALL">Tất cả tỉnh / thành</option>
+            <option *ngFor="let city of citiesList" [value]="city">{{ city }}</option>
+          </select>
+        </div>
+
+        <!-- Filter by Star Rating -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="selectedStar" (change)="applyFilter()">
+            <option value="ALL">Tất cả xếp hạng sao</option>
+            <option value="5">5 Sao ⭐⭐⭐⭐⭐</option>
+            <option value="4">4 Sao ⭐⭐⭐⭐</option>
+            <option value="3">3 Sao ⭐⭐⭐</option>
+            <option value="2">2 Sao ⭐⭐</option>
+            <option value="1">1 Sao ⭐</option>
+            <option value="UNRATED">Chưa phân hạng</option>
+          </select>
+        </div>
+
+        <!-- Sort By -->
+        <div class="col-6 col-md-2 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="sortBy" (change)="applyFilter()">
+            <option value="NEWEST">Mới nhất trước</option>
+            <option value="OLDEST">Cũ nhất trước</option>
+            <option value="NAME_ASC">Tên KS: A &rarr; Z</option>
+            <option value="COMMISSION_DESC">Hoa hồng cao nhất</option>
+            <option value="COMMISSION_ASC">Hoa hồng thấp nhất</option>
+          </select>
+        </div>
+
+        <!-- Right Side: Count & Clear -->
+        <div class="col-6 col-md-12 col-lg-3 d-flex justify-content-end align-items-center gap-2">
+          <span class="badge bg-slate-100 text-slate-700 border fw-normal" style="font-size: 11.5px;">
+            {{ filteredList.length }} / {{ totalActive }} đối tác
+          </span>
+          <button
+            *ngIf="searchKeyword || selectedCity !== 'ALL' || selectedStar !== 'ALL' || sortBy !== 'NEWEST'"
+            class="btn btn-link btn-sm text-decoration-none text-muted p-0 small"
+            (click)="resetFilters()"
+            title="Đặt lại toàn bộ bộ lọc"
+          >
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. LOADING STATE -->
+  <div *ngIf="isLoading" class="card border-0 shadow-xs text-center py-5">
+    <div class="spinner-border text-primary mx-auto mb-2" role="status">
+      <span class="visually-hidden">Đang tải...</span>
+    </div>
+    <div class="text-muted small">Đang tải danh sách đối tác hoạt động...</div>
+  </div>
+
+  <!-- 5. EMPTY STATE: NO PARTNERS -->
+  <div *ngIf="!isLoading && partnerList.length === 0" class="card border-0 shadow-xs text-center py-5 px-3">
+    <div class="empty-icon-wrapper mx-auto mb-3 bg-slate-100 text-slate-500 rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 28px;">
+      <i class="bi bi-buildings"></i>
+    </div>
+    <h5 class="fw-bold text-slate-800 mb-1">Hiện chưa có đối tác nào đang hoạt động!</h5>
+    <p class="text-muted small mb-0 mx-auto" style="max-width: 480px;">
+      Các đối tác sau khi được phê duyệt tại mục "Kiểm duyệt Đối tác" sẽ hiển thị tại đây.
+    </p>
+  </div>
+
+  <!-- 6. EMPTY STATE: NO FILTER MATCH -->
+  <div *ngIf="!isLoading && partnerList.length > 0 && filteredList.length === 0" class="card border-0 shadow-xs text-center py-5 px-3">
+    <div class="empty-icon-wrapper mx-auto mb-3 bg-slate-100 text-slate-500 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; font-size: 24px;">
+      <i class="bi bi-search"></i>
+    </div>
+    <h6 class="fw-bold text-slate-800 mb-1">Không tìm thấy đối tác phù hợp</h6>
+    <p class="text-muted small mb-3">Không có khách sạn nào khớp với từ khóa tìm kiếm hoặc bộ lọc hiện tại.</p>
+    <div>
+      <button class="btn btn-outline-secondary btn-sm px-3 rounded-3" (click)="resetFilters()">
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Xóa bộ lọc tìm kiếm
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. DESKTOP TABLE VIEW (>= 992px) -->
+  <div *ngIf="!isLoading && filteredList.length > 0" class="card border-0 shadow-xs d-none d-lg-block">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0 align-middle">
+        <thead>
+          <tr>
+            <th style="width: 70px;" class="text-center">ID</th>
+            <th style="min-width: 230px;">Khách Sạn & Pháp Lý</th>
+            <th style="min-width: 200px;">Địa Bàn / Vị Trí</th>
+            <th style="min-width: 170px;">Chủ Sở Hữu (Đối Tác)</th>
+            <th style="min-width: 180px;">Thông Tin Liên Hệ</th>
+            <th style="min-width: 130px;" class="text-center">Hoa Hồng (%)</th>
+            <th style="min-width: 170px;" class="text-center">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredList" class="partner-row">
+            <!-- ID -->
+            <td class="text-center">
+              <span class="badge bg-slate-100 text-slate-800 border fw-bold px-2 py-1">
+                #{{ item.id }}
+              </span>
+            </td>
+
+            <!-- Hotel Name & Info -->
+            <td>
+              <div class="fw-bold text-slate-900 hotel-title" (click)="openDetailsModal(item)">
+                {{ item.name }}
+              </div>
+              <div class="d-flex flex-wrap align-items-center gap-1.5 mt-1">
+                <span *ngIf="item.star_rating" class="badge bg-amber-50 text-amber-700 border border-amber-200" style="font-size: 10.5px;">
+                  {{ item.star_rating }} ⭐
+                </span>
+                <span *ngIf="item.tax_code" class="badge bg-light text-slate-700 border" style="font-size: 10.5px;">
+                  <i class="bi bi-hash text-muted"></i> MST: {{ item.tax_code }}
+                </span>
+                <span *ngIf="item.average_rating > 0" class="badge bg-light text-muted border" style="font-size: 10.5px;">
+                  <i class="bi bi-star-fill text-warning me-0.5"></i>{{ item.average_rating }} ({{ item.review_count || 0 }})
+                </span>
+              </div>
+            </td>
+
+            <!-- Location -->
+            <td>
+              <div>
+                <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 py-1 px-2 mb-1 d-inline-block">
+                  <i class="bi bi-geo-alt-fill text-indigo-500 me-1"></i>{{ item.city }}
+                </span>
+              </div>
+              <div class="small text-slate-600 text-truncate-2" [title]="item.address">
+                {{ item.address }}
+              </div>
+            </td>
+
+            <!-- Owner / Partner Name (Prevent text wrapping) -->
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar-circle flex-shrink-0">
+                  <i class="bi bi-person-fill text-slate-500"></i>
+                </div>
+                <div class="overflow-hidden">
+                  <div class="fw-semibold text-slate-800 text-nowrap" *ngIf="item.partner">
+                    {{ item.partner.last_name }} {{ item.partner.first_name }}
+                  </div>
+                  <div class="text-muted small text-nowrap" style="font-size: 11px;">Chủ sở hữu</div>
+                  <div *ngIf="!item.partner" class="text-muted small italic">Chưa liên kết tài khoản</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Contact -->
+            <td>
+              <div *ngIf="item.partner" class="small">
+                <div class="text-slate-700 text-truncate mb-0.5" [title]="item.partner.email">
+                  <i class="bi bi-envelope text-muted me-1.5"></i>{{ item.partner.email }}
+                </div>
+                <div class="text-slate-700">
+                  <i class="bi bi-telephone text-muted me-1.5"></i>
+                  <a [href]="'tel:' + item.partner.phone" class="text-decoration-none text-slate-700 fw-medium">
+                    {{ item.partner.phone || 'Chưa cập nhật' }}
+                  </a>
+                </div>
+              </div>
+              <div *ngIf="!item.partner" class="text-muted small italic">Chưa có thông tin liên hệ</div>
+            </td>
+
+            <!-- Commission Rate -->
+            <td class="text-center">
+              <div class="d-inline-flex flex-column align-items-center">
+                <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 fs-6 fw-bold px-2.5 py-1 mb-1">
+                  {{ item.commission_rate != null ? item.commission_rate : '15.00' }}%
+                </span>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-link text-decoration-none p-0 small text-indigo-600"
+                  (click)="editCommission(item)"
+                  title="Chỉnh sửa tỷ lệ hoa hồng"
+                >
+                  <i class="bi bi-pencil-square me-1"></i>Điều chỉnh
+                </button>
+              </div>
+            </td>
+
+            <!-- Action Buttons -->
+            <td class="text-center">
+              <div class="d-flex align-items-center justify-content-center gap-1.5">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary action-btn"
+                  title="Xem thông tin chi tiết khách sạn"
+                  (click)="openDetailsModal(item)"
+                >
+                  <i class="bi bi-eye-fill me-1"></i>Xem
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger action-btn"
+                  title="Tạm khóa hoạt động đối tác"
+                  (click)="openSuspendModal(item.id, item.name)"
+                  [disabled]="isSubmitting"
+                >
+                  <i class="bi bi-lock-fill me-1"></i>Khóa
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 8. MOBILE / TABLET CARDS VIEW (< 992px) -->
+  <div *ngIf="!isLoading && filteredList.length > 0" class="d-block d-lg-none">
+    <div class="row g-2.5">
+      <div *ngFor="let item of filteredList" class="col-12 col-md-6">
+        <div class="card border-0 shadow-xs h-100 partner-mobile-card">
+          <div class="card-body p-3">
+            <!-- Top badge row -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex align-items-center gap-1.5">
+                <span class="badge bg-slate-100 text-slate-800 border fw-bold px-2 py-1">
+                  #{{ item.id }}
+                </span>
+                <span *ngIf="item.star_rating" class="badge bg-amber-50 text-amber-700 border border-amber-200">
+                  {{ item.star_rating }} ⭐
+                </span>
+              </div>
+              <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 fw-bold">
+                Hoa hồng: {{ item.commission_rate != null ? item.commission_rate : '15.00' }}%
+              </span>
+            </div>
+
+            <!-- Hotel name & City -->
+            <h6 class="fw-bold text-slate-900 mb-1" (click)="openDetailsModal(item)">
+              {{ item.name }}
+            </h6>
+            <div class="mb-2">
+              <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 py-0.5 px-2">
+                <i class="bi bi-geo-alt-fill text-indigo-500 me-1"></i>{{ item.city }}
+              </span>
+            </div>
+
+            <!-- Address -->
+            <div class="small text-slate-600 mb-2">
+              <i class="bi bi-pin-map text-muted me-1"></i>{{ item.address }}
+            </div>
+
+            <!-- Partner info -->
+            <div class="bg-slate-50 p-2 rounded-3 mb-3 border border-slate-100" *ngIf="item.partner">
+              <div class="fw-semibold text-slate-800 small mb-1">
+                <i class="bi bi-person-fill text-muted me-1"></i>{{ item.partner.last_name }} {{ item.partner.first_name }}
+              </div>
+              <div class="small text-muted mb-0.5">
+                <i class="bi bi-envelope text-muted me-1"></i>{{ item.partner.email }}
+              </div>
+              <div class="small text-muted">
+                <i class="bi bi-telephone text-muted me-1"></i>{{ item.partner.phone || 'Chưa cập nhật' }}
+              </div>
+            </div>
+
+            <!-- Actions row -->
+            <div class="d-flex gap-1.5 pt-2 border-top">
+              <button type="button" class="btn btn-outline-primary btn-sm flex-fill" (click)="openDetailsModal(item)">
+                <i class="bi bi-eye me-1"></i>Chi tiết
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" (click)="editCommission(item)">
+                <i class="bi bi-percent me-1"></i>Hoa hồng
+              </button>
+              <button type="button" class="btn btn-outline-danger btn-sm flex-fill" (click)="openSuspendModal(item.id, item.name)">
+                <i class="bi bi-lock me-1"></i>Khóa
+              </button>
             </div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
+  <!-- 9. DETAIL MODAL -->
+  <div *ngIf="showDetailsModal" class="modal-backdrop-custom fade-in">
+    <div class="modal-dialog-custom modal-lg">
+      <div class="modal-content-custom">
+        <!-- Modal Header -->
+        <div class="modal-header-custom d-flex justify-content-between align-items-center">
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <h5 class="modal-title-custom mb-0">Hồ Sơ Chi Tiết Khách Sạn</h5>
+              <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <i class="bi bi-check-circle-fill me-1"></i>Đang Mở Bán
+              </span>
+            </div>
+            <div class="small text-muted mt-0.5">
+              Khách sạn #{{ selectedHotelDetails?.id }} &bull; Hoa hồng hiện tại: {{ selectedHotelDetails?.commission_rate || '15.00' }}%
+            </div>
+          </div>
+          <button type="button" class="btn-close-custom" (click)="closeDetailsModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body-custom" *ngIf="selectedHotelDetails">
+          <!-- Section 1: Hotel Information -->
+          <div class="detail-section mb-3">
+            <div class="section-title d-flex align-items-center gap-1.5 mb-2">
+              <i class="bi bi-building text-indigo-600"></i>
+              <span>Thông Tin Cơ Sở Lưu Trú</span>
+            </div>
+            <div class="card border-0 bg-slate-50 p-3 rounded-3">
+              <div class="row g-2">
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Tên Khách Sạn:</span>
+                    <span class="field-value fw-bold text-slate-900">{{ selectedHotelDetails.name }}</span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Xếp Hạng Sao:</span>
+                    <span class="field-value">
+                      <span *ngIf="selectedHotelDetails.star_rating" class="badge bg-amber-50 text-amber-700 border border-amber-200">
+                        {{ selectedHotelDetails.star_rating }} ⭐
+                      </span>
+                      <span *ngIf="!selectedHotelDetails.star_rating" class="text-muted small">Chưa phân hạng sao</span>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Mã Số Thuế (MST):</span>
+                    <span class="field-value">{{ selectedHotelDetails.tax_code || 'Chưa cập nhật' }}</span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Tỉnh / Thành Phố:</span>
+                    <span class="field-value">{{ selectedHotelDetails.city }}</span>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="detail-field">
+                    <span class="field-label">Địa Chỉ Chi Tiết:</span>
+                    <span class="field-value">{{ selectedHotelDetails.address }}</span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Giờ Nhận Phòng:</span>
+                    <span class="field-value">{{ formatTime(selectedHotelDetails.standard_check_in_time) || '14:00' }}</span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Giờ Trả Phòng:</span>
+                    <span class="field-value">{{ formatTime(selectedHotelDetails.standard_check_out_time) || '12:00' }}</span>
+                  </div>
+                </div>
+                <div class="col-12" *ngIf="selectedHotelDetails.description">
+                  <div class="detail-field flex-column align-items-start">
+                    <span class="field-label mb-1">Mô Tả:</span>
+                    <p class="field-value text-slate-600 mb-0 small">{{ selectedHotelDetails.description }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Business & Commission -->
+          <div class="detail-section mb-3">
+            <div class="section-title d-flex align-items-center gap-1.5 mb-2">
+              <i class="bi bi-graph-up-arrow text-blue-600"></i>
+              <span>Cấu Hình Thương Mại & Hoa Hồng Sàn</span>
+            </div>
+            <div class="card border-0 bg-slate-50 p-3 rounded-3">
+              <div class="row g-2 align-items-center">
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Tỷ Lệ Hoa Hồng:</span>
+                    <span class="field-value fs-6 fw-bold text-indigo-600">
+                      {{ selectedHotelDetails.commission_rate != null ? selectedHotelDetails.commission_rate : '15.00' }}%
+                    </span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <button type="button" class="btn btn-sm btn-outline-indigo px-3 rounded-3" (click)="editCommission(selectedHotelDetails)">
+                    <i class="bi bi-pencil-square me-1"></i>Điều Chỉnh Hoa Hồng
+                  </button>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Đánh Giá Trung Bình:</span>
+                    <span class="field-value">
+                      <i class="bi bi-star-fill text-warning me-1"></i>
+                      <strong>{{ selectedHotelDetails.average_rating || '0.00' }}</strong> / 5.0 ({{ selectedHotelDetails.review_count || 0 }} đánh giá)
+                    </span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Trạng Thái Mở Bán:</span>
+                    <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200">Bình thường</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Business License -->
+          <div class="detail-section mb-3">
+            <div class="section-title d-flex align-items-center gap-1.5 mb-2">
+              <i class="bi bi-file-earmark-text text-emerald-600"></i>
+              <span>Giấy Phép Kinh Doanh & Hồ Sơ Pháp Lý</span>
+            </div>
+            <div class="card border-0 bg-slate-50 p-3 rounded-3">
+              <div *ngIf="selectedHotelDetails.business_license_url" class="text-center">
+                <!-- If PDF Document -->
+                <div *ngIf="isPdf(selectedHotelDetails.business_license_url)" class="p-3 bg-white rounded-3 border mb-2 text-center">
+                  <i class="bi bi-file-earmark-pdf-fill text-danger" style="font-size: 44px;"></i>
+                  <div class="fw-semibold text-slate-800 mt-2 mb-1">Tài Liệu Giấy Phép Kinh Doanh (Định dạng PDF)</div>
+                  <p class="text-muted small mb-3">Tài liệu đã được tải lên dưới định dạng tệp tin PDF.</p>
+                  <a
+                    [href]="getImageUrl(selectedHotelDetails.business_license_url)"
+                    target="_blank"
+                    class="btn btn-sm btn-outline-danger px-4 rounded-3"
+                  >
+                    <i class="bi bi-box-arrow-up-right me-1.5"></i>Mở Xem File PDF Trong Tab Mới
+                  </a>
+                </div>
+
+                <!-- If Image -->
+                <div *ngIf="!isPdf(selectedHotelDetails.business_license_url)">
+                  <div class="license-img-container mb-2 position-relative d-inline-block">
+                    <img
+                      [src]="getImageUrl(selectedHotelDetails.business_license_url)"
+                      alt="Giấy phép kinh doanh"
+                      class="img-fluid rounded-3 shadow-2xs border"
+                      style="max-height: 240px; object-fit: contain; cursor: pointer;"
+                      (click)="openFullscreenImage(selectedHotelDetails.business_license_url)"
+                      (error)="onImageError($event)"
+                    />
+                    <div class="image-fallback alert alert-secondary p-3 text-center rounded-3" style="display: none;">
+                      <i class="bi bi-image text-muted fs-3 d-block mb-1"></i>
+                      <span class="small text-muted">Không thể tải trước ảnh giấy phép</span>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-center gap-2">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-indigo px-3 rounded-3"
+                      (click)="openFullscreenImage(selectedHotelDetails.business_license_url)"
+                    >
+                      <i class="bi bi-zoom-in me-1"></i>Phóng to ảnh
+                    </button>
+                    <a
+                      [href]="getImageUrl(selectedHotelDetails.business_license_url)"
+                      target="_blank"
+                      class="btn btn-sm btn-outline-secondary px-3 rounded-3"
+                    >
+                      <i class="bi bi-box-arrow-up-right me-1"></i>Mở tab mới
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!selectedHotelDetails.business_license_url" class="alert alert-warning mb-0 py-2.5 small d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill fs-5 text-warning flex-shrink-0"></i>
+                <div>
+                  <strong>Chưa đính kèm hồ sơ pháp lý!</strong> Đối tác chưa cập nhật giấy phép kinh doanh.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Representative / Owner Account -->
+          <div class="detail-section" *ngIf="selectedHotelDetails.partner">
+            <div class="section-title d-flex align-items-center gap-1.5 mb-2">
+              <i class="bi bi-person-badge text-indigo-600"></i>
+              <span>Chủ Sở Hữu / Tài Khoản Đối Tác</span>
+            </div>
+            <div class="card border-0 bg-slate-50 p-3 rounded-3">
+              <div class="row g-2">
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Họ và Tên:</span>
+                    <span class="field-value fw-bold text-slate-900">
+                      {{ selectedHotelDetails.partner.last_name }} {{ selectedHotelDetails.partner.first_name }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Email Đăng Nhập:</span>
+                    <span class="field-value text-slate-800">{{ selectedHotelDetails.partner.email }}</span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Số Điện Thoại:</span>
+                    <span class="field-value">
+                      <a [href]="'tel:' + selectedHotelDetails.partner.phone" class="text-decoration-none fw-medium text-indigo-600">
+                        {{ selectedHotelDetails.partner.phone || 'Chưa cập nhật' }}
+                      </a>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="detail-field">
+                    <span class="field-label">Vai Trò Hệ Thống:</span>
+                    <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200">Chủ Khách Sạn (Owner)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer-custom d-flex justify-content-between align-items-center">
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3 rounded-3" (click)="closeDetailsModal()">
+            Đóng
+          </button>
+          <div class="d-flex gap-2" *ngIf="selectedHotelDetails">
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm px-3 rounded-3"
+              (click)="openSuspendModal(selectedHotelDetails.id, selectedHotelDetails.name)"
+            >
+              <i class="bi bi-lock-fill me-1"></i>Khóa Tài Khoản
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. SUSPEND MODAL -->
+  <div *ngIf="showSuspendModal" class="modal-backdrop-custom fade-in" style="z-index: 1060;">
+    <div class="modal-dialog-custom modal-md">
+      <div class="modal-content-custom">
+        <div class="modal-header-custom border-bottom-0 pb-0 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2 text-rose-600">
+            <i class="bi bi-shield-slash fs-4"></i>
+            <h5 class="modal-title-custom text-slate-900 mb-0">Đình Chỉ & Khóa Tài Khoản Đối Tác</h5>
+          </div>
+          <button type="button" class="btn-close-custom" (click)="closeSuspendModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="modal-body-custom pt-2">
+          <div class="alert alert-danger py-2 px-2.5 small mb-2.5 d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5 text-danger flex-shrink-0"></i>
+            <div>
+              Khách sạn <strong>"{{ selectedHotelName }}"</strong> sẽ bị tạm dừng mở bán phòng ngay lập tức và tài khoản đối tác sẽ không thể đăng nhập.
+            </div>
+          </div>
+
+          <!-- Quick Reasons -->
+          <div class="mb-2">
+            <span class="text-muted small fw-semibold d-block mb-1.5" style="font-size: 11px;">Gợi ý lý do khóa nhanh:</span>
+            <div class="d-flex flex-wrap gap-1.5">
+              <button
+                *ngFor="let qr of quickReasons"
+                type="button"
+                class="btn btn-sm btn-light border text-slate-700 py-1 px-2 text-start small quick-reason-btn"
+                (click)="selectQuickReason(qr)"
+              >
+                {{ qr }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Reason Textarea -->
+          <div class="mb-2">
+            <textarea
+              [(ngModel)]="suspendReason"
+              rows="3"
+              class="form-control rejection-textarea"
+              placeholder="Nhập lý do chi tiết đình chỉ hoạt động..."
+              maxlength="255"
+            ></textarea>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="text-muted" style="font-size: 11px;">Tối đa 255 ký tự</span>
+              <span class="text-muted" style="font-size: 11px;">{{ (suspendReason || '').length }} / 255</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer-custom d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3 rounded-3" (click)="closeSuspendModal()">
+            Hủy Bỏ
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger btn-sm px-3 rounded-3 fw-semibold"
+            [disabled]="!(suspendReason || '').trim() || isSubmitting"
+            (click)="submitSuspend()"
+          >
+            <i class="bi bi-lock-fill me-1" *ngIf="!isSubmitting"></i>
+            <i class="bi bi-arrow-clockwise spin-icon me-1" *ngIf="isSubmitting"></i>
+            <span *ngIf="!isSubmitting">Xác Nhận Khóa</span>
+            <span *ngIf="isSubmitting">Đang Xử Lý...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. IMAGE LIGHTBOX MODAL -->
+  <div *ngIf="previewImageModal" class="modal-backdrop-custom lightbox-backdrop fade-in" style="z-index: 1070;" (click)="closeFullscreenImage()">
+    <div class="lightbox-wrapper" (click)="$event.stopPropagation()">
+      <div class="lightbox-header d-flex justify-content-between align-items-center mb-2">
+        <span class="text-white small fw-semibold">
+          <i class="bi bi-file-earmark-image me-1"></i>Ảnh Giấy Phép Kinh Doanh
+        </span>
+        <button type="button" class="btn btn-sm btn-outline-light rounded-circle p-1" style="width: 32px; height: 32px;" (click)="closeFullscreenImage()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="lightbox-content text-center">
+        <img [src]="previewImageUrl" alt="Giấy phép kinh doanh" class="img-fluid rounded-3 shadow-lg" style="max-height: 80vh; object-fit: contain;" />
+      </div>
+      <div class="lightbox-footer text-center mt-2">
+        <a [href]="previewImageUrl" target="_blank" class="btn btn-sm btn-light rounded-pill px-3">
+          <i class="bi bi-box-arrow-up-right me-1"></i>Mở trong tab mới
+        </a>
+      </div>
+    </div>
+  </div>
 </div>

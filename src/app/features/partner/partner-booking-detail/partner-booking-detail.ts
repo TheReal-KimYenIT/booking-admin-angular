@@ -1,8 +1,10 @@
+// Partner Booking Detail Component
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import { BookingService } from '../../../services/booking.service';
 import { PartnerService } from '../../../services/partner.service'; 
 import Swal from 'sweetalert2';
@@ -55,7 +57,7 @@ constructor(
         this.cartMinibars = servicesList.filter((item: any) => item.service?.type == 2);
 
         if (this.guests.length === 0) {
-          this.guests.push({ full_name: this.booking.guest_name, identity_number: '' });
+          this.guests.push({ full_name: this.booking.guest_name, identity_number: '', gender: 1 });
         }
         
         if (this.booking.status === 0 || this.booking.status === 1) {
@@ -67,7 +69,7 @@ constructor(
         
         this.cdr.detectChanges();
       },
-      error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi tải dữ liệu đơn hàng!', confirmButtonText: 'Đóng' })
+      error: (err: any) => Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Lỗi tải dữ liệu đơn đặt phòng!', confirmButtonText: 'Đóng' })
     });
   }
 
@@ -86,7 +88,7 @@ constructor(
     if (this.editingGuests.length === 0) this.addEditingGuest();
   }
 
-  addEditingGuest() { this.editingGuests.push({ full_name: '', identity_number: '' }); }
+  addEditingGuest() { this.editingGuests.push({ full_name: '', identity_number: '', gender: 1 }); }
   removeEditingGuest(index: number) { this.editingGuests.splice(index, 1); }
   cancelEditGuests() { this.isEditingGuests = false; }
 
@@ -110,13 +112,34 @@ constructor(
     }
   }
 
-  addGuest() { this.guests.push({ full_name: '', identity_number: '' }); }
+  addGuest() { this.guests.push({ full_name: '', identity_number: '', gender: 1 }); }
   removeGuest(index: number) { this.guests.splice(index, 1); }
 
+  getTotalRoomsCount(): number {
+    if (!this.booking?.details || this.booking.details.length === 0) return 1;
+    return this.booking.details.reduce((sum: number, d: any) => sum + (d.rooms_count || 1), 0);
+  }
+
+  getRoomSubtotal(): number {
+    if (!this.booking?.details || this.booking.details.length === 0) return 0;
+    return this.booking.details.reduce((sum: number, d: any) => sum + Number(d.subtotal || 0), 0);
+  }
+
+  getRoomNightRate(d: any): number {
+    if (!d || !d.subtotal) return 0;
+    const divisor = Math.max(1, (d.rooms_count || 1) * (this.numberOfNights || 1));
+    return Math.round(Number(d.subtotal) / divisor);
+  }
+
   processCheckIn() {
-    const requiredRooms = this.booking?.details?.[0]?.rooms_count || 1;
+    const requiredRooms = this.getTotalRoomsCount();
     if (this.selectedRoomIds.length !== requiredRooms) {
-      Swal.fire({ icon: 'warning', title: 'Cảnh báo', text: `Khách đặt ${requiredRooms} phòng. Vui lòng chọn đủ số lượng!`, confirmButtonText: 'Đóng' });
+      Swal.fire({ 
+        icon: 'warning', 
+        title: 'Cảnh báo', 
+        text: `Khách đặt tổng cộng ${requiredRooms} phòng. Bạn đã chọn ${this.selectedRoomIds.length} phòng. Vui lòng chọn đủ số lượng!`, 
+        confirmButtonText: 'Đóng' 
+      });
       return;
     }
 
@@ -143,14 +166,14 @@ constructor(
 
   confirmOrder() {
     Swal.fire({
-      title: 'Xác nhận đơn hàng?', text: 'Bạn có chắc chắn muốn XÁC NHẬN đơn hàng này?', icon: 'question',
+      title: 'Xác nhận đặt phòng?', text: 'Bạn có chắc chắn muốn XÁC NHẬN đơn đặt phòng này?', icon: 'question',
       showCancelButton: true, confirmButtonColor: '#3b82f6', cancelButtonColor: '#94a3b8',
       confirmButtonText: 'Xác nhận', cancelButtonText: 'Hủy'
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.confirmBooking(this.bookingId).subscribe({
           next: () => {
-            Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Đã xác nhận đơn hàng!', showConfirmButton: false, timer: 1500 });
+            Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Đã xác nhận đơn đặt phòng!', showConfirmButton: false, timer: 1500 });
             this.loadBookingDetail();
           }
         });
@@ -160,14 +183,14 @@ constructor(
 
   cancelOrder() {
     Swal.fire({
-      title: 'Hủy đơn hàng?', text: 'Bạn có chắc chắn muốn TỪ CHỐI / HỦY đơn hàng này?', icon: 'warning',
+      title: 'Hủy đơn đặt phòng?', text: 'Bạn có chắc chắn muốn TỪ CHỐI / HỦY đơn đặt phòng này?', icon: 'warning',
       showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#94a3b8',
-      confirmButtonText: 'Vâng, Hủy đơn!', cancelButtonText: 'Đóng'
+      confirmButtonText: 'Vâng, Hủy đơn đặt phòng!', cancelButtonText: 'Đóng'
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.cancelBooking(this.bookingId).subscribe({
           next: () => {
-            Swal.fire({ icon: 'success', title: 'Đã hủy!', text: 'Đã hủy đơn hàng!', showConfirmButton: false, timer: 1500 });
+            Swal.fire({ icon: 'success', title: 'Đã hủy!', text: 'Đã hủy đơn đặt phòng!', showConfirmButton: false, timer: 1500 });
             this.loadBookingDetail();
           }
         });
@@ -290,7 +313,7 @@ constructor(
     if (this.booking?.payment_status !== 1) return false;
     const bookingTime = new Date(this.booking.created_at).getTime();
     const itemTime = new Date(cartItem.created_at).getTime();
-    return Math.abs(itemTime - bookingTime) < 120000;
+    return Math.abs(itemTime - bookingTime) < 5000; // Thay đổi thành 5 giây để phân biệt chính xác
   }
 
   removeFromCart(cartId: number, cartItem: any) {
@@ -300,7 +323,7 @@ constructor(
     }
 
     Swal.fire({
-      title: 'Xóa món?', text: 'Chắc chắn muốn xóa khỏi hóa đơn?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'
+      title: 'Xóa dịch vụ?', text: 'Bạn có chắc chắn muốn xóa dịch vụ/minibar này khỏi hóa đơn?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444'
     }).then((res) => {
       if (res.isConfirmed) {
         this.bookingService.removeExtraService(this.bookingId, cartId).subscribe({
@@ -338,41 +361,87 @@ constructor(
   availableSurcharges: any[] = [];
   surchargeForm: any = { surcharge_category_id: '', amount: '', note: '' };
 
-  // 👉 TÍNH TOÁN LẠI VAT TRỰC TIẾP (LIVE VAT)
   getCurrentVatAmount(): number {
-    const room = Number(this.booking?.details?.[0]?.subtotal || 0);
+    const room = this.getRoomSubtotal();
     const srv = Number(this.cartTotal || 0);
     const sur = this.getSurchargeTotal();
-    const dmg = this.getDamagedItemsTotal();
     const disc = Number(this.booking?.discount_amount || 0);
 
-    const vatRate = Number(this.booking?.vat_rate ?? 10); // Lấy % VAT đã chốt trong đơn
+    const vatRate = Number(this.booking?.vat_rate ?? 10);
 
-    // Công thức: (Phòng + Dịch vụ + Phụ thu + Đền bù - Khuyến mãi) * (vat_rate / 100)
-    const taxableAmount = Math.max(0, room + srv + sur + dmg - disc);
+    const taxableAmount = Math.max(0, room + srv + sur - disc);
     return taxableAmount * (vatRate / 100);
   }
 
-  // 👉 TÍNH TỔNG TIỀN DỰA TRÊN LIVE VAT
   getFinalInvoiceTotal(): number {
-    const room = Number(this.booking?.details?.[0]?.subtotal || 0);
+    if (this.booking?.status === 3 && this.booking?.total_amount) {
+      return Number(this.booking.total_amount);
+    }
+    const room = this.getRoomSubtotal();
     const srv = Number(this.cartTotal || 0);
     const sur = this.getSurchargeTotal();
     const dmg = this.getDamagedItemsTotal();
     const disc = Number(this.booking?.discount_amount || 0);
-    
-    const vat = this.getCurrentVatAmount(); // Lấy Live VAT vừa tính
+    const vat = this.getCurrentVatAmount();
 
-    return room + srv + sur + dmg + vat - disc;
+    return Math.max(0, room + srv + sur + dmg + vat - disc);
   }
 
   getAlreadyPaidAmount(): number {
-    return this.booking?.payment_status === 1 ? Number(this.booking?.total_price || 0) : 0;
+    if (this.booking?.status === 3) {
+      return this.getFinalInvoiceTotal();
+    }
+    return this.booking?.payment_status === 1 ? Number(this.booking?.deposit_amount || (this.booking?.total_amount / 2) || 0) : 0;
   }
 
   getRemainingAmount(): number {
+    if (this.booking?.status === 3 || this.booking?.status === 4 || this.booking?.status === 5) {
+      return 0;
+    }
     const rem = this.getFinalInvoiceTotal() - this.getAlreadyPaidAmount();
     return rem > 0 ? rem : 0;
+  }
+
+  getPaymentStatusText(): string {
+    if (!this.booking) return '---';
+    if (this.booking.status === 3) {
+      return 'Đã thanh toán đủ 100%';
+    }
+    if (this.booking.status === 4) {
+      return this.booking.payment_status === 2 ? 'Đã hoàn tiền VNPay' : 'Đơn đã hủy';
+    }
+    if (this.booking.status === 5) {
+      return 'Khách không đến';
+    }
+    if (this.booking.payment_status === 1) {
+      const dep = Number(this.booking.deposit_amount || 0);
+      return dep > 0 ? `Đã cọc (${dep.toLocaleString('vi-VN')} đ)` : 'Đã cọc 50%';
+    }
+    return 'Chưa thanh toán';
+  }
+
+  getStatusBadgeClass(status: number): string {
+    switch(status) {
+      case 0: return 'status-pending';
+      case 1: return 'status-confirmed';
+      case 2: return 'status-checked-in';
+      case 3: return 'status-checked-out';
+      case 4: return 'status-cancelled';
+      case 5: return 'status-noshow';
+      default: return 'status-pending';
+    }
+  }
+
+  getStatusText(status: number): string {
+    switch(status) {
+      case 0: return 'Chờ thanh toán cọc';
+      case 1: return 'Đã xác nhận';
+      case 2: return 'Đang lưu trú';
+      case 3: return 'Đã trả phòng';
+      case 4: return 'Đã hủy';
+      case 5: return '❌ Khách không đến (No-Show)';
+      default: return 'Không xác định';
+    }
   }
 
   loadSurchargeCategories() {
@@ -441,7 +510,7 @@ constructor(
     this.cdr.detectChanges(); // Ép giao diện cập nhật trạng thái "Đang tạo..." lập tức
 
     const token = localStorage.getItem('partner_token') || '';
-    const apiUrl = `http://localhost:8000/api/partner/bookings/${this.bookingId}/export-invoice`;
+    const apiUrl = `${environment.apiUrl}/partner/bookings/${this.bookingId}/export-invoice`;
 
     Swal.fire({ title: 'Đang tạo Hóa đơn...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
@@ -490,9 +559,9 @@ constructor(
     if (!this.booking?.check_in || !this.booking?.check_out) {
       this.numberOfNights = 1; return;
     }
-    const start = new Date(this.booking.check_in).getTime();
-    const end = new Date(this.booking.check_out).getTime();
-    const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    const d1 = new Date(this.booking.check_in.substring(0, 10));
+    const d2 = new Date(this.booking.check_out.substring(0, 10));
+    const diffDays = Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
     this.numberOfNights = diffDays > 0 ? diffDays : 1; 
   }
   
@@ -519,7 +588,7 @@ constructor(
 
     this.bookingService.addDamagedItem(this.bookingId, this.supplyForm).subscribe({
       next: () => {
-        Swal.fire({ icon: 'success', title: 'Thành công', text: 'Đã thêm phí đền bù!', showConfirmButton: false, timer: 1500 });
+        Swal.fire({ icon: 'success', title: 'Thành công', text: 'Đã thêm phí bồi hoàn tài sản!', showConfirmButton: false, timer: 1500 });
         this.supplyForm = { supply_id: '', incident_type: 1, quantity: 1, actual_price: 0, note: '' }; 
         this.loadBookingDetail(); 
       }
@@ -528,13 +597,13 @@ constructor(
 
   removeDamagedItem(itemId: number) {
     Swal.fire({
-      title: 'Xóa phí đền bù?', text: 'Bạn có chắc muốn xóa khoản đền bù này khỏi hóa đơn?', icon: 'warning',
+      title: 'Xóa phí bồi hoàn?', text: 'Bạn có chắc muốn xóa khoản bồi hoàn này khỏi hóa đơn?', icon: 'warning',
       showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Xóa', cancelButtonText: 'Hủy'
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.removeDamagedItem(this.bookingId, itemId).subscribe({
           next: () => {
-            Swal.fire({ icon: 'success', title: 'Đã xóa', text: 'Đã xóa khoản đền bù.', showConfirmButton: false, timer: 1500 });
+            Swal.fire({ icon: 'success', title: 'Đã xóa', text: 'Đã xóa khoản bồi hoàn.', showConfirmButton: false, timer: 1500 });
             this.loadBookingDetail();
           }
         });
@@ -564,7 +633,7 @@ constructor(
 
   reportLateCheckIn() {
     Swal.fire({
-      title: 'Khách hẹn đến trễ', text: 'Nhập giờ khách dự kiến tới (VD: 19:30):',
+      title: 'Hẹn giờ đến', text: 'Nhập giờ khách dự kiến đến (VD: 19:30):',
       input: 'text', inputPlaceholder: 'HH:MM', showCancelButton: true,
       inputValidator: (value) => {
         if (!value || !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) return 'Vui lòng nhập đúng định dạng HH:MM';
@@ -573,7 +642,7 @@ constructor(
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.updateEstimatedTime(this.bookingId, { estimated_arrival_time: result.value }).subscribe({
-          next: () => { Swal.fire('Thành công', 'Đã lưu giờ đến trễ', 'success'); this.loadBookingDetail(); }
+          next: () => { Swal.fire('Thành công', 'Đã lưu giờ đến của khách', 'success'); this.loadBookingDetail(); }
         });
       }
     });
@@ -581,7 +650,7 @@ constructor(
 
   reportLateCheckOut() {
     Swal.fire({
-      title: 'Khách xin trả phòng trễ', text: 'Nhập giờ khách dự kiến đi (VD: 15:00):',
+      title: 'Hẹn trả phòng trễ', text: 'Nhập giờ khách dự kiến trả phòng (VD: 15:00):',
       input: 'text', inputPlaceholder: 'HH:MM', showCancelButton: true,
       inputValidator: (value) => {
         if (!value || !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) return 'Vui lòng nhập đúng định dạng HH:MM';
@@ -598,12 +667,12 @@ constructor(
 
   processNoShow() {
     Swal.fire({
-      title: 'Khách KHÔNG ĐẾN (No-Show)?', text: 'Đơn hàng sẽ bị đóng và phòng sẽ được giải phóng lập tức.',
+      title: 'Khách không đến (No-Show)?', text: 'Đơn đặt phòng sẽ được đánh dấu No-Show và các phòng được gán sẽ được giải phóng ngay lập tức.',
       icon: 'warning', showCancelButton: true, confirmButtonColor: '#1e293b', confirmButtonText: 'Đồng ý', cancelButtonText: 'Hủy'
     }).then((result) => {
       if (result.isConfirmed) {
         this.bookingService.markAsNoShow(this.bookingId).subscribe({
-          next: () => { Swal.fire('Đã gạch sổ!', '', 'success'); this.loadBookingDetail(); }
+          next: () => { Swal.fire('Thành công', 'Đã ghi nhận No-Show và giải phóng phòng!', 'success'); this.loadBookingDetail(); }
         });
       }
     });

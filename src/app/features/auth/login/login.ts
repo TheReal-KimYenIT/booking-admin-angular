@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -16,6 +16,7 @@ import { AuthService } from '../../../services/auth.service';
 export class LoginComponent {
   email = '';
   password = '';
+  showPassword = false;
   isLoading = false;
 
   constructor(
@@ -31,7 +32,6 @@ export class LoginComponent {
         // 1. Lưu Token để gọi API
         this.authService.saveToken(res.token);
 
-        // 👉 2. DÒNG THIẾT YẾU: Lưu thông tin User (chứa role_id) để phân quyền Menu
         if (res.user) {
           localStorage.setItem('partner_user', JSON.stringify(res.user));
         }

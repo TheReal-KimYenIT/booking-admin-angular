@@ -9,6 +9,21 @@ export class PartnerService {
 
   constructor(private http: HttpClient ) { }
 
+  getReviews(page: number, status: string, rating: string = 'all', search: string = ''): Observable<any> {
+    let url = `${this.apiUrl}/partner/reviews?page=${page}&status=${status}`;
+    if (rating && rating !== 'all') {
+      url += `&rating=${rating}`;
+    }
+    if (search && search.trim()) {
+      url += `&search=${encodeURIComponent(search.trim())}`;
+    }
+    return this.http.get(url);
+  }
+
+  submitReply(reviewId: number, content: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/partner/reviews/${reviewId}/reply`, { reply_content: content });
+  }
+
   registerPartner(data: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}/partner/register`, data);
   }
@@ -46,6 +61,14 @@ export class PartnerService {
 
   deleteRoomType(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/partner/room-types/${id}`);
+  }
+
+  setPrimaryRoomImage(mediaId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/partner/media/${mediaId}/set-primary`, {});
+  }
+
+  deleteRoomMedia(mediaId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/partner/media/${mediaId}`);
   }
 
   // ==========================================
@@ -126,6 +149,9 @@ getAvailableRoomsByType(roomTypeId: number): Observable<any> {
   updatePromotion(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/partner/promotions/${id}`, data);
   }
+  deletePromotion(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/partner/promotions/${id}`);
+  }
 
   // ==========================================
   // CÁC HÀM XEM HỒ SƠ CHI TIẾT
@@ -183,6 +209,9 @@ getAvailableRoomsByType(roomTypeId: number): Observable<any> {
   }
   deleteStaff(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/partner/staffs/${id}`);
+  }
+  toggleStaffStatus(id: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/partner/staffs/${id}/toggle-status`, {});
   }
 
 

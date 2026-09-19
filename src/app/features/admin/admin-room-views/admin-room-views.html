@@ -1,74 +1,438 @@
-<div class="admin-card">
-    <div class="d-flex justify-content-between align-items-start mb-4">
-        <div>
-            <h2 class="page-title">Quản Lý Hướng Nhìn Phòng</h2>
-            <p class="page-subtitle">Thiết lập danh mục hướng nhìn (view) cho các phòng khách sạn.</p>
+<div class="room-views-container p-2 p-md-3 fade-in-up">
+  <!-- 1. HEADER -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-image me-1"></i> Quản Trị Dữ Liệu Master &bull; Hướng Nhìn Phòng
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Quản Lý Hướng Nhìn Phòng</h2>
+      <p class="text-muted mb-0 small">Thiết lập danh mục hướng nhìn (view) chuẩn cho các hạng phòng khách sạn trên toàn sàn StayHub.</p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end">
+      <button class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 shadow-2xs d-inline-flex align-items-center gap-1.5 text-nowrap" (click)="loadViews()" [disabled]="loading">
+        <i class="bi bi-arrow-clockwise" [class.spin-icon]="loading"></i>
+        <span>Làm Mới</span>
+      </button>
+      <button class="btn btn-primary btn-sm px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-1.5 text-nowrap fw-semibold" (click)="openAddModal()">
+        <i class="bi bi-plus-circle-fill"></i>
+        <span>Thêm Hướng Nhìn</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. KPI SUMMARY CARDS (4 CARDS) -->
+  <div class="row g-2 mb-3">
+    <!-- Card 1: Tổng Hướng Nhìn -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-image"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Tổng Hướng Nhìn</div>
+            <div class="fs-6 fw-bold text-indigo-600 text-truncate">{{ totalViews }} <span class="text-muted small fw-normal">danh mục</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Master data hệ thống</div>
+          </div>
         </div>
-        <button class="btn btn-primary btn-add" (click)="openAddModal()">+ Thêm Hướng Nhìn</button>
+      </div>
     </div>
 
-    <div *ngIf="loading" class="text-center my-5">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
-    </div>
-
-    <div class="table-responsive" *ngIf="!loading">
-        <table class="table align-middle custom-table">
-            <thead>
-                <tr>
-                    <th width="10%">ID</th>
-                    <th width="40%">Tên Hướng Nhìn</th>
-                    <th width="20%">Trạng Thái</th>
-                    <th width="30%">Thao Tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let view of roomViews">
-                    <td>{{ view.id }}</td>
-                    <td class="fw-bold">{{ view.name }}</td>
-                    <td>
-                        <span class="custom-badge" [ngClass]="view.status ? 'badge-active' : 'badge-inactive'">
-                            {{ view.status ? 'Hoạt động' : 'Tạm ẩn' }}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn btn-warning btn-sm btn-action me-2"
-                            (click)="openEditModal(view)">Sửa</button>
-                        <button class="btn btn-danger btn-sm btn-action" (click)="deleteView(view.id)">Xóa</button>
-                    </td>
-                </tr>
-                <tr *ngIf="roomViews.length === 0">
-                    <td colspan="4" class="text-center py-4 text-muted">Chưa có dữ liệu hướng nhìn nào.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div class="modal" tabindex="-1" [style.display]="showModal ? 'flex' : 'none'">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ isEditMode ? 'Sửa Hướng Nhìn' : 'Thêm Hướng Nhìn' }}</h5>
-                <button type="button" class="btn-close" (click)="closeModal()"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Tên Hướng Nhìn <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" [(ngModel)]="currentView.name" placeholder="VD: Hướng Biển">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Trạng Thái</label>
-                    <select class="form-select" [(ngModel)]="currentView.status">
-                        <option [ngValue]="1">Hoạt động</option>
-                        <option [ngValue]="0">Tạm ẩn</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light border" (click)="closeModal()">Hủy</button>
-                <button type="button" class="btn btn-primary px-4" (click)="saveView()">Lưu Lại</button>
-            </div>
+    <!-- Card 2: Đang Hoạt Động -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Đang Hoạt Động</div>
+            <div class="fs-6 fw-bold text-emerald-600 text-truncate">{{ activeViewsCount }} <span class="text-muted small fw-normal">hướng nhìn</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Sẵn sàng chọn cấu hình</div>
+          </div>
         </div>
+      </div>
     </div>
+
+    <!-- Card 3: Tạm Ẩn -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-slate-100 text-slate-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-eye-slash-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Tạm Ẩn</div>
+            <div class="fs-6 fw-bold text-slate-600 text-truncate">{{ inactiveViewsCount }} <span class="text-muted small fw-normal">hướng nhìn</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Tạm khóa trên hệ thống</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Đang Được Dùng -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-amber-50 text-amber-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-door-open-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Đang Được Dùng</div>
+            <div class="fs-6 fw-bold text-amber-600 text-truncate">{{ usedViewsCount }} <span class="text-muted small fw-normal">hướng nhìn</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Gán vào {{ totalLinkedRooms }} hạng phòng</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TOOLBAR & FILTERS -->
+  <div class="card border-0 shadow-xs mb-3">
+    <div class="card-body p-3">
+      <div class="row g-2 align-items-center">
+        <!-- Search input -->
+        <div class="col-12 col-md-4 col-lg-3">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0 text-muted">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control border-start-0 ps-0"
+              placeholder="Tìm theo tên hướng nhìn, ID..."
+              [(ngModel)]="searchKeyword"
+              (input)="applyFilter()"
+            />
+            <button *ngIf="searchKeyword" class="btn btn-outline-secondary border-start-0 border-end" (click)="searchKeyword=''; applyFilter()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter by Status -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="statusFilter" (change)="applyFilter()">
+            <option value="ALL">Tất cả trạng thái</option>
+            <option value="1">Đang hoạt động</option>
+            <option value="0">Tạm ẩn</option>
+          </select>
+        </div>
+
+        <!-- Filter by Usage -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="usageFilter" (change)="applyFilter()">
+            <option value="ALL">Tất cả mức sử dụng</option>
+            <option value="USED">Đang liên kết phòng</option>
+            <option value="UNUSED">Chưa liên kết (An toàn xóa)</option>
+          </select>
+        </div>
+
+        <!-- Sort By -->
+        <div class="col-6 col-md-2 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="sortBy" (change)="applyFilter()">
+            <option value="NEWEST">Mới nhất trước</option>
+            <option value="OLDEST">Cũ nhất trước</option>
+            <option value="NAME_ASC">Tên: A &rarr; Z</option>
+            <option value="USAGE_DESC">Liên kết nhiều nhất</option>
+          </select>
+        </div>
+
+        <!-- Right Side: Count & Clear -->
+        <div class="col-6 col-md-12 col-lg-3 d-flex justify-content-end align-items-center gap-2">
+          <span class="badge bg-slate-100 text-slate-700 border fw-normal" style="font-size: 11.5px;">
+            {{ filteredViews.length }} / {{ totalViews }} hướng nhìn
+          </span>
+          <button
+            *ngIf="searchKeyword || statusFilter !== 'ALL' || usageFilter !== 'ALL' || sortBy !== 'NEWEST'"
+            class="btn btn-link btn-sm text-decoration-none text-muted p-0 small"
+            (click)="resetFilters()"
+            title="Đặt lại toàn bộ bộ lọc"
+          >
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. LOADING STATE -->
+  <div *ngIf="loading" class="card border-0 shadow-xs text-center py-5">
+    <div class="spinner-border text-primary mx-auto mb-2" role="status">
+      <span class="visually-hidden">Đang tải...</span>
+    </div>
+    <div class="text-muted small">Đang tải danh mục hướng nhìn phòng...</div>
+  </div>
+
+  <!-- 5. EMPTY STATE: NO DATA AT ALL -->
+  <div *ngIf="!loading && roomViews.length === 0" class="card border-0 shadow-xs text-center py-5 px-3">
+    <div class="empty-icon-wrapper mx-auto mb-3 bg-slate-100 text-slate-500 rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 28px;">
+      <i class="bi bi-image"></i>
+    </div>
+    <h5 class="fw-bold text-slate-800 mb-1">Chưa có hướng nhìn nào được tạo!</h5>
+    <p class="text-muted small mb-3 mx-auto" style="max-width: 480px;">
+      Hãy thêm các hướng nhìn tiêu chuẩn để đối tác khách sạn có thể lựa chọn khi cấu hình loại phòng.
+    </p>
+    <button class="btn btn-primary btn-sm px-3 rounded-3" (click)="openAddModal()">
+      <i class="bi bi-plus-circle me-1"></i>Thêm Hướng Nhìn Đầu Tiên
+    </button>
+  </div>
+
+  <!-- 6. EMPTY STATE: NO FILTER MATCH -->
+  <div *ngIf="!loading && roomViews.length > 0 && filteredViews.length === 0" class="card border-0 shadow-xs text-center py-5 px-3">
+    <div class="empty-icon-wrapper mx-auto mb-3 bg-slate-100 text-slate-500 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; font-size: 24px;">
+      <i class="bi bi-search"></i>
+    </div>
+    <h6 class="fw-bold text-slate-800 mb-1">Không tìm thấy hướng nhìn phù hợp</h6>
+    <p class="text-muted small mb-3">Không có mục nào khớp với từ khóa tìm kiếm hoặc bộ lọc hiện tại.</p>
+    <div>
+      <button class="btn btn-outline-secondary btn-sm px-3 rounded-3" (click)="resetFilters()">
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Xóa bộ lọc tìm kiếm
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. DESKTOP TABLE VIEW (>= 992px) -->
+  <div *ngIf="!loading && filteredViews.length > 0" class="card border-0 shadow-xs d-none d-lg-block">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0 align-middle">
+        <thead>
+          <tr>
+            <th style="width: 80px;" class="text-center">ID</th>
+            <th style="min-width: 250px;">Tên Hướng Nhìn</th>
+            <th style="min-width: 180px;">Liên Kết Sử Dụng</th>
+            <th style="min-width: 150px;" class="text-center">Trạng Thái</th>
+            <th style="width: 160px;" class="text-center">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let view of filteredViews" class="room-view-row">
+            <!-- ID -->
+            <td class="text-center">
+              <span class="badge bg-slate-100 text-slate-800 border fw-bold px-2 py-1">
+                #{{ view.id }}
+              </span>
+            </td>
+
+            <!-- View Name -->
+            <td>
+              <div class="d-flex align-items-center gap-2.5">
+                <div class="view-icon-box shadow-2xs flex-shrink-0">
+                  <i class="bi bi-image text-slate-600"></i>
+                </div>
+                <div>
+                  <span class="fw-bold text-slate-900 view-name">{{ view.name }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Linked Room Types Count -->
+            <td>
+              <span *ngIf="view.room_types_count > 0" class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 py-1 px-2.5" style="font-size: 11px;">
+                <i class="bi bi-door-closed text-indigo-500 me-1"></i>{{ view.room_types_count }} hạng phòng
+              </span>
+              <span *ngIf="!view.room_types_count || view.room_types_count == 0" class="badge bg-slate-100 text-slate-500 border py-1 px-2.5" style="font-size: 11px;">
+                Chưa liên kết
+              </span>
+            </td>
+
+            <!-- Status (Clickable for quick toggle) -->
+            <td class="text-center">
+              <button
+                type="button"
+                class="badge border status-badge-btn"
+                [ngClass]="view.status == 1 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-300'"
+                (click)="toggleStatus(view)"
+                title="Bấm để chuyển đổi trạng thái"
+              >
+                <i class="bi me-1" [ngClass]="view.status == 1 ? 'bi-check-circle-fill text-emerald-500' : 'bi-eye-slash-fill text-slate-400'"></i>
+                {{ view.status == 1 ? 'Hoạt động' : 'Tạm ẩn' }}
+              </button>
+            </td>
+
+            <!-- Action Buttons -->
+            <td class="text-center">
+              <div class="d-flex align-items-center justify-content-center gap-1.5">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary action-btn"
+                  title="Chỉnh sửa hướng nhìn"
+                  (click)="openEditModal(view)"
+                >
+                  <i class="bi bi-pencil-square me-1"></i>Sửa
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger action-btn"
+                  title="Xóa hướng nhìn"
+                  (click)="deleteView(view)"
+                >
+                  <i class="bi bi-trash3 me-1"></i>Xóa
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 8. MOBILE / TABLET CARDS VIEW (< 992px) -->
+  <div *ngIf="!loading && filteredViews.length > 0" class="d-block d-lg-none">
+    <div class="row g-2.5">
+      <div *ngFor="let view of filteredViews" class="col-12 col-md-6">
+        <div class="card border-0 shadow-xs h-100 view-mobile-card">
+          <div class="card-body p-3">
+            <!-- Top badge row -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge bg-slate-100 text-slate-800 border fw-bold px-2 py-1">
+                #{{ view.id }}
+              </span>
+              <button
+                type="button"
+                class="badge border status-badge-btn"
+                [ngClass]="view.status == 1 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-300'"
+                (click)="toggleStatus(view)"
+              >
+                <i class="bi me-1" [ngClass]="view.status == 1 ? 'bi-check-circle-fill text-emerald-500' : 'bi-eye-slash-fill text-slate-400'"></i>
+                {{ view.status == 1 ? 'Hoạt động' : 'Tạm ẩn' }}
+              </button>
+            </div>
+
+            <!-- Name row -->
+            <div class="d-flex align-items-center gap-2.5 mb-2.5">
+              <div class="view-icon-box shadow-2xs flex-shrink-0">
+                <i class="bi bi-image text-slate-600"></i>
+              </div>
+              <div class="fw-bold text-slate-900 fs-6">
+                {{ view.name }}
+              </div>
+            </div>
+
+            <!-- Usage row -->
+            <div class="bg-slate-50 p-2 rounded-3 mb-2.5 border border-slate-100 small d-flex flex-wrap gap-1.5 align-items-center">
+              <span *ngIf="view.room_types_count > 0" class="badge bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <i class="bi bi-door-closed text-indigo-500 me-1"></i>{{ view.room_types_count }} hạng phòng đang dùng
+              </span>
+              <span *ngIf="!view.room_types_count || view.room_types_count == 0" class="badge bg-slate-100 text-slate-500 border">
+                Chưa liên kết
+              </span>
+            </div>
+
+            <!-- Actions row -->
+            <div class="d-flex gap-1.5 pt-2 border-top">
+              <button type="button" class="btn btn-outline-primary btn-sm flex-fill" (click)="openEditModal(view)">
+                <i class="bi bi-pencil-square me-1"></i>Sửa
+              </button>
+              <button type="button" class="btn btn-outline-danger btn-sm flex-fill" (click)="deleteView(view)">
+                <i class="bi bi-trash3 me-1"></i>Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. ADD / EDIT MODAL -->
+  <div *ngIf="showModal" class="modal-backdrop-custom fade-in">
+    <div class="modal-dialog-custom modal-md">
+      <div class="modal-content-custom">
+        <!-- Modal Header -->
+        <div class="modal-header-custom d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi text-indigo-600 fs-5" [ngClass]="isEditMode ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i>
+            <h5 class="modal-title-custom mb-0">{{ isEditMode ? 'Cập Nhật Hướng Nhìn' : 'Thêm Hướng Nhìn Mới' }}</h5>
+          </div>
+          <button type="button" class="btn-close-custom" (click)="closeModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body-custom">
+          <!-- View Name -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-slate-700 mb-1">Tên Hướng Nhìn (*):</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              [(ngModel)]="currentView.name"
+              placeholder="VD: Hướng Biển, Hướng Núi, Hướng Hồ Bơi..."
+              maxlength="100"
+            />
+          </div>
+
+          <!-- Status Selector Cards -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-slate-700 mb-1">Trạng Thái Áp Dụng (*):</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <div
+                  class="status-option-card p-2.5 rounded-3 border text-center cursor-pointer"
+                  [class.active]="currentView.status == 1"
+                  (click)="currentView.status = 1"
+                >
+                  <i class="bi bi-check-circle-fill fs-5 d-block mb-1 text-emerald-600"></i>
+                  <div class="fw-semibold small">Hoạt động</div>
+                  <div class="text-muted" style="font-size: 10.5px;">Sẵn sàng cho khách sạn chọn</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div
+                  class="status-option-card p-2.5 rounded-3 border text-center cursor-pointer"
+                  [class.active]="currentView.status == 0"
+                  (click)="currentView.status = 0"
+                >
+                  <i class="bi bi-eye-slash-fill fs-5 d-block mb-1 text-slate-500"></i>
+                  <div class="fw-semibold small">Tạm ẩn</div>
+                  <div class="text-muted" style="font-size: 10.5px;">Tạm ngưng cung cấp lựa chọn</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview Badge -->
+          <div class="p-2.5 bg-slate-50 rounded-3 border border-slate-100">
+            <div class="small text-muted mb-1" style="font-size: 11px;">Xem trước hiển thị:</div>
+            <div class="d-flex align-items-center gap-2">
+              <div class="view-icon-box shadow-2xs flex-shrink-0" style="width: 34px; height: 34px;">
+                <i class="bi bi-image text-slate-600"></i>
+              </div>
+              <div>
+                <strong class="text-slate-900 small d-block">{{ currentView.name || 'Tên hướng nhìn' }}</strong>
+                <span *ngIf="currentView.status == 1" class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 py-0.5 px-2" style="font-size: 10px;">
+                  <i class="bi bi-check-circle-fill me-1"></i>Hoạt động
+                </span>
+                <span *ngIf="currentView.status == 0" class="badge bg-slate-100 text-slate-600 border border-slate-300 py-0.5 px-2" style="font-size: 10px;">
+                  <i class="bi bi-eye-slash-fill me-1"></i>Tạm ẩn
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer-custom d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3 rounded-3" (click)="closeModal()">
+            Hủy Bỏ
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm px-4 rounded-3 fw-semibold"
+            [disabled]="!currentView.name?.trim() || isSubmitting"
+            (click)="saveView()"
+          >
+            <i class="bi bi-check-lg me-1" *ngIf="!isSubmitting"></i>
+            <i class="bi bi-arrow-clockwise spin-icon me-1" *ngIf="isSubmitting"></i>
+            <span *ngIf="!isSubmitting">{{ isEditMode ? 'Lưu Thay Đổi' : 'Thêm Hướng Nhìn' }}</span>
+            <span *ngIf="isSubmitting">Đang Lưu...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

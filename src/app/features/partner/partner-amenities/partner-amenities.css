@@ -1,103 +1,258 @@
-:host { 
-  display: block; 
-  width: 100%; 
-  padding: 20px; 
-  box-sizing: border-box; 
+:host {
+    display: block;
+    width: 100%;
 }
 
-.partner-container { 
-  padding: 20px; 
-  background: #fff; 
-  border-radius: 8px; 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-  position: relative;
+.fade-in-up {
+    animation: fadeInUp 0.3s ease-out;
 }
 
-.amenities-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-  gap: 15px; 
-  margin-top: 20px; 
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.amenity-card { 
-  display: flex; 
-  align-items: center; 
-  padding: 15px; 
-  border: 1px solid #ddd; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  transition: 0.3s; 
+/* ============================================================
+   1. KPI MINI CARDS
+   ============================================================ */
+.kpi-mini-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px 18px;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.2s ease;
 }
 
-.amenity-card:hover { 
-  border-color: #0d6efd; 
-  background-color: #f8f9fa; 
+.kpi-mini-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px -3px rgba(0, 0, 0, 0.06);
 }
 
-.amenity-card input[type="checkbox"] { 
-  width: 18px; 
-  height: 18px; 
-  margin-right: 15px; 
-  cursor: pointer; 
+.kpi-mini-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
 }
 
-.card-content { 
-  display: flex; 
-  align-items: center; 
+.bg-blue-light { background-color: #eff6ff; }
+.bg-emerald-light { background-color: #d1fae5; }
+.bg-amber-light { background-color: #fef3c7; }
+
+.text-amber { color: #b45309 !important; }
+
+.kpi-mini-label {
+    font-size: 11.5px;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.card-content .icon { 
-  font-size: 24px; 
-  margin-right: 10px; 
+.kpi-mini-value {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-top: 2px;
 }
 
-.card-content .name { 
-  font-weight: bold; 
-  font-size: 15px;
+/* ============================================================
+   2. FILTER TABS & SEARCH BAR
+   ============================================================ */
+.filter-tab-btn {
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
-.actions { 
-  margin-top: 30px; 
-  text-align: right; 
-  border-top: 1px solid #eee; 
-  padding-top: 20px;
+.filter-tab-btn:hover:not(.active) {
+    background: #f8fafc;
+    color: #1e293b;
+    border-color: #cbd5e1;
 }
 
-.btn { 
-  padding: 10px 20px; 
-  border: none; 
-  border-radius: 4px; 
-  cursor: pointer; 
-  color: white; 
-  font-weight: bold; 
-  font-size: 16px;
+.filter-tab-btn.active {
+    background: #4f46e5;
+    color: #ffffff !important;
+    border-color: #4f46e5;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
 }
 
-.btn-primary { 
-  background-color: #0d6efd; 
+.search-wrapper {
+    position: relative;
+    min-width: 220px;
 }
 
-/* CSS Toast */
-.toast-notification { 
-  position: fixed; 
-  top: 20px; 
-  right: 20px; 
-  background-color: #198754; 
-  color: white; 
-  padding: 15px 25px; 
-  border-radius: 6px; 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
-  z-index: 9999; 
-  font-weight: bold; 
-  animation: slideIn 0.3s ease-out; 
+.search-input {
+    padding-left: 36px;
+    padding-right: 32px;
+    border-radius: 20px;
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    height: 34px;
+    box-shadow: none;
+    transition: all 0.2s;
 }
 
-.toast-notification.toast-error { 
-  background-color: #dc3545; 
+.search-input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-@keyframes slideIn { 
-  from { transform: translateX(100%); opacity: 0; } 
-  to { transform: translateX(0); opacity: 1; } 
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: #94a3b8;
+    pointer-events: none;
 }
+
+.search-clear-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 50%;
+}
+
+.search-clear-btn:hover {
+    color: #334155;
+}
+
+/* ============================================================
+   3. AMENITY INTERACTIVE CARDS
+   ============================================================ */
+.amenity-interactive-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    height: 100%;
+}
+
+.amenity-interactive-card:hover {
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.08);
+}
+
+.amenity-interactive-card.is-selected {
+    border-color: #4f46e5 !important;
+    background-color: #f5f7ff !important;
+    box-shadow: 0 4px 14px -2px rgba(79, 70, 229, 0.18) !important;
+}
+
+.amenity-check-indicator {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #94a3b8;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.amenity-check-indicator.checked {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+    color: #ffffff;
+    box-shadow: 0 2px 5px rgba(79, 70, 229, 0.35);
+}
+
+.amenity-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.icon-box-active {
+    background-color: #e0e7ff;
+    border-color: #c7d2fe;
+}
+
+.amenity-card-info {
+    flex-grow: 1;
+    min-width: 0;
+    padding-right: 20px; /* Tránh đè lên checkmark */
+}
+
+.amenity-name {
+    font-size: 14px;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.amenity-status-tag {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-top: 3px;
+}
+
+.amenity-status-tag.tag-active {
+    color: #4f46e5;
+    font-weight: 700;
+}
+
+/* ============================================================
+   4. UTILITIES
+   ============================================================ */
+.shadow-xs {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.text-slate-800 { color: #1e293b !important; }
+.text-slate-700 { color: #334155 !important; }
+.text-slate-400 { color: #94a3b8 !important; }

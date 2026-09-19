@@ -1,62 +1,411 @@
-.admin-container {
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-}
-
-.search-box {
-    margin-bottom: 20px;
-}
-
-.search-box input {
-    width: 300px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.table {
+:host {
+    display: block;
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
 }
 
-.table th,
-.table td {
-    border: 1px solid #ddd;
-    padding: 12px;
+.fade-in-up {
+    animation: fadeInUp 0.3s ease-out;
 }
 
-.actions {
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================
+   1. THẺ THỐNG KÊ TỔNG QUAN (KPI CARDS) - RESPONSIVE
+   ============================================================ */
+.kpi-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 1px solid #f1f5f9;
     display: flex;
-    gap: 5px;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+    transition: all 0.2s ease;
 }
 
-.btn {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
+@media (min-width: 576px) {
+    .kpi-card {
+        padding: 16px 18px;
+        gap: 14px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .kpi-card {
+        padding: 18px 20px;
+        gap: 16px;
+    }
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px -4px rgba(0, 0, 0, 0.07);
+}
+
+.kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    flex-shrink: 0;
+}
+
+@media (min-width: 576px) {
+    .kpi-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 21px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+    }
+}
+
+.bg-blue-light { background-color: #eff6ff; }
+.bg-amber-light { background-color: #fef3c7; }
+.bg-rose-light { background-color: #ffe4e6; }
+.bg-emerald-light { background-color: #d1fae5; }
+
+.text-amber { color: #b45309 !important; }
+
+.kpi-content {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.kpi-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (min-width: 576px) {
+    .kpi-label {
+        font-size: 12px;
+    }
+}
+
+.kpi-value {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (min-width: 576px) {
+    .kpi-value {
+        font-size: 20px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .kpi-value {
+        font-size: 22px;
+    }
+}
+
+/* ============================================================
+   2. BỘ LỌC TABS & THANH TÌM KIẾM - RESPONSIVE
+   ============================================================ */
+.filter-tab-btn {
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
     cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    white-space: nowrap;
+}
+
+@media (min-width: 576px) {
+    .filter-tab-btn {
+        font-size: 13px;
+        padding: 6px 14px;
+    }
+}
+
+.filter-tab-btn:hover:not(.active) {
+    background: #f8fafc;
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+
+.filter-tab-btn.active {
+    background: #4f46e5;
+    color: #ffffff !important;
+    border-color: #4f46e5;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+}
+
+.search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+@media (min-width: 992px) {
+    .search-wrapper {
+        width: 320px;
+    }
+}
+
+.search-input {
+    padding-left: 36px;
+    padding-right: 32px;
+    border-radius: 20px;
+    width: 100%;
+    height: 38px;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    box-shadow: none;
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.search-clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-clear-btn:hover {
+    color: #1e293b;
+    background-color: #f1f5f9;
+}
+
+/* ============================================================
+   3. AVATAR KHÁCH HÀNG & PHÂN LOẠI
+   ============================================================ */
+.customer-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: white;
-    font-weight: bold;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.btn-primary {
-    background: #007bff;
+@media (min-width: 576px) {
+    .customer-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 14px;
+    }
 }
 
-.btn-info {
-    background: #17a2b8;
+.modal-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 14px;
+    flex-shrink: 0;
 }
 
-.btn-danger {
-    background: #dc3545;
+@media (min-width: 576px) {
+    .modal-avatar {
+        width: 48px;
+        height: 48px;
+        font-size: 16px;
+    }
 }
 
-.btn-success {
-    background: #28a745;
+/* Tiers Phân Loại */
+.tier-vip {
+    background-color: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 12px;
 }
 
-.row-blocked {
-    background-color: #fff5f5;
+.tier-loyal {
+    background-color: #e0e7ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 12px;
 }
+
+.tier-new {
+    background-color: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    font-weight: 500;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+/* ============================================================
+   4. BẢNG DỮ LIỆU CHÍNH (CUSTOM TABLE) - RESPONSIVE
+   ============================================================ */
+.table-responsive {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f8fafc;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background-color: #f8fafc;
+}
+
+.custom-customer-table {
+    border-color: #f1f5f9;
+    min-width: 1060px; /* Đảm bảo các cột không bao giờ bị dồn ép trên mobile/tablet */
+}
+
+.custom-customer-table th {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.custom-customer-table td {
+    padding-top: 13px;
+    padding-bottom: 13px;
+    font-size: 13.5px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.row-blocked-highlight {
+    background-color: #fff8f8 !important;
+}
+
+.row-blocked-highlight:hover {
+    background-color: #fee2e2 !important;
+}
+
+.customer-name {
+    white-space: nowrap !important;
+}
+
+.block-reason-badge {
+    display: inline-block;
+    font-size: 11px;
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px dashed #fca5a5;
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-action-icon {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 9px;
+    border-radius: 6px;
+    white-space: nowrap !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-action-icon:hover {
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   5. TIỆN ÍCH & MÀU SẮC BỔ TRỢ
+   ============================================================ */
+.shadow-xs {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.text-slate-800 { color: #1e293b !important; }
+.text-slate-700 { color: #334155 !important; }
+.text-slate-400 { color: #94a3b8 !important; }
+.text-slate-300 { color: #cbd5e1 !important; }
+.bg-slate-900 { background-color: #0f172a !important; }
+.bg-slate-100 { background-color: #f1f5f9 !important; }
+.border-slate-200 { border-color: #e2e8f0 !important; }
+.text-emerald-400 { color: #34d399 !important; }

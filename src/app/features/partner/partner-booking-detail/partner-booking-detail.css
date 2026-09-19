@@ -54,35 +54,49 @@
 }
 
 .status-badge {
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: bold;
-    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .status-pending {
-    background: #fef08a;
+    background: #fef9c3;
     color: #854d0e;
+    border: 1px solid #fef08a;
 }
 
 .status-confirmed {
-    background: #bfdbfe;
-    color: #1e40af;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
 }
 
 .status-checked-in {
-    background: #bbf7d0;
-    color: #166534;
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
 }
 
 .status-checked-out {
-    background: #e2e8f0;
+    background: #f1f5f9;
     color: #475569;
+    border: 1px solid #cbd5e1;
 }
 
 .status-cancelled {
-    background: #fecaca;
-    color: #991b1b;
+    background: #fff1f2;
+    color: #be123c;
+    border: 1px solid #fecdd3;
+}
+
+.status-noshow {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
 }
 
 .tab-container {
@@ -253,3 +267,100 @@ input[type="checkbox"]:checked+.room-lbl {
 .tab-title {
     color: #333;
 }
+
+/* ====================================================
+   INVOICE / FOLIO MODERN STYLES & ANTI-WRAP FIXES
+   ==================================================== */
+.invoice-card {
+    max-width: 980px;
+    margin: 1.5rem auto 0;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+}
+
+.invoice-stamp {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    transform: rotate(15deg);
+    padding: 6px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    white-space: nowrap !important;
+    opacity: 0.85;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.invoice-stamp-paid {
+    border: 3px solid #10b981;
+    color: #10b981;
+}
+
+.invoice-stamp-deposit {
+    border: 3px solid #0284c7;
+    color: #0284c7;
+}
+
+.invoice-stamp-cancelled {
+    border: 3px solid #ef4444;
+    color: #ef4444;
+}
+
+.invoice-stamp-noshow {
+    border: 3px solid #b45309;
+    color: #b45309;
+}
+
+.invoice-summary-card {
+    width: 540px;
+    max-width: 100%;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+.checkout-status-box {
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.checkout-status-pending {
+    background-color: #fff1f2;
+    border: 1.5px solid #fecdd3;
+}
+
+.checkout-status-success {
+    background-color: #ecfdf5;
+    border: 1.5px solid #a7f3d0;
+}
+
+.checkout-status-cancelled {
+    background-color: #fef2f2;
+    border: 1.5px solid #fee2e2;
+}
+
+.checkout-status-noshow {
+    background-color: #fffbeb;
+    border: 1.5px solid #fef3c7;
+}
+
+.checkout-footer-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.checkout-footer-bar .btn {
+    white-space: nowrap !important;
+    flex-shrink: 0;
+}
+
+.text-nowrap-force {
+    white-space: nowrap !important;
+}

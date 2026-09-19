@@ -1,122 +1,467 @@
-<div class="admin-support-page fade-in-up">
-    <div class="page-header">
-        <div>
-            <h2 class="page-title">Tin nhắn Hệ thống (Contacts)</h2>
-            <p class="page-subtitle">Quản lý góp ý, báo lỗi và yêu cầu từ khách hàng vãng lai gửi đến Ban Quản Trị.</p>
-        </div>
-
-        <div class="filter-tabs">
-            <button [class.active]="statusFilter === '0'" (click)="statusFilter = '0'; applyFilter()">📥 Chưa xử
-                lý</button>
-            <button [class.active]="statusFilter === '1'" (click)="statusFilter = '1'; applyFilter()">✅ Đã giải
-                quyết</button>
-            <button [class.active]="statusFilter === 'all'" (click)="statusFilter = 'all'; applyFilter()">📁 Tất
-                cả</button>
-        </div>
+<div class="contacts-container p-2 p-md-3 fade-in-up">
+  <!-- 1. HEADER -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-chat-left-dots me-1"></i> Quản Trị Hệ Thống &bull; Xử Lý Liên Hệ
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Xử Lý Liên Hệ & Phản Hồi</h2>
+      <p class="text-muted mb-0 small">Quản lý các góp ý, báo lỗi và yêu cầu từ người dùng hoặc đối tác gửi đến Ban Quản Trị StayHub.</p>
     </div>
 
-    <div class="table-responsive">
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th style="width: 180px;">NGƯỜI GỬI</th>
-                    <th style="width: 150px;">LIÊN HỆ</th>
-                    <th>CHỦ ĐỀ</th>
-                    <th>NỘI DUNG YÊU CẦU</th>
-                    <th style="width: 130px; text-align: center;">TRẠNG THÁI</th>
-                    <th style="width: 140px; text-align: center;">THAO TÁC</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of filteredContacts" class="ticket-row" [class.unresolved]="item.status === 0">
-                    <td>
-                        <div class="sender-name">{{ item.name }}</div>
-                        <div class="ticket-time">{{ item.created_at | date:'dd/MM/yyyy HH:mm' }}</div>
-                    </td>
-                    <td>
-                        <div class="contact-link"><a href="mailto:{{ item.email }}">📧 {{ item.email }}</a></div>
-                        <div class="contact-phone" *ngIf="item.phone">📞 {{ item.phone }}</div>
-                    </td>
-                    <td>
-                        <span class="subject-text">{{ item.subject || 'Không có chủ đề' }}</span>
-                    </td>
-                    <td>
-                        <div class="message-box line-clamp">{{ item.message }}</div>
-                        <button class="btn-link-detail" (click)="openDetailModal(item)">Xem chi tiết</button>
-                    </td>
-                    <td style="text-align: center;">
-                        <span class="status-badge" [class.badge-new]="item.status === 0"
-                            [class.badge-done]="item.status === 1">
-                            {{ item.status === 0 ? 'Chưa xử lý' : 'Đã xong' }}
-                        </span>
-                    </td>
-                    <td style="text-align: center;">
-                        <button *ngIf="item.status === 0" class="btn-action-done" (click)="handleResolve(item.id)">
-                            Đánh dấu xong
-                        </button>
-                        <a *ngIf="item.status === 1" href="mailto:{{ item.email }}" class="btn-action-email">
-                            Gửi lại Mail
-                        </a>
-                    </td>
-                </tr>
-
-                <tr *ngIf="filteredContacts.length === 0">
-                    <td colspan="6" class="empty-state">
-                        📭 Hiện không có tin nhắn liên hệ nào trong mục này.
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end">
+      <button class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 shadow-2xs d-inline-flex align-items-center gap-1.5 text-nowrap" (click)="loadContacts()" [disabled]="loading">
+        <i class="bi bi-arrow-clockwise" [class.spin-icon]="loading"></i>
+        <span>Làm Mới</span>
+      </button>
     </div>
-</div>
+  </div>
 
-<div class="modal-overlay" *ngIf="selectedContactDetail" (click)="closeDetailModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-
-        <div class="modal-header">
-            <h3>Chi tiết Yêu cầu Hỗ trợ</h3>
-            <button class="btn-close" (click)="closeDetailModal()">✕</button>
+  <!-- 2. KPI SUMMARY CARDS (4 CARDS) -->
+  <div class="row g-2 mb-3">
+    <!-- Card 1: Tổng Tin Nhắn -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-inbox-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Tổng Tin Nhắn</div>
+            <div class="fs-6 fw-bold text-indigo-600 text-truncate">{{ totalContacts }} <span class="text-muted small fw-normal">yêu cầu</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Tiếp nhận toàn hệ thống</div>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <div class="modal-body">
-            <div class="detail-group">
-                <label>Người gửi:</label>
-                <p><strong>{{ selectedContactDetail.name }}</strong></p>
-            </div>
-
-            <div class="detail-row">
-                <div class="detail-group">
-                    <label>Email:</label>
-                    <p><a href="mailto:{{ selectedContactDetail.email }}">{{ selectedContactDetail.email }}</a></p>
-                </div>
-                <div class="detail-group" *ngIf="selectedContactDetail.phone">
-                    <label>Số điện thoại:</label>
-                    <p>{{ selectedContactDetail.phone }}</p>
-                </div>
-                <div class="detail-group">
-                    <label>Thời gian gửi:</label>
-                    <p>{{ selectedContactDetail.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
-                </div>
-            </div>
-
-            <div class="detail-group">
-                <label>Chủ đề:</label>
-                <p class="subject-highlight">{{ selectedContactDetail.subject || 'Không có chủ đề' }}</p>
-            </div>
-
-            <div class="detail-group">
-                <label>Nội dung chi tiết:</label>
-                <div class="full-message-box">{{ selectedContactDetail.message }}</div>
-            </div>
+    <!-- Card 2: Chờ Xử Lý -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-amber-50 text-amber-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Chờ Xử Lý</div>
+            <div class="fs-6 fw-bold text-amber-600 text-truncate">{{ pendingCount }} <span class="text-muted small fw-normal">yêu cầu</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Cần phản hồi kịp thời</div>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <div class="modal-footer">
-            <button *ngIf="selectedContactDetail.status === 0" class="btn-action-done"
-                (click)="handleResolve(selectedContactDetail.id)">
-                ✅ Đánh dấu đã giải quyết
+    <!-- Card 3: Đã Giải Quyết -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Đã Giải Quyết</div>
+            <div class="fs-6 fw-bold text-emerald-600 text-truncate">{{ resolvedCount }} <span class="text-muted small fw-normal">yêu cầu</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Đã hỗ trợ hoàn tất</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Có Điện Thoại -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-blue-50 text-blue-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-telephone-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Có Số Điện Thoại</div>
+            <div class="fs-6 fw-bold text-blue-600 text-truncate">{{ withPhoneCount }} <span class="text-muted small fw-normal">người gửi</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Hỗ trợ gọi liên lạc trực tiếp</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TOOLBAR & FILTERS -->
+  <div class="card border-0 shadow-xs mb-3">
+    <div class="card-body p-3">
+      <div class="row g-2 align-items-center">
+        <!-- Search input -->
+        <div class="col-12 col-md-5 col-lg-4">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0 text-muted">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control border-start-0 ps-0"
+              placeholder="Tìm theo tên người gửi, email, SĐT, chủ đề..."
+              [(ngModel)]="searchKeyword"
+              (input)="applyFilter()"
+            />
+            <button *ngIf="searchKeyword" class="btn btn-outline-secondary border-start-0 border-end" (click)="searchKeyword=''; applyFilter()">
+              <i class="bi bi-x-lg"></i>
             </button>
-            <button class="btn-cancel" (click)="closeDetailModal()">Đóng</button>
+          </div>
         </div>
 
+        <!-- Filter by Status -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="statusFilter" (change)="applyFilter()">
+            <option value="all">Tất cả trạng thái</option>
+            <option value="0">Chưa xử lý (Mới)</option>
+            <option value="1">Đã giải quyết</option>
+          </select>
+        </div>
+
+        <!-- Sort By -->
+        <div class="col-6 col-md-4 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="sortBy" (change)="applyFilter()">
+            <option value="NEWEST">Mới nhất trước</option>
+            <option value="OLDEST">Cũ nhất trước</option>
+            <option value="NAME_ASC">Tên người gửi: A &rarr; Z</option>
+          </select>
+        </div>
+
+        <!-- Right Side: Count & Reset -->
+        <div class="col-12 col-lg-4 d-flex justify-content-end align-items-center gap-2 mt-2 mt-lg-0">
+          <span class="badge bg-slate-100 text-slate-700 border fw-normal" style="font-size: 11.5px;">
+            {{ filteredContacts.length }} / {{ totalContacts }} liên hệ
+          </span>
+          <button
+            *ngIf="searchKeyword || statusFilter !== 'all' || sortBy !== 'NEWEST'"
+            class="btn btn-link btn-sm text-decoration-none text-muted p-0 small"
+            (click)="resetFilters()"
+            title="Đặt lại toàn bộ bộ lọc"
+          >
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- 4. LOADING STATE -->
+  <div *ngIf="loading" class="card border-0 shadow-xs text-center py-5">
+    <div class="spinner-border text-primary mx-auto mb-2" role="status">
+      <span class="visually-hidden">Đang tải...</span>
+    </div>
+    <div class="text-muted small">Đang tải danh sách tin nhắn liên hệ...</div>
+  </div>
+
+  <!-- 5. EMPTY STATE: NO DATA AT ALL -->
+  <div *ngIf="!loading && contacts.length === 0" class="card border-0 shadow-xs text-center py-5 px-3">
+    <div class="empty-icon-wrapper mx-auto mb-3 bg-slate-100 text-slate-500 rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 28px;">
+      <i class="bi bi-inbox"></i>
+    </div>
+    <h5 class="fw-bold text-slate-800 mb-1">Chưa có tin nhắn liên hệ nào!</h5>
+    <p class="text-muted small mb-0 mx-auto" style="max-width: 480px;">
+      Hộp thư hiện đang trống. Mọi thắc mắc hoặc yêu cầu từ người dùng trên sàn sẽ được hiển thị tại đây.
+    </p>
+  </div>
+
+  <!-- 6. EMPTY STATE: NO FILTER MATCH -->
+  <div *ngIf="!loading && contacts.length > 0 && filteredContacts.length === 0" class="card border-0 shadow-xs text-center py-5 px-3">
+    <div class="empty-icon-wrapper mx-auto mb-3 bg-slate-100 text-slate-500 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; font-size: 24px;">
+      <i class="bi bi-search"></i>
+    </div>
+    <h6 class="fw-bold text-slate-800 mb-1">Không tìm thấy tin nhắn phù hợp</h6>
+    <p class="text-muted small mb-3">Không có liên hệ nào khớp với từ khóa tìm kiếm hoặc bộ lọc hiện tại.</p>
+    <div>
+      <button class="btn btn-outline-secondary btn-sm px-3 rounded-3" (click)="resetFilters()">
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Xóa bộ lọc tìm kiếm
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. DESKTOP TABLE VIEW (>= 992px) -->
+  <div *ngIf="!loading && filteredContacts.length > 0" class="card border-0 shadow-xs d-none d-lg-block">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0 align-middle">
+        <thead>
+          <tr>
+            <th style="width: 220px;">Người Gửi</th>
+            <th style="width: 220px;">Thông Tin Liên Hệ</th>
+            <th style="min-width: 300px;">Chủ Đề & Nội Dung</th>
+            <th style="width: 140px;" class="text-center">Trạng Thái</th>
+            <th style="width: 180px;" class="text-center">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredContacts" class="contact-row" [class.row-unresolved]="item.status === 0">
+            <!-- SENDER -->
+            <td>
+              <div class="fw-bold text-slate-900 mb-0.5">{{ item.name }}</div>
+              <div class="text-muted small d-flex align-items-center gap-1" style="font-size: 11.5px;">
+                <i class="bi bi-clock text-slate-400"></i>
+                <span>{{ item.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </td>
+
+            <!-- CONTACT DETAILS -->
+            <td>
+              <div class="mb-1">
+                <a href="mailto:{{ item.email }}" class="text-decoration-none d-inline-flex align-items-center gap-1.5 text-indigo-600 fw-medium small" title="Bấm để gửi email">
+                  <i class="bi bi-envelope-fill text-indigo-400"></i>
+                  <span>{{ item.email }}</span>
+                </a>
+              </div>
+              <div *ngIf="item.phone">
+                <a href="tel:{{ item.phone }}" class="text-decoration-none d-inline-flex align-items-center gap-1.5 text-slate-600 small" title="Bấm để gọi điện">
+                  <i class="bi bi-telephone-fill text-slate-400"></i>
+                  <span>{{ item.phone }}</span>
+                </a>
+              </div>
+            </td>
+
+            <!-- SUBJECT & MESSAGE -->
+            <td>
+              <div class="d-flex align-items-center gap-1.5 mb-1">
+                <span class="badge bg-slate-100 text-slate-800 border px-2 py-0.5" style="font-size: 11px;">Chủ đề</span>
+                <strong class="text-slate-900 small">{{ item.subject || 'Không có chủ đề' }}</strong>
+              </div>
+              <div class="text-muted small line-clamp-2 mb-1" style="max-width: 480px; font-size: 12.5px; line-height: 1.45;">
+                {{ item.message }}
+              </div>
+              <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-indigo-600 small fw-semibold" (click)="openDetailModal(item)">
+                <i class="bi bi-arrows-angle-expand me-1"></i>Xem chi tiết tin nhắn
+              </button>
+            </td>
+
+            <!-- STATUS -->
+            <td class="text-center">
+              <button
+                type="button"
+                class="badge border status-badge-btn"
+                [ngClass]="item.status === 1 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+                (click)="toggleStatus(item)"
+                title="Nhấp để chuyển đổi trạng thái"
+              >
+                <i class="bi me-1" [ngClass]="item.status === 1 ? 'bi-check-circle-fill text-emerald-500' : 'bi-clock-history text-amber-500'"></i>
+                {{ item.status === 1 ? 'Đã giải quyết' : 'Chưa xử lý' }}
+              </button>
+            </td>
+
+            <!-- ACTIONS -->
+            <td class="text-center">
+              <div class="d-flex align-items-center justify-content-center gap-1.5">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary action-btn"
+                  title="Xem toàn bộ nội dung"
+                  (click)="openDetailModal(item)"
+                >
+                  <i class="bi bi-eye me-1"></i>Xem
+                </button>
+                <button
+                  *ngIf="item.status === 0"
+                  type="button"
+                  class="btn btn-sm btn-outline-success action-btn"
+                  title="Đánh dấu đã giải quyết"
+                  (click)="handleResolve(item.id)"
+                >
+                  <i class="bi bi-check-lg me-1"></i>Xong
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger action-btn"
+                  title="Xóa tin nhắn này"
+                  (click)="deleteContact(item)"
+                >
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 8. MOBILE / TABLET CARDS VIEW (< 992px) -->
+  <div *ngIf="!loading && filteredContacts.length > 0" class="d-block d-lg-none">
+    <div class="row g-2.5">
+      <div *ngFor="let item of filteredContacts" class="col-12 col-md-6">
+        <div class="card border-0 shadow-xs h-100 contact-mobile-card" [class.card-unresolved]="item.status === 0">
+          <div class="card-body p-3">
+            <!-- Top row: Sender & Status -->
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <span class="fw-bold text-slate-900 fs-6 d-block">{{ item.name }}</span>
+                <span class="text-muted small" style="font-size: 11px;">
+                  <i class="bi bi-clock me-1"></i>{{ item.created_at | date:'dd/MM/yyyy HH:mm' }}
+                </span>
+              </div>
+              <button
+                type="button"
+                class="badge border status-badge-btn"
+                [ngClass]="item.status === 1 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+                (click)="toggleStatus(item)"
+              >
+                <i class="bi me-1" [ngClass]="item.status === 1 ? 'bi-check-circle-fill text-emerald-500' : 'bi-clock-history text-amber-500'"></i>
+                {{ item.status === 1 ? 'Đã giải quyết' : 'Chưa xử lý' }}
+              </button>
+            </div>
+
+            <!-- Contact info -->
+            <div class="bg-slate-50 p-2 rounded-3 mb-2.5 border border-slate-100 small">
+              <div class="mb-1 text-truncate">
+                <a href="mailto:{{ item.email }}" class="text-decoration-none text-indigo-600 fw-medium">
+                  <i class="bi bi-envelope-fill text-indigo-400 me-1"></i>{{ item.email }}
+                </a>
+              </div>
+              <div *ngIf="item.phone" class="text-truncate">
+                <a href="tel:{{ item.phone }}" class="text-decoration-none text-slate-600">
+                  <i class="bi bi-telephone-fill text-slate-400 me-1"></i>{{ item.phone }}
+                </a>
+              </div>
+            </div>
+
+            <!-- Subject & Message -->
+            <div class="mb-2.5">
+              <div class="fw-semibold text-slate-900 small mb-1">
+                <span class="badge bg-slate-100 text-slate-700 border me-1">Chủ đề</span>
+                {{ item.subject || 'Không có chủ đề' }}
+              </div>
+              <p class="text-muted small line-clamp-2 mb-0" style="font-size: 12px;">
+                {{ item.message }}
+              </p>
+            </div>
+
+            <!-- Actions row -->
+            <div class="d-flex gap-1.5 pt-2 border-top">
+              <button type="button" class="btn btn-outline-primary btn-sm flex-fill" (click)="openDetailModal(item)">
+                <i class="bi bi-eye me-1"></i>Xem Chi Tiết
+              </button>
+              <button
+                *ngIf="item.status === 0"
+                type="button"
+                class="btn btn-outline-success btn-sm flex-fill"
+                (click)="handleResolve(item.id)"
+              >
+                <i class="bi bi-check-lg me-1"></i>Xong
+              </button>
+              <button type="button" class="btn btn-outline-danger btn-sm" (click)="deleteContact(item)" title="Xóa tin nhắn">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. DETAIL MODAL -->
+  <div *ngIf="selectedContactDetail" class="modal-backdrop-custom fade-in" (click)="closeDetailModal()">
+    <div class="modal-dialog-custom modal-md" (click)="$event.stopPropagation()">
+      <div class="modal-content-custom">
+        <!-- Modal Header -->
+        <div class="modal-header-custom d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-chat-square-text-fill text-indigo-600 fs-5"></i>
+            <h5 class="modal-title-custom mb-0">Chi Tiết Tin Nhắn Liên Hệ</h5>
+          </div>
+          <button type="button" class="btn-close-custom" (click)="closeDetailModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body-custom">
+          <!-- Sender overview card -->
+          <div class="bg-slate-50 p-3 rounded-3 border border-slate-100 mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <span class="text-muted small d-block" style="font-size: 11px;">Họ tên người gửi:</span>
+                <strong class="text-slate-900 fs-6">{{ selectedContactDetail.name }}</strong>
+              </div>
+              <span
+                class="badge border py-1 px-2.5"
+                [ngClass]="selectedContactDetail.status === 1 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+              >
+                <i class="bi me-1" [ngClass]="selectedContactDetail.status === 1 ? 'bi-check-circle-fill text-emerald-500' : 'bi-clock-history text-amber-500'"></i>
+                {{ selectedContactDetail.status === 1 ? 'Đã giải quyết' : 'Chưa xử lý' }}
+              </span>
+            </div>
+
+            <div class="row g-2 pt-2 border-top border-slate-200 small">
+              <div class="col-12 col-sm-6">
+                <span class="text-muted d-block" style="font-size: 11px;">Email liên hệ:</span>
+                <a href="mailto:{{ selectedContactDetail.email }}" class="text-indigo-600 text-decoration-none fw-medium text-break">
+                  <i class="bi bi-envelope-fill text-indigo-400 me-1"></i>{{ selectedContactDetail.email }}
+                </a>
+              </div>
+              <div class="col-12 col-sm-6">
+                <span class="text-muted d-block" style="font-size: 11px;">Số điện thoại:</span>
+                <a *ngIf="selectedContactDetail.phone" href="tel:{{ selectedContactDetail.phone }}" class="text-slate-700 text-decoration-none">
+                  <i class="bi bi-telephone-fill text-slate-400 me-1"></i>{{ selectedContactDetail.phone }}
+                </a>
+                <span *ngIf="!selectedContactDetail.phone" class="text-muted fst-italic">Không cung cấp</span>
+              </div>
+              <div class="col-12 mt-1">
+                <span class="text-muted d-block" style="font-size: 11px;">Thời gian gửi:</span>
+                <span class="text-slate-700">
+                  <i class="bi bi-clock me-1 text-slate-400"></i>{{ selectedContactDetail.created_at | date:'dd/MM/yyyy HH:mm:ss' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subject -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-slate-700 mb-1">Chủ đề:</label>
+            <div class="p-2.5 bg-white rounded-3 border border-slate-200 fw-semibold text-slate-900 small">
+              {{ selectedContactDetail.subject || 'Không có chủ đề' }}
+            </div>
+          </div>
+
+          <!-- Message Content -->
+          <div class="mb-2">
+            <label class="form-label small fw-semibold text-slate-700 mb-1">Nội dung chi tiết:</label>
+            <div class="p-3 bg-slate-50 rounded-3 border border-slate-200 text-slate-800 small full-message-box">
+              {{ selectedContactDetail.message }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer-custom d-flex justify-content-between align-items-center gap-2">
+          <div class="d-flex gap-2">
+            <a
+              href="mailto:{{ selectedContactDetail.email }}?subject=Phản hồi từ StayHub: {{ selectedContactDetail.subject }}"
+              class="btn btn-outline-primary btn-sm rounded-3 d-inline-flex align-items-center gap-1"
+            >
+              <i class="bi bi-reply-fill"></i>
+              <span>Phản Hồi Email</span>
+            </a>
+            <button
+              *ngIf="selectedContactDetail.status === 0"
+              type="button"
+              class="btn btn-success btn-sm rounded-3 d-inline-flex align-items-center gap-1"
+              (click)="handleResolve(selectedContactDetail.id)"
+            >
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Đánh Dấu Đã Xử Lý</span>
+            </button>
+            <button
+              *ngIf="selectedContactDetail.status === 1"
+              type="button"
+              class="btn btn-outline-warning btn-sm rounded-3 d-inline-flex align-items-center gap-1"
+              (click)="toggleStatus(selectedContactDetail)"
+            >
+              <i class="bi bi-arrow-counterclockwise"></i>
+              <span>Đổi Sang Chưa Xử Lý</span>
+            </button>
+          </div>
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3 rounded-3" (click)="closeDetailModal()">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

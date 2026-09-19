@@ -1,97 +1,559 @@
-<div class="partner-container">
-  <div class="header-action">
+<div class="minibar-container p-2 p-md-3">
+  <!-- HEADER -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
     <div>
-      <h2>Quản Lý Danh Mục Minibar</h2>
-      <p>Quản lý các loại đồ ăn nhẹ, thức uống phục vụ tại phòng và số lượng tồn kho.</p>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-cup-straw me-1"></i> Dịch Vụ Minibar Phòng
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Quản Lý Danh Mục Minibar</h2>
+      <p class="text-muted mb-0 small">Theo dõi đồ uống, đồ ăn nhẹ phục vụ tại phòng, kiểm soát tồn kho và cập nhật giá bán tức thì.</p>
     </div>
-    <button class="btn btn-primary" (click)="openModal()">+ Thêm Món</button>
+    <button class="btn btn-primary fw-semibold px-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 rounded-3 w-100 w-md-auto" (click)="openModal()">
+      <i class="bi bi-plus-lg"></i>
+      <span>Thêm Món Minibar</span>
+    </button>
   </div>
 
-  <div *ngIf="isLoading" class="loading">Đang tải danh sách...</div>
-
-  <table class="table" *ngIf="!isLoading && itemList.length > 0">
-    <thead>
-      <tr>
-        <th style="width: 25%;">Tên Món</th>
-        <th>Mô tả</th>
-        <th style="white-space: nowrap;">Đơn Giá (VNĐ)</th>
-        <th style="white-space: nowrap;">Tồn Kho</th>
-        <th style="white-space: nowrap; text-align: center;">Trạng Thái</th>
-        <th style="width: 140px; text-align: center;">Thao Tác</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of itemList">
-        <td><strong>{{ item.icon }} {{ item.name }}</strong></td>
-        <td><small>{{ item.description || '---' }}</small></td>
-        
-        <td style="color: #0d6efd; font-weight: bold; white-space: nowrap;">
-          {{ item.price | number:'1.0-0' }}đ
-        </td>
-        
-        <td [ngStyle]="{'color': item.quantity <= 5 ? 'red' : 'green', 'font-weight': 'bold', 'white-space': 'nowrap'}">
-          {{ item.quantity }} <span *ngIf="item.quantity <= 5">⚠️ Gần hết</span>
-        </td>
-
-        <td style="white-space: nowrap; text-align: center;">
-          <span class="badge" [class.bg-success]="item.status == 1" [class.bg-danger]="item.status == 0">
-            {{ item.status == 1 ? 'Đang bán' : 'Ngừng bán' }}
-          </span>
-        </td>
-        
-        <td>
-          <div class="action-buttons">
-            <button class="btn btn-warning" (click)="openModal(item)">Sửa / Nhập</button>
-            <button class="btn btn-danger" *ngIf="item.status == 1" (click)="toggleStatus(item, 0)">Ngừng bán</button>
-            <button class="btn btn-success" *ngIf="item.status == 0" (click)="toggleStatus(item, 1)">Mở bán lại</button>
+  <!-- KPI SUMMARY CARDS -->
+  <div class="row g-2 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2 px-2 px-sm-3 d-flex align-items-center gap-2">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-1.5 p-sm-2 fs-5">
+            <i class="bi bi-grid-fill"></i>
           </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div *ngIf="!isLoading && itemList.length === 0" class="empty-state">
-    Danh mục Minibar đang trống.
-  </div>
-
-  <div class="modal" *ngIf="showModal">
-    <div class="modal-content">
-      <h3>{{ isEditMode ? 'Cập Nhật / Nhập Hàng Minibar' : 'Thêm Món Minibar Mới' }}</h3>
-      
-      <div class="form-group">
-        <label>Tên món (*):</label>
-        <input type="text" class="form-control" [(ngModel)]="currentItem.name" placeholder="VD: Coca Cola, Snack...">
-      </div>
-
-      <div style="display: flex; gap: 10px;">
-        <div class="form-group" style="flex: 1;">
-          <label>Đơn giá (VNĐ) (*):</label>
-          <input type="number" class="form-control" [(ngModel)]="currentItem.price" placeholder="0">
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label>Số lượng tồn (*):</label>
-          <input type="number" class="form-control" [(ngModel)]="currentItem.quantity" placeholder="0">
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Tổng Món Minibar</div>
+            <div class="fs-6 fw-bold text-slate-800">{{ totalItems }} <span class="text-muted small fw-normal">món</span></div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label>Icon (Mã Emoji):</label>
-        <input type="text" class="form-control" [(ngModel)]="currentItem.icon" placeholder="VD: 🥤, 🍺, 🍫...">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2 px-2 px-sm-3 d-flex align-items-center gap-2">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-1.5 p-sm-2 fs-5">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Đang Kinh Doanh</div>
+            <div class="fs-6 fw-bold text-emerald-600">{{ activeItems }} <span class="text-muted small fw-normal">món</span></div>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label>Mô tả chi tiết:</label>
-        <textarea class="form-control" [(ngModel)]="currentItem.description" placeholder="Nhập dung tích, thành phần..."></textarea>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2 px-2 px-sm-3 d-flex align-items-center gap-2">
+          <div class="kpi-icon-wrapper bg-blue-50 text-blue-600 rounded-3 p-1.5 p-sm-2 fs-5">
+            <i class="bi bi-box-seam-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Tổng Tồn Kho</div>
+            <div class="fs-6 fw-bold text-blue-600">{{ totalStock }} <span class="text-muted small fw-normal">sản phẩm</span></div>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <div class="modal-actions">
-        <button class="btn btn-secondary" (click)="closeModal()">Hủy</button>
-        <button class="btn btn-primary" (click)="saveItem()">Lưu Lại</button>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2 px-2 px-sm-3 d-flex align-items-center gap-2">
+          <div class="kpi-icon-wrapper rounded-3 p-1.5 p-sm-2 fs-5"
+            [ngClass]="lowStockCount > 0 ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500'">
+            <i class="bi" [ngClass]="lowStockCount > 0 ? 'bi-exclamation-triangle-fill' : 'bi-shield-check'"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Cảnh Báo Tồn Thấp</div>
+            <div class="fs-6 fw-bold" [ngClass]="lowStockCount > 0 ? 'text-amber-600' : 'text-slate-700'">
+              {{ lowStockCount > 0 ? lowStockCount + ' món cần nhập' : 'Kho dồi dào' }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="toast-notification" [class.toast-error]="toastType === 'error'" *ngIf="showToast">
-    {{ toastMessage }}
+  <!-- CONTROLS & FILTER TOOLBAR -->
+  <div class="card border-0 shadow-xs mb-3 bg-white rounded-3">
+    <div class="card-body py-2 px-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
+      <!-- Filter tabs -->
+      <div class="btn-group btn-group-sm shadow-2xs filter-btn-group">
+        <button type="button" class="btn fw-semibold px-2 px-sm-3 text-nowrap"
+          [ngClass]="statusFilter === 'all' ? 'btn-primary' : 'btn-outline-secondary'"
+          (click)="statusFilter = 'all'">
+          Tất cả ({{ totalItems }})
+        </button>
+        <button type="button" class="btn fw-semibold px-2 px-sm-3 text-nowrap"
+          [ngClass]="statusFilter === '1' ? 'btn-primary' : 'btn-outline-secondary'"
+          (click)="statusFilter = '1'">
+          Đang bán ({{ activeItems }})
+        </button>
+        <button type="button" class="btn fw-semibold px-2 px-sm-3 text-nowrap"
+          [ngClass]="statusFilter === '0' ? 'btn-primary' : 'btn-outline-secondary'"
+          (click)="statusFilter = '0'">
+          Ngừng bán ({{ inactiveItems }})
+        </button>
+        <button type="button" class="btn fw-semibold px-2 px-sm-3 text-nowrap"
+          [ngClass]="statusFilter === 'low_stock' ? 'btn-warning text-dark fw-bold' : 'btn-outline-secondary'"
+          (click)="statusFilter = 'low_stock'">
+          Sắp hết ({{ lowStockCount }})
+        </button>
+      </div>
+
+      <!-- Search input -->
+      <div class="d-flex align-items-center gap-2 w-100 w-md-auto">
+        <div class="input-group input-group-sm search-group flex-grow-1">
+          <span class="input-group-text bg-slate-50 border-end-0 text-muted">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="text" class="form-control border-start-0 bg-slate-50" 
+            [(ngModel)]="searchTerm" placeholder="Tìm kiếm món Minibar...">
+          <button *ngIf="searchTerm" class="btn btn-outline-secondary border-start-0 bg-slate-50 text-muted" type="button" (click)="searchTerm = ''">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary rounded-3 flex-shrink-0" (click)="loadData()" title="Tải lại danh sách">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE CARD -->
+  <!-- TABLE & MOBILE CARDS CONTAINER -->
+  <div class="card border-0 shadow-xs bg-white rounded-3 overflow-hidden">
+    <!-- 1. DESKTOP & TABLET TABLE VIEW (>= 768px) -->
+    <div class="table-responsive mb-0 d-none d-md-block">
+      <table class="table align-middle table-hover mb-0 minibar-table">
+        <thead>
+          <tr class="table-header-row">
+            <th class="ps-3 py-3" style="min-width: 200px;">MÓN MINIBAR</th>
+            <th class="py-3" style="min-width: 220px;">MÔ TẢ</th>
+            <th class="py-3" style="min-width: 130px; white-space: nowrap;">ĐƠN GIÁ (VND)</th>
+            <th class="py-3" style="min-width: 140px; white-space: nowrap;">TỒN KHO</th>
+            <th class="text-center py-3" style="min-width: 110px; white-space: nowrap;">TRẠNG THÁI</th>
+            <th class="text-end pe-3 py-3" style="min-width: 195px; white-space: nowrap;">THAO TÁC</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- LOADING STATE -->
+          <tr *ngIf="isLoading">
+            <td colspan="6" class="text-center p-5">
+              <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+              <span class="text-muted fw-semibold">Đang nạp danh mục Minibar phòng...</span>
+            </td>
+          </tr>
+
+          <!-- EMPTY STATE -->
+          <tr *ngIf="!isLoading && filteredItems.length === 0">
+            <td colspan="6" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-1 text-slate-300 d-block mb-2"></i>
+              <div class="fw-semibold text-slate-700 mb-1">
+                {{ searchTerm ? 'Không tìm thấy món nào phù hợp với từ khóa "' + searchTerm + '"' : 'Danh mục Minibar đang trống.' }}
+              </div>
+              <p class="small text-muted mb-3" *ngIf="!searchTerm">
+                Thêm các món đồ uống, đồ ăn vặt đóng gói để khách hàng tiện lợi thưởng thức ngay tại phòng!
+              </p>
+              <button *ngIf="!searchTerm" class="btn btn-sm btn-primary rounded-pill px-3" (click)="openModal()">
+                <i class="bi bi-plus-lg me-1"></i> Thêm món Minibar đầu tiên
+              </button>
+            </td>
+          </tr>
+
+          <!-- DATA ROWS -->
+          <ng-container *ngIf="!isLoading">
+            <tr *ngFor="let item of filteredItems" class="minibar-row" [class.minibar-row-inactive]="item.status == 0">
+              <!-- Cột 1: Tên Món & Icon -->
+              <td class="ps-3 py-2.5">
+                <div class="d-flex align-items-center gap-2.5">
+                  <div class="minibar-icon-box shadow-2xs">
+                    {{ item.icon || '🥤' }}
+                  </div>
+                  <div>
+                    <div class="fw-bold text-slate-900 item-name">{{ item.name }}</div>
+                    <span *ngIf="item.status == 0" class="badge-status-inactive d-inline-flex d-md-none mt-1" style="font-size: 9.5px;">
+                      Ngừng bán
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Cột 2: Mô tả -->
+              <td class="py-2.5">
+                <div class="item-desc text-muted small" [title]="item.description || ''">
+                  {{ item.description || 'Chưa có mô tả.' }}
+                </div>
+              </td>
+
+              <!-- Cột 3: Đơn giá -->
+              <td class="py-2.5">
+                <div class="d-flex align-items-baseline gap-1">
+                  <span class="fw-bold text-slate-900 fs-6">{{ formatPrice(item.price) }}</span>
+                  <span class="unit-tag">/ {{ item.unit || 'món' }}</span>
+                </div>
+              </td>
+
+              <!-- Cột 4: Tồn kho -->
+              <td class="py-2.5">
+                <!-- Tồn dồi dào (> 10) -->
+                <span class="badge-stock-good" *ngIf="item.quantity > 10">
+                  <i class="bi bi-box-seam me-1"></i>{{ item.quantity }} {{ item.unit || 'món' }}
+                </span>
+                <!-- Tồn sắp hết (1 - 10) -->
+                <span class="badge-stock-low" *ngIf="item.quantity > 0 && item.quantity <= 10">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i>Còn {{ item.quantity }} {{ item.unit || 'món' }}
+                </span>
+                <!-- Hết hàng (= 0) -->
+                <span class="badge-stock-out" *ngIf="item.quantity <= 0">
+                  <i class="bi bi-x-circle-fill me-1"></i>Hết hàng (0)
+                </span>
+              </td>
+
+              <!-- Cột 5: Trạng thái -->
+              <td class="text-center py-2.5">
+                <span class="badge-status-active" *ngIf="item.status == 1">
+                  <i class="bi bi-check-circle-fill me-1"></i>Đang bán
+                </span>
+                <span class="badge-status-inactive" *ngIf="item.status == 0">
+                  <i class="bi bi-pause-circle-fill text-warning me-1"></i>Ngừng bán
+                </span>
+              </td>
+
+              <!-- Cột 6: Thao tác (Hàng ngang gọn gàng) -->
+              <td class="text-end pe-3 py-2.5">
+                <div class="d-flex justify-content-end align-items-center gap-1.5">
+                  <!-- Nút Sửa -->
+                  <button type="button" class="btn btn-sm btn-action-btn btn-action-edit"
+                    (click)="openModal(item)" title="Chỉnh sửa thông tin món">
+                    <i class="bi bi-pencil-fill me-1"></i> Sửa
+                  </button>
+
+                  <!-- Nút Nhập Hàng Nhanh -->
+                  <button type="button" class="btn btn-sm btn-action-btn btn-action-restock"
+                    (click)="openRestockModal(item, $event)" title="Nhập thêm số lượng hàng">
+                    <i class="bi bi-box-arrow-in-down me-1"></i> +Nhập
+                  </button>
+
+                  <!-- Nút Ngừng / Mở bán lại -->
+                  <button type="button" class="btn btn-sm btn-action-btn"
+                    [ngClass]="item.status == 1 ? 'btn-action-pause' : 'btn-action-resume'"
+                    (click)="toggleStatus(item, item.status == 1 ? 0 : 1)"
+                    [title]="item.status == 1 ? 'Tạm ngừng kinh doanh món này' : 'Mở bán lại món này'">
+                    <i class="bi" [ngClass]="item.status == 1 ? 'bi-pause-fill' : 'bi-play-fill'"></i>
+                    {{ item.status == 1 ? 'Ngừng' : 'Mở lại' }}
+                  </button>
+
+                  <!-- Nút Xóa -->
+                  <button type="button" class="btn btn-sm btn-action-btn btn-action-delete"
+                    (click)="deleteItem(item)" title="Xóa món khỏi danh sách">
+                    <i class="bi bi-trash3-fill"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 2. MOBILE CARD LIST VIEW (< 768px - TỐI ƯU TRÊN ĐIỆN THOẠI) -->
+    <div class="d-block d-md-none p-2 p-sm-3">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="text-center py-4">
+        <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+        <span class="text-muted small fw-semibold">Đang nạp danh mục Minibar...</span>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredItems.length === 0" class="text-center py-4 text-muted">
+        <i class="bi bi-inbox fs-2 text-slate-300 d-block mb-2"></i>
+        <div class="fw-semibold text-slate-700 small mb-1">
+          {{ searchTerm ? 'Không tìm thấy món phù hợp' : 'Danh mục Minibar đang trống.' }}
+        </div>
+        <button *ngIf="!searchTerm" class="btn btn-xs btn-primary rounded-pill px-3 mt-2" (click)="openModal()">
+          <i class="bi bi-plus-lg me-1"></i> Thêm món mới
+        </button>
+      </div>
+
+      <!-- Card List -->
+      <div *ngIf="!isLoading" class="d-flex flex-column gap-2.5">
+        <div *ngFor="let item of filteredItems" class="card border rounded-3 p-2.5 shadow-2xs minibar-mobile-card"
+          [class.minibar-row-inactive]="item.status == 0">
+          
+          <!-- Top Row: Icon + Name + Status Badge -->
+          <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div class="minibar-icon-box shadow-2xs">
+                {{ item.icon || '🥤' }}
+              </div>
+              <div>
+                <div class="fw-bold text-slate-900 fs-6 item-name">{{ item.name }}</div>
+                <div class="text-muted small text-truncate" style="max-width: 180px; font-size: 11px;">
+                  {{ item.description || 'Chưa có mô tả' }}
+                </div>
+              </div>
+            </div>
+            <!-- Status Badge -->
+            <span class="badge-status-active flex-shrink-0" *ngIf="item.status == 1">
+              <i class="bi bi-check-circle-fill me-1"></i>Đang bán
+            </span>
+            <span class="badge-status-inactive flex-shrink-0" *ngIf="item.status == 0">
+              <i class="bi bi-pause-circle-fill text-warning me-1"></i>Ngừng bán
+            </span>
+          </div>
+
+          <!-- Middle Info Box: Giá & Tồn kho -->
+          <div class="d-flex justify-content-between align-items-center bg-slate-50 p-2 rounded-2 mb-2.5 border">
+            <div>
+              <span class="text-muted small d-block" style="font-size: 10.5px;">Đơn giá:</span>
+              <div class="fw-bold text-slate-900 fs-6">
+                {{ formatPrice(item.price) }}
+                <span class="unit-tag font-normal">/ {{ item.unit || 'món' }}</span>
+              </div>
+            </div>
+            <div class="text-end">
+              <span class="text-muted small d-block" style="font-size: 10.5px;">Tồn kho:</span>
+              <div>
+                <span class="badge-stock-good" *ngIf="item.quantity > 10">
+                  <i class="bi bi-box-seam me-1"></i>{{ item.quantity }} {{ item.unit || 'món' }}
+                </span>
+                <span class="badge-stock-low" *ngIf="item.quantity > 0 && item.quantity <= 10">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i>Còn {{ item.quantity }}
+                </span>
+                <span class="badge-stock-out" *ngIf="item.quantity <= 0">
+                  <i class="bi bi-x-circle-fill me-1"></i>Hết hàng (0)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons: 4 nút thao tác full width -->
+          <div class="d-flex gap-1.5">
+            <button type="button" class="btn btn-sm btn-action-btn btn-action-edit flex-fill justify-content-center py-1.5"
+              (click)="openModal(item)">
+              <i class="bi bi-pencil-fill me-1"></i> Sửa
+            </button>
+
+            <button type="button" class="btn btn-sm btn-action-btn btn-action-restock flex-fill justify-content-center py-1.5"
+              (click)="openRestockModal(item, $event)">
+              <i class="bi bi-box-arrow-in-down me-1"></i> +Nhập
+            </button>
+
+            <button type="button" class="btn btn-sm btn-action-btn flex-fill justify-content-center py-1.5"
+              [ngClass]="item.status == 1 ? 'btn-action-pause' : 'btn-action-resume'"
+              (click)="toggleStatus(item, item.status == 1 ? 0 : 1)">
+              <i class="bi" [ngClass]="item.status == 1 ? 'bi-pause-fill' : 'bi-play-fill'"></i>
+              {{ item.status == 1 ? 'Ngừng' : 'Mở' }}
+            </button>
+
+            <button type="button" class="btn btn-sm btn-action-btn btn-action-delete px-2.5 py-1.5"
+              (click)="deleteItem(item)" title="Xóa món">
+              <i class="bi bi-trash3-fill"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL THÊM / CẬP NHẬT MÓN MINIBAR                                         -->
+<!-- ========================================================================= -->
+<div class="custom-modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="custom-modal-content" (click)="$event.stopPropagation()" style="max-width: 540px;">
+    <!-- Modal Header -->
+    <div class="modal-header p-3 px-4 bg-slate-50 border-bottom d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="modal-title fw-bold text-slate-900 mb-0">
+          <i class="bi" [ngClass]="isEditMode ? 'bi-pencil-square text-primary' : 'bi-plus-circle-fill text-primary'" class="me-1.5"></i>
+          {{ isEditMode ? 'Cập Nhật Món Minibar' : 'Thêm Món Minibar Mới' }}
+        </h5>
+        <div class="text-muted small mt-0.5">
+          {{ isEditMode ? 'Điều chỉnh biểu phí và số lượng tồn kho của sản phẩm.' : 'Bổ sung đồ uống hoặc đồ ăn nhẹ vào danh mục phòng.' }}
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="closeModal()"></button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body p-3 px-sm-4 text-slate-800">
+      <!-- 1. Tên Món -->
+      <div class="mb-3">
+        <label class="form-label fw-bold text-slate-800 small mb-1">
+          Tên món Minibar <span class="text-danger">*</span>:
+        </label>
+        <input type="text" class="form-control form-control-solid" [(ngModel)]="currentItem.name"
+          placeholder="Ví dụ: Nước suối LaVie 500ml, Bia Tiger, Snack Khoai Tây...">
+      </div>
+
+      <!-- 2. Biểu tượng Emoji & Bảng chọn nhanh -->
+      <div class="mb-3">
+        <label class="form-label fw-bold text-slate-800 small mb-1 d-flex justify-content-between">
+          <span>Biểu tượng (Icon / Emoji):</span>
+          <span class="text-muted fw-normal small">Bấm chọn icon nhanh bên dưới</span>
+        </label>
+        <div class="input-group mb-2">
+          <span class="input-group-text bg-white fs-4 p-1 px-3 border-end-0">
+            {{ currentItem.icon || '🥤' }}
+          </span>
+          <input type="text" class="form-control form-control-solid border-start-0" [(ngModel)]="currentItem.icon"
+            placeholder="Nhập hoặc dán emoji tùy ý...">
+        </div>
+        <!-- Quick Emoji Palette -->
+        <div class="d-flex flex-wrap gap-1 p-2 bg-slate-50 border rounded-3 emoji-picker-box">
+          <button *ngFor="let emoji of commonEmojis" type="button" 
+            class="btn btn-sm btn-emoji" [class.active]="currentItem.icon === emoji"
+            (click)="selectEmoji(emoji)">
+            {{ emoji }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Đơn Giá & Đơn Vị Tính -->
+      <div class="row g-2 g-sm-3 mb-3">
+        <div class="col-12 col-sm-7">
+          <label class="form-label fw-bold text-slate-800 small mb-1">
+            Đơn giá (VND) <span class="text-danger">*</span>:
+          </label>
+          <div class="input-group">
+            <input type="number" class="form-control form-control-solid fw-bold text-primary" 
+              [(ngModel)]="currentItem.price" min="0" step="5000" placeholder="0">
+            <span class="input-group-text bg-white small text-muted">đ</span>
+          </div>
+          <div class="small text-muted mt-1 fw-semibold" *ngIf="currentItem.price > 0">
+            ≈ {{ formatPrice(currentItem.price) }}
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-5">
+          <label class="form-label fw-bold text-slate-800 small mb-1">
+            Đơn vị tính <span class="text-danger">*</span>:
+          </label>
+          <select class="form-select form-select-solid" [(ngModel)]="currentItem.unit">
+            <option *ngFor="let u of commonUnits" [value]="u">{{ u }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 4. Số Lượng Tồn Kho -->
+      <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <label class="form-label fw-bold text-slate-800 small mb-0">
+            Số lượng tồn kho <span class="text-danger">*</span>:
+          </label>
+          <div class="d-flex gap-1">
+            <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" (click)="addModalQuantity(10)">+10</button>
+            <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" (click)="addModalQuantity(20)">+20</button>
+            <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" (click)="addModalQuantity(50)">+50</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <span class="input-group-text bg-white text-muted"><i class="bi bi-box-seam"></i></span>
+          <input type="number" class="form-control form-control-solid fw-bold" [(ngModel)]="currentItem.quantity" min="0" placeholder="0">
+          <span class="input-group-text bg-white text-muted small">{{ currentItem.unit || 'món' }}</span>
+        </div>
+      </div>
+
+      <!-- 5. Mô Tả Chi Tiết -->
+      <div class="mb-3">
+        <label class="form-label fw-bold text-slate-800 small mb-1">Mô tả sản phẩm:</label>
+        <textarea class="form-control form-control-solid" rows="2" [(ngModel)]="currentItem.description"
+          placeholder="Nhập dung tích, xuất xứ, hạn sử dụng..."></textarea>
+      </div>
+
+      <!-- 6. Trạng Thái (Nếu đang sửa) -->
+      <div class="card p-3 border rounded-3 bg-slate-50" *ngIf="isEditMode">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-bold small" [ngClass]="currentItem.status == 1 ? 'text-emerald-700' : 'text-slate-600'">
+              {{ currentItem.status == 1 ? '🟢 Đang mở bán trong Minibar' : '🔒 Đang ngừng bán' }}
+            </div>
+            <small class="text-muted">
+              {{ currentItem.status == 1 ? 'Khách lưu trú có thể sử dụng món này tại phòng.' : 'Món sẽ tạm ẩn khỏi danh mục phục vụ phòng.' }}
+            </small>
+          </div>
+          <button type="button" class="btn btn-sm fw-bold px-3 ms-3"
+            [ngClass]="currentItem.status == 1 ? 'btn-outline-danger' : 'btn-success'"
+            (click)="currentItem.status = currentItem.status == 1 ? 0 : 1">
+            {{ currentItem.status == 1 ? 'Ngừng bán' : 'Mở bán' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer p-3 px-4 bg-slate-50 border-top d-flex justify-content-between">
+      <button type="button" class="btn btn-sm btn-secondary px-3" (click)="closeModal()">Đóng</button>
+      <button type="button" class="btn btn-sm btn-primary fw-bold px-4 shadow-sm" (click)="saveItem()">
+        <i class="bi bi-check2-circle me-1"></i> {{ isEditMode ? 'Lưu Thay Đổi' : 'Thêm Món' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL NHẬP HÀNG NHANH (QUICK RESTOCK POPUP)                               -->
+<!-- ========================================================================= -->
+<div class="custom-modal-overlay" *ngIf="showRestockModal" (click)="closeRestockModal()">
+  <div class="custom-modal-content" (click)="$event.stopPropagation()" style="max-width: 440px;">
+    <!-- Header -->
+    <div class="modal-header p-3 px-4 bg-slate-50 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="modal-title fw-bold text-slate-900 mb-0">
+        <i class="bi bi-box-arrow-in-down text-primary me-1.5"></i> Nhập Hàng Vào Minibar
+      </h5>
+      <button type="button" class="btn-close" (click)="closeRestockModal()"></button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body p-3 px-4 text-slate-800" *ngIf="restockItem">
+      <div class="d-flex align-items-center gap-2.5 p-2.5 bg-slate-50 rounded-3 mb-3 border">
+        <div class="minibar-icon-box fs-4">{{ restockItem.icon || '🥤' }}</div>
+        <div>
+          <div class="fw-bold text-slate-900">{{ restockItem.name }}</div>
+          <div class="text-muted small">Tồn kho hiện tại: <b class="text-primary">{{ restockItem.quantity }} {{ restockItem.unit || 'món' }}</b></div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold text-slate-800 small mb-1">
+          Số lượng muốn cộng thêm:
+        </label>
+        <div class="input-group">
+          <span class="input-group-text bg-white text-success fw-bold">+</span>
+          <input type="number" class="form-control form-control-solid fw-bold fs-5 text-success" 
+            [(ngModel)]="restockAmount" min="1" placeholder="Nhập số lượng...">
+          <span class="input-group-text bg-white small text-muted">{{ restockItem.unit || 'món' }}</span>
+        </div>
+
+        <!-- Quick increment buttons -->
+        <div class="d-flex gap-1.5 mt-2">
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 flex-fill fw-semibold" (click)="quickAddRestock(10)">+10</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 flex-fill fw-semibold" (click)="quickAddRestock(20)">+20</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 flex-fill fw-semibold" (click)="quickAddRestock(50)">+50</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 flex-fill fw-semibold" (click)="quickAddRestock(100)">+100</button>
+        </div>
+      </div>
+
+      <div class="alert alert-primary p-2.5 mb-0 small d-flex align-items-center gap-2 border-0" style="background-color: #eff6ff; color: #1e40af;">
+        <i class="bi bi-info-circle-fill fs-5 flex-shrink-0"></i>
+        <div>
+          Tồn kho dự kiến sau khi nhập: <b>{{ (restockItem.quantity || 0) + (restockAmount || 0) }} {{ restockItem.unit || 'món' }}</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer p-3 px-4 bg-slate-50 border-top d-flex justify-content-between">
+      <button type="button" class="btn btn-sm btn-secondary px-3" (click)="closeRestockModal()">Hủy</button>
+      <button type="button" class="btn btn-sm btn-success fw-bold px-4 shadow-sm" (click)="confirmRestock()">
+        <i class="bi bi-check-lg me-1"></i> Xác Nhận Nhập
+      </button>
+    </div>
   </div>
 </div>

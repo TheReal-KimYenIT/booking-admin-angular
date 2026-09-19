@@ -32,6 +32,10 @@ export class AdminService {
     return this.http.post(`${this.apiUrl}/admin/suspend-partner/${hotelId}`, { reason });
   }
 
+  updateCommission(hotelId: number, commissionRate: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/admin/hotels/${hotelId}/commission`, { commission_rate: commissionRate });
+  }
+
   // ==========================================
   // QUẢN LÝ KHÁCH HÀNG (CUSTOMERS)
   // ==========================================
@@ -110,6 +114,16 @@ export class AdminService {
     return this.http.put(`${this.apiUrl}/admin/contacts/${id}/resolve`, {});
   }
 
+  // 3. Cập nhật trạng thái liên hệ tùy chọn (0: Chưa xử lý, 1: Đã giải quyết)
+  updateContactStatus(id: number, status: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/admin/contacts/${id}/status`, { status });
+  }
+
+  // 4. Xóa liên hệ
+  deleteContact(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/admin/contacts/${id}`);
+  }
+
   getGlobalPromotions(): Observable<any> {
     return this.http.get(`${this.apiUrl}/admin/promotions`);
   }
@@ -118,6 +132,9 @@ export class AdminService {
   }
   updateGlobalPromotion(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/admin/promotions/${id}`, data);
+  }
+  deleteGlobalPromotion(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/admin/promotions/${id}`);
   }
 
   getTransactions(date: string, method: string) {

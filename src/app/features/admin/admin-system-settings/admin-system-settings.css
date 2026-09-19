@@ -1,0 +1,234 @@
+:host {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.system-settings-container {
+  max-width: 100%;
+}
+
+/* ========================================================================= */
+/* TAGS & BADGES                                                             */
+/* ========================================================================= */
+.portal-tag {
+  background-color: #e0e7ff !important;
+  color: #3730a3 !important;
+  border: 1px solid #c7d2fe !important;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-2xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* ========================================================================= */
+/* SLATE & NEUTRAL TOKENS                                                    */
+/* ========================================================================= */
+.border-slate-100 { border-color: #f1f5f9 !important; }
+.border-slate-200 { border-color: #e2e8f0 !important; }
+.border-slate-300 { border-color: #cbd5e1 !important; }
+.bg-slate-50 { background-color: #f8fafc !important; }
+.bg-slate-100 { background-color: #f1f5f9 !important; }
+.text-slate-900 { color: #0f172a !important; }
+.text-slate-800 { color: #1e293b !important; }
+.text-slate-700 { color: #334155 !important; }
+.text-slate-600 { color: #475569 !important; }
+.text-slate-500 { color: #64748b !important; }
+.text-slate-400 { color: #94a3b8 !important; }
+
+/* ========================================================================= */
+/* COLOR PALETTE TOKENS                                                      */
+/* ========================================================================= */
+.bg-indigo-50 { background-color: #eef2ff !important; }
+.text-indigo-600 { color: #4f46e5 !important; }
+.text-indigo-700 { color: #4338ca !important; }
+.text-indigo-500 { color: #6366f1 !important; }
+.border-indigo-100 { border-color: #e0e7ff !important; }
+.border-indigo-200 { border-color: #c7d2fe !important; }
+
+.bg-emerald-50 { background-color: #ecfdf5 !important; }
+.text-emerald-500 { color: #10b981 !important; }
+.text-emerald-600 { color: #059669 !important; }
+.text-emerald-700 { color: #047857 !important; }
+.text-emerald-900 { color: #064e3b !important; }
+.border-emerald-100 { border-color: #d1fae5 !important; }
+.border-emerald-200 { border-color: #a7f3d0 !important; }
+.bg-emerald-500 { background-color: #10b981 !important; }
+
+.bg-amber-50 { background-color: #fffbeb !important; }
+.text-amber-600 { color: #d97706 !important; }
+.text-amber-700 { color: #b45309 !important; }
+.text-amber-800 { color: #92400e !important; }
+.border-amber-100 { border-color: #fef3c7 !important; }
+.border-amber-200 { border-color: #fde68a !important; }
+.bg-amber-500 { background-color: #f59e0b !important; }
+
+.bg-sky-50 { background-color: #f0f9ff !important; }
+.text-sky-600 { color: #0284c7 !important; }
+.text-sky-700 { color: #0369a1 !important; }
+.border-sky-200 { border-color: #bae6fd !important; }
+
+/* ========================================================================= */
+/* KPI CARDS                                                                 */
+/* ========================================================================= */
+.kpi-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.kpi-icon-wrapper {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ========================================================================= */
+/* PRESET BUTTONS                                                            */
+/* ========================================================================= */
+.preset-btn {
+  background-color: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.preset-btn:hover {
+  background-color: #eef2ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
+}
+
+.preset-btn.preset-active {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  border-color: #818cf8;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(99, 102, 241, 0.15);
+}
+
+/* Sample selector buttons */
+.sample-btn {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  transition: all 0.15s ease;
+}
+
+.sample-btn:hover {
+  background: #e2e8f0;
+}
+
+.sample-btn.sample-active {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+}
+
+.btn-xs {
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+/* ========================================================================= */
+/* INPUT CONTROLS & FORM                                                     */
+/* ========================================================================= */
+.form-control:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.input-group-text {
+  border-color: #e2e8f0;
+}
+
+/* ========================================================================= */
+/* ANIMATIONS                                                                */
+/* ========================================================================= */
+.fade-in-up {
+  animation: fadeInUp 0.25s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spin-icon {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ========================================================================= */
+/* RESPONSIVE OPTIMIZATIONS                                                  */
+/* ========================================================================= */
+@media (max-width: 991px) {
+  .system-settings-container {
+    padding: 12px !important;
+  }
+  
+  .simulation-card {
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 576px) {
+  .kpi-card .card-body {
+    padding: 10px !important;
+    gap: 8px !important;
+  }
+
+  .kpi-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    font-size: 16px !important;
+  }
+
+  .preset-btn {
+    font-size: 10.5px;
+    padding: 2px 6px;
+  }
+
+  .card-body {
+    padding: 16px !important;
+  }
+
+  .btn-primary.px-4 {
+    width: 100%;
+    justify-content: center;
+  }
+}

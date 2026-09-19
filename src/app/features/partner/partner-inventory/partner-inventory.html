@@ -1,205 +1,578 @@
-<div class="inventory-container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 style="color: #1e1b4b; margin: 0; font-weight: 800;">Lịch Giá & Tình Trạng Phòng</h2>
-            <p style="color: #64748b;">Điều chỉnh giá động toàn diện và đóng/mở bán phòng linh hoạt.</p>
+<div class="inventory-container p-2 p-md-3">
+  <!-- HEADER -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-calendar3-range me-1.5"></i> Quản Trị Phân Phối
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Lịch Giá & Tình Trạng Phòng</h2>
+      <p class="text-muted mb-0 small">Điều chỉnh giá bán linh hoạt theo ngày, theo dõi số lượng phòng trống và đóng/mở bán tức thì.</p>
+    </div>
+    <button class="btn btn-primary fw-semibold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2" (click)="openBulkModal()">
+      <i class="bi bi-sliders"></i>
+      <span>Cài Đặt Giá Hàng Loạt</span>
+    </button>
+  </div>
+
+  <!-- KPI SUMMARY CARDS (COMPACT) -->
+  <!-- KPI SUMMARY CARDS (COMPACT & INFORMATIVE) -->
+  <div class="row g-2 mb-2.5">
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2 px-3 d-flex align-items-center gap-2">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-1.5 fs-5">
+            <i class="bi bi-grid-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Tổng Loại Phòng</div>
+            <div class="fs-6 fw-bold text-slate-800 d-flex align-items-center gap-1">
+              <span>{{ totalRoomTypes }}</span> <span class="text-muted small fw-normal">loại</span>
+              <span *ngIf="activeRoomTypesCount < totalRoomTypes" class="badge-status-active ms-1" style="font-size: 9.5px; padding: 1px 5px;">
+                {{ activeRoomTypesCount }} đang bán
+              </span>
+            </div>
+          </div>
         </div>
-        <button class="btn btn-primary fw-bold px-4" (click)="openBulkModal()">
-            ⚙️ Điều chỉnh tỷ lệ hàng loạt
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2 px-3 d-flex align-items-center gap-2">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-1.5 fs-5">
+            <i class="bi bi-door-open-fill"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Tổng Phòng Vật Lý</div>
+            <div class="fs-6 fw-bold text-emerald-600">{{ totalPhysicalRooms }} <span class="text-muted small fw-normal">phòng</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2 px-3 d-flex align-items-center gap-2">
+          <div class="kpi-icon-wrapper bg-blue-50 text-blue-600 rounded-3 p-1.5 fs-5">
+            <i class="bi bi-calendar-week"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Khoảng Thời Gian</div>
+            <div class="fs-6 fw-bold text-slate-800">
+              {{ totalDays }} ngày
+              <span class="text-muted small fw-normal">({{ startDate | date:'dd/MM' }} - {{ endDate | date:'dd/MM' }})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2 px-3 d-flex align-items-center gap-2">
+          <div class="kpi-icon-wrapper bg-rose-50 text-rose-600 rounded-3 p-1.5 fs-5">
+            <i class="bi bi-stars"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold" style="font-size: 11px;">Ngày Cuối Tuần</div>
+            <div class="fs-6 fw-bold text-rose-600">{{ totalWeekendDays }} <span class="text-muted small fw-normal">ngày (T7, CN)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS & DATE NAVIGATOR -->
+  <div class="card border-0 shadow-xs mb-2 bg-white">
+    <div class="card-body py-2 px-3 d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-2">
+      <!-- Quick Shift & Presets -->
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="btn-group btn-group-sm shadow-2xs">
+          <button type="button" class="btn btn-outline-secondary fw-semibold px-2.5" (click)="shiftDays(-7)" title="Lùi 1 tuần">
+            <i class="bi bi-chevron-double-left"></i> 1 Tuần
+          </button>
+          <button type="button" class="btn btn-outline-secondary fw-semibold px-2" (click)="shiftDays(-1)" title="Lùi 1 ngày">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button type="button" class="btn btn-primary fw-bold px-3" (click)="goToToday()">
+            Hôm nay
+          </button>
+          <button type="button" class="btn btn-outline-secondary fw-semibold px-2" (click)="shiftDays(1)" title="Tiến 1 ngày">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+          <button type="button" class="btn btn-outline-secondary fw-semibold px-2.5" (click)="shiftDays(7)" title="Tiến 1 tuần">
+            1 Tuần <i class="bi bi-chevron-double-right"></i>
+          </button>
+        </div>
+
+        <!-- Presets 7/14/30 days -->
+        <div class="btn-group btn-group-sm shadow-2xs ms-1">
+          <button type="button" class="btn fw-semibold" 
+            [ngClass]="selectedPreset === 7 ? 'btn-secondary text-white' : 'btn-outline-secondary'"
+            (click)="setPresetDays(7)">7 ngày</button>
+          <button type="button" class="btn fw-semibold" 
+            [ngClass]="selectedPreset === 14 ? 'btn-secondary text-white' : 'btn-outline-secondary'"
+            (click)="setPresetDays(14)">14 ngày</button>
+          <button type="button" class="btn fw-semibold" 
+            [ngClass]="selectedPreset === 30 ? 'btn-secondary text-white' : 'btn-outline-secondary'"
+            (click)="setPresetDays(30)">30 ngày</button>
+        </div>
+      </div>
+
+      <!-- Date Pickers on Right -->
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="d-flex align-items-center gap-1.5 bg-slate-50 border rounded-3 px-2 py-1">
+          <span class="text-muted small fw-semibold">Từ:</span>
+          <input type="date" class="form-control form-control-sm border-0 bg-transparent p-0" 
+            style="width: 125px;" [(ngModel)]="startDate" (change)="loadInventory()" [min]="minDate">
+        </div>
+        <span class="text-muted small fw-bold">→</span>
+        <div class="d-flex align-items-center gap-1.5 bg-slate-50 border rounded-3 px-2 py-1">
+          <span class="text-muted small fw-semibold">Đến:</span>
+          <input type="date" class="form-control form-control-sm border-0 bg-transparent p-0" 
+            style="width: 125px;" [(ngModel)]="endDate" (change)="loadInventory()" [min]="minDate">
+        </div>
+        <button class="btn btn-sm btn-outline-secondary p-1.5 rounded-3" (click)="loadInventory()" title="Tải lại bảng dữ liệu">
+          <i class="bi bi-arrow-clockwise"></i>
         </button>
+      </div>
     </div>
+  </div>
 
-    <div class="card shadow-sm border-0 mb-3 bg-white p-3">
-        <div class="d-flex align-items-center gap-4 text-dark font-weight-bold" style="font-size: 13px;">
-            <span class="d-flex align-items-center gap-2">🛡️ <b>Chú thích bảng lịch:</b></span>
-            <span class="d-flex align-items-center gap-1"><span class="badge-legend mode-base"></span> Giá cơ bản</span>
-            <span class="d-flex align-items-center gap-1"><span class="badge-legend mode-custom"></span> Giá tùy chỉnh
-                thủ công</span>
-            <span class="d-flex align-items-center gap-1"><span class="badge-legend mode-closed"></span> Phòng đang đóng
-                bán (🔒)</span>
+  <!-- CHÚ THÍCH BẢNG LỊCH (LEGEND) -->
+  <div class="card border-0 shadow-xs mb-2.5 bg-white">
+    <div class="card-body p-2 px-3 d-flex align-items-center flex-wrap gap-2 small">
+      <span class="fw-bold text-slate-800 d-inline-flex align-items-center gap-1 me-1">
+        <i class="bi bi-info-circle-fill text-primary"></i> Chú thích:
+      </span>
+      <span class="legend-pill pill-default">⚪ Giá mặc định</span>
+      <span class="legend-pill pill-custom">✏️ Đã chỉnh giá riêng</span>
+      <span class="legend-pill pill-up"><i class="bi bi-arrow-up-right me-0.5"></i> Giá tăng</span>
+      <span class="legend-pill pill-down"><i class="bi bi-arrow-down-right me-0.5"></i> Giá giảm</span>
+      <span class="legend-pill pill-available">🟢 Còn phòng trống</span>
+      <span class="legend-pill pill-soldout">🔴 Hết phòng (0)</span>
+      <span class="legend-pill pill-closed">🔒 Đang khóa bán</span>
+      <span class="ms-auto text-muted small fst-italic d-none d-xl-inline">
+        💡 Mẹo: Nhấp trực tiếp vào ô để sửa nhanh giá & số phòng.
+      </span>
+    </div>
+  </div>
+
+  <!-- MA TRẬN BẢNG LỊCH (MATRIX TABLE) -->
+  <div class="card border-0 shadow-xs bg-white matrix-wrapper overflow-hidden">
+    <!-- Matrix Sub-Header Toolbar with Horizontal Scroll Buttons -->
+    <div class="p-2 px-3 bg-slate-50 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <span class="fw-bold text-slate-800 small text-uppercase d-flex align-items-center gap-1.5">
+          <i class="bi bi-table text-primary"></i> Bảng Lịch Phòng ({{ headers.length }} ngày)
+        </span>
+        <span class="date-range-tag">
+          {{ startDate | date:'dd/MM/yyyy' }} - {{ endDate | date:'dd/MM/yyyy' }}
+        </span>
+      </div>
+
+      <div class="d-flex align-items-center gap-2" *ngIf="headers.length > 7">
+        <span class="text-muted small fw-semibold d-none d-sm-inline">
+          <i class="bi bi-arrow-left-right me-1 text-primary"></i> Cuộn ngang xem tiếp:
+        </span>
+        <div class="btn-group btn-group-sm shadow-2xs">
+          <button type="button" class="btn btn-outline-secondary px-2.5 py-0.5 fw-semibold" (click)="scrollTable('left')" title="Cuộn sang trái">
+            <i class="bi bi-chevron-left me-1"></i> Trước
+          </button>
+          <button type="button" class="btn btn-outline-secondary px-2.5 py-0.5 fw-semibold" (click)="scrollTable('right')" title="Cuộn sang phải">
+            Sau <i class="bi bi-chevron-right ms-1"></i>
+          </button>
         </div>
+      </div>
     </div>
 
-    <div class="card shadow-sm border-0 mb-3 bg-white p-3">
-        <div class="d-flex align-items-center flex-wrap justify-content-between gap-3">
-            <div class="btn-group shadow-sm">
-                <button class="btn btn-outline-secondary" (click)="shiftDays(-7)">« 1 Tuần</button>
-                <button class="btn btn-outline-secondary" (click)="shiftDays(-1)">‹</button>
-                <button class="btn btn-outline-secondary bg-light text-dark fw-bold" (click)="goToToday()">Hôm
-                    nay</button>
-                <button class="btn btn-outline-secondary" (click)="shiftDays(1)">›</button>
-                <button class="btn btn-outline-secondary" (click)="shiftDays(7)">1 Tuần »</button>
-            </div>
+    <div class="table-responsive matrix-scroll-container">
+      <table class="table table-bordered table-matrix mb-0">
+        <thead>
+          <tr class="header-row">
+            <th class="sticky-col font-title align-middle">
+              <div class="d-flex align-items-center justify-content-between">
+                <span>HẠNG PHÒNG</span>
+                <span class="room-type-counter">{{ gridData.length }} loại phòng</span>
+              </div>
+            </th>
+            <th *ngFor="let day of headers" class="text-center p-2 day-header"
+              [class.day-today]="day.is_today"
+              [class.weekend]="day.is_weekend">
+              <div *ngIf="day.is_today" class="today-badge mb-1">HÔM NAY</div>
+              <div class="day-name" [class.text-rose-600]="day.is_weekend" [class.text-primary]="day.is_today">
+                {{ day.day_name }}
+              </div>
+              <div class="day-label text-muted fw-bold">{{ day.day_label }}</div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- LOADING STATE -->
+          <tr *ngIf="isLoading">
+            <td [attr.colspan]="headers.length + 1" class="text-center p-5">
+              <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+              <span class="text-muted fw-semibold">Đang tải và tính toán ma trận tồn kho & giá phòng...</span>
+            </td>
+          </tr>
 
-            <div class="d-flex align-items-center gap-2 text-dark">
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="startDate"
-                    (change)="loadInventory()">
-                <span>đến</span>
-                <input type="date" class="form-control form-control-sm" [(ngModel)]="endDate"
-                    (change)="loadInventory()">
-            </div>
-        </div>
-    </div>
+          <!-- EMPTY STATE -->
+          <tr *ngIf="!isLoading && gridData.length === 0">
+            <td [attr.colspan]="headers.length + 1" class="text-center py-5 text-muted">
+              <i class="bi bi-inbox fs-2 text-slate-300 d-block mb-2"></i>
+              Không tìm thấy loại phòng nào đang mở bán.
+            </td>
+          </tr>
 
-    <div class="card shadow-sm border-0 bg-white text-dark" style="overflow-x: auto;">
-        <table class="table table-bordered table-matrix mb-0">
-            <thead>
-                <tr class="bg-light">
-                    <th class="sticky-col font-title" style="min-width: 240px; z-index: 5;">TẤT CẢ CÁC LOẠI PHÒNG</th>
-                    <th *ngFor="let day of headers" class="text-center p-2 day-header"
-                        [class.weekend]="day.day_name === 'T7' || day.day_name === 'CN'">
-                        <div class="day-name text-uppercase">{{ day.day_name }}</div>
-                        <div class="day-label text-muted fw-bold">{{ day.day_label }}</div>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngIf="isLoading">
-                    <td [attr.colspan]="headers.length + 1" class="text-center p-5 text-muted">Đang tính toán ma trận dữ
-                        liệu lịch...</td>
-                </tr>
+          <!-- ROWS -->
+          <ng-container *ngIf="!isLoading">
+            <tr *ngFor="let row of gridData" class="room-row" [class.row-inactive]="row.status === 0">
+              <!-- Sticky Room Title Cell -->
+              <td class="sticky-col align-middle p-2 px-2.5">
+                <div class="room-info">
+                  <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                    <div class="room-title-text" [title]="row.room_type_name">
+                      {{ cleanRoomName(row.room_type_name) }}
+                    </div>
+                    <span *ngIf="row.status === 0" class="badge-status-inactive" title="Hạng phòng đang tạm ngưng mở bán">
+                      <i class="bi bi-pause-circle-fill text-warning me-0.5"></i>Tạm ngưng
+                    </span>
+                  </div>
 
-                <ng-container *ngIf="!isLoading">
-                    <tr *ngFor="let row of gridData">
-                        <td class="sticky-col fw-bold bg-white align-middle">
-                            {{ row.room_type_name }}
-                            <div class="text-muted small mt-1" style="font-weight: normal; font-size: 11px;">Mặc định:
-                                {{ formatPrice(row.base_price) }}</div>
-                        </td>
+                  <div class="d-flex align-items-center justify-content-between gap-1 flex-wrap">
+                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                      <span class="badge-base-price">
+                        Giá gốc: {{ formatPrice(row.base_price) }}
+                      </span>
+                      <span class="badge-room-count">
+                        {{ row.total_physical_rooms }} phòng
+                      </span>
+                    </div>
 
-                        <td *ngFor="let day of row.days_data" class="matrix-cell"
-                            [class.cell-closed]="day.is_closed === 1"
-                            [class.bg-increase]="day.trend === 'up' && day.is_closed === 0"
-                            [class.bg-decrease]="day.trend === 'down' && day.is_closed === 0">
-
-                            <div class="cell-content p-2" *ngIf="day.is_closed === 0">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="icon-manual">{{ day.is_custom ? '✏️' : '' }}</span>
-
-                                    <span *ngIf="day.trend === 'up'" class="text-success fw-bold icon-trend">↗</span>
-                                    <span *ngIf="day.trend === 'down'" class="text-danger fw-bold icon-trend">↘</span>
-                                </div>
-
-                                <div class="cell-price fw-bold text-center mb-1">
-                                    {{ formatPrice(day.price).replace(',00 ₫', 'đ').replace(' ₫', 'đ') }}
-                                </div>
-
-                                <div class="d-flex align-items-center gap-1 mt-auto">
-                                    <span class="percent-text">{{ day.percent_change > 0 ? '+' : '' }}{{
-                                        day.percent_change }}%</span>
-                                    <div class="progress-bar-tiny flex-grow-1" [class.bg-success]="day.trend === 'up'"
-                                        [class.bg-danger]="day.trend === 'down'"
-                                        [class.bg-secondary]="day.trend === 'none'"
-                                        [class.opacity-25]="day.trend === 'none'"></div>
-                                </div>
-                            </div>
-
-                            <div class="cell-content p-2 d-flex justify-content-center align-items-center"
-                                *ngIf="day.is_closed === 1">
-                                <div class="text-danger fw-bold">🔒 ĐÓNG</div>
-                            </div>
-
-                            <button class="quick-toggle-btn shadow"
-                                (click)="quickToggleClose(row.room_type_id, day.date, day.is_closed)">
-                                {{ day.is_closed === 1 ? '🔓 Mở' : '🔒 Khóa' }}
-                            </button>
-                        </td>
-                    </tr>
-                </ng-container>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div class="custom-modal-overlay" *ngIf="showBulkModal" (click)="showBulkModal = false">
-    <div class="custom-modal-content" (click)="$event.stopPropagation()" style="max-width: 580px;">
-        <div class="modal-header p-4 bg-light d-flex justify-content-between align-items-center">
-            <h4 class="mb-0 fw-bold" style="color: #1e293b;">📊 Điều chỉnh tỷ lệ & cấu hình lịch</h4>
-            <button class="btn-close" (click)="showBulkModal = false"></button>
-        </div>
-        <div class="modal-body p-4 text-dark">
-
-            <div class="mb-3">
-                <label class="form-label fw-bold">Các loại phòng bị ảnh hưởng:</label>
-                <div class="d-flex flex-wrap gap-2">
-                    <button *ngFor="let row of gridData" type="button" class="btn btn-sm btn-role-select"
-                        [class.active]="bulkForm.room_type_ids.includes(row.room_type_id)"
-                        (click)="toggleRoomTypeSelection(row.room_type_id)">
-                        {{ row.room_type_name }}
+                    <!-- Nút Mở bán lại / Tạm ngưng nhanh -->
+                    <button *ngIf="row.status === 0" type="button" 
+                      class="btn btn-xs btn-outline-success fw-bold py-0.5 px-2 rounded-pill d-inline-flex align-items-center gap-1"
+                      (click)="toggleRoomTypeActive(row, $event)" title="Kích hoạt mở bán lại hạng phòng này">
+                      <i class="bi bi-play-circle-fill"></i> Mở bán lại
                     </button>
+                    <button *ngIf="row.status === 1" type="button" 
+                      class="btn btn-xs text-muted border-0 p-0.5 px-1 rounded btn-hover-pause"
+                      (click)="toggleRoomTypeActive(row, $event)" title="Tạm ngưng mở bán hạng phòng này">
+                      <i class="bi bi-pause-fill"></i>
+                    </button>
+                  </div>
                 </div>
-            </div>
+              </td>
 
-            <div class="row mb-3">
-                <div class="col-6">
-                    <label class="form-label fw-bold">Từ ngày:</label>
-                    <input type="date" class="form-control" [(ngModel)]="bulkForm.start_date">
-                </div>
-                <div class="col-6">
-                    <label class="form-label fw-bold">Đến ngày:</label>
-                    <input type="date" class="form-control" [(ngModel)]="bulkForm.end_date">
-                </div>
-            </div>
+              <!-- Matrix Date Cells -->
+              <td *ngFor="let day of row.days_data" class="matrix-cell"
+                [class.cell-closed]="day.is_closed === 1"
+                [class.cell-custom]="day.is_custom && day.is_closed === 0"
+                [class.cell-increase]="day.trend === 'up' && day.is_closed === 0"
+                [class.cell-decrease]="day.trend === 'down' && day.is_closed === 0"
+                [class.cell-today]="day.date === startDate && day.is_today"
+                (click)="openCellModal(row, day, $event)"
+                [title]="'Nhấp để sửa ngày ' + day.date">
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Hình thức điều chỉnh giá:</label>
-                <div class="btn-group d-flex w-100 shadow-sm" role="group">
-                    <button type="button" class="btn btn-outline-primary fw-bold w-100"
-                        [class.active]="bulkForm.update_type === 'percent'" (click)="bulkForm.update_type = 'percent'">%
-                        Phần trăm</button>
-                    <button type="button" class="btn btn-outline-primary fw-bold w-100"
-                        [class.active]="bulkForm.update_type === 'fixed'" (click)="bulkForm.update_type = 'fixed'">$ Giá
-                        cố định</button>
-                    <button type="button" class="btn btn-outline-primary fw-bold w-100"
-                        [class.active]="bulkForm.update_type === 'reset'" (click)="bulkForm.update_type = 'reset'">🔄
-                        Thông thoáng (Reset)</button>
-                </div>
-            </div>
-
-            <div class="card p-3 mb-4 bg-light border-0" *ngIf="bulkForm.update_type !== 'reset'">
-                <div *ngIf="bulkForm.update_type === 'percent'">
-                    <label class="form-label font-weight-bold">Nhập tỷ lệ tăng/giảm giá (Ví dụ: <code>10</code> để tăng
-                        10%, <code>-15</code> để giảm 15%)</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white fw-bold">%</span>
-                        <input type="number" class="form-control" [(ngModel)]="bulkForm.price_value"
-                            placeholder="Nhập số phần trăm...">
+                <div class="cell-inner p-2 d-flex flex-column justify-content-between">
+                  <!-- Dòng trên: Giá bán & Trend chip -->
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <!-- Price -->
+                    <div class="cell-price fw-bold" [class.text-decoration-line-through]="day.is_closed === 1" [class.text-muted]="day.is_closed === 1">
+                      {{ formatPrice(day.price) }}
                     </div>
-                </div>
 
-                <div *ngIf="bulkForm.update_type === 'fixed'">
-                    <label class="form-label font-weight-bold">Đặt mức giá bán cố định mới cho các ngày đã chọn:</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white fw-bold">VND</span>
-                        <input type="number" class="form-control" [(ngModel)]="bulkForm.price_value"
-                            placeholder="Nhập giá tiền cụ thể...">
+                    <!-- Indicators -->
+                    <div class="d-flex align-items-center gap-1">
+                      <span *ngIf="day.is_custom" class="custom-badge" title="Đã chỉnh sửa thủ công">✏️</span>
+                      <span *ngIf="day.trend === 'up' && day.is_closed === 0" class="trend-badge trend-up" [title]="'Tăng ' + day.percent_change + '% so với giá gốc'">
+                        ↗+{{ day.percent_change }}%
+                      </span>
+                      <span *ngIf="day.trend === 'down' && day.is_closed === 0" class="trend-badge trend-down" [title]="'Giảm ' + day.percent_change + '% so với giá gốc'">
+                        ↘{{ day.percent_change }}%
+                      </span>
                     </div>
+                  </div>
+
+                  <!-- Dòng dưới: Tồn kho phòng trống / Trạng thái đóng -->
+                  <div class="d-flex align-items-center justify-content-between mt-auto">
+                    <!-- If Closed -->
+                    <div *ngIf="day.is_closed === 1" class="allotment-badge badge-closed w-100 text-center">
+                      <i class="bi bi-lock-fill me-0.5"></i> Đã đóng
+                    </div>
+
+                    <!-- If Open -->
+                    <div *ngIf="day.is_closed === 0" class="allotment-badge w-100 text-center"
+                      [ngClass]="day.available_allotment > 0 ? 'badge-available' : 'badge-soldout'">
+                      <span *ngIf="day.available_allotment > 0">
+                        Còn <b>{{ day.available_allotment }}</b> phòng
+                      </span>
+                      <span *ngIf="day.available_allotment === 0">
+                        <i class="bi bi-exclamation-circle-fill me-0.5"></i> Hết phòng
+                      </span>
+                    </div>
+                  </div>
                 </div>
-            </div>
 
-            <div class="alert alert-warning border-0" *ngIf="bulkForm.update_type === 'reset'"
-                style="background-color: #fff7ed; color: #c2410c;">
-                ⚠️ <b>Lưu ý:</b> Các mức giá tùy chỉnh đã thiết lập tại dải ngày này sẽ bị xóa bỏ hoàn toàn. Hệ thống sẽ
-                tự động sử dụng lại mức giá gốc ban đầu của khách sạn.
-            </div>
-
-            <div class="card p-3 border-0 bg-light">
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" id="changeStatusCheck"
-                        [(ngModel)]="bulkForm.change_status">
-                    <label class="form-check-label fw-bold" for="changeStatusCheck">Điều chỉnh đồng thời trạng thái
-                        Đóng/Mở phòng</label>
+                <!-- Hover Floating Actions Overlay -->
+                <div class="cell-hover-actions">
+                  <button type="button" class="btn-action-mini btn-action-edit" 
+                    (click)="openCellModal(row, day, $event)" title="Chỉnh sửa chi tiết">
+                    <i class="bi bi-pencil-fill"></i> Sửa
+                  </button>
+                  <button type="button" class="btn-action-mini"
+                    [ngClass]="day.is_closed === 1 ? 'btn-action-open' : 'btn-action-close'"
+                    (click)="quickToggleClose(row.room_type_id, day.date, day.is_closed, $event)"
+                    [title]="day.is_closed === 1 ? 'Mở bán phòng' : 'Khóa phòng ngày này'">
+                    <i class="bi" [ngClass]="day.is_closed === 1 ? 'bi-unlock-fill' : 'bi-lock-fill'"></i>
+                    {{ day.is_closed === 1 ? 'Mở' : 'Khóa' }}
+                  </button>
                 </div>
-                <select class="form-select" [disabled]="!bulkForm.change_status" [(ngModel)]="bulkForm.is_closed">
-                    <option [ngValue]="false">🟢 Mở bán bình thường</option>
-                    <option [ngValue]="true">🔴 Đóng phòng hoàn toàn (🔒 KHÓA BÁN)</option>
-                </select>
-            </div>
-
-        </div>
-        <div class="modal-footer p-3 bg-light text-end border-top">
-            <button class="btn btn-secondary px-3" (click)="showBulkModal = false">Hủy bỏ</button>
-            <button class="btn btn-dark px-4 fw-bold shadow-sm" (click)="saveBulkUpdate()">💾 Cứu (Lưu lại)</button>
-        </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
+
+<!-- ========================================================================= -->
+<!-- MODAL SỬA NHANH CHO 1 NGÀY (SINGLE CELL QUICK EDIT)                        -->
+<!-- ========================================================================= -->
+<div class="custom-modal-overlay" *ngIf="showCellModal" (click)="closeCellModal()">
+  <div class="custom-modal-content" (click)="$event.stopPropagation()" style="max-width: 520px;">
+    <!-- Modal Header -->
+    <div class="modal-header p-3 px-4 bg-slate-50 border-bottom d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="modal-title fw-bold text-slate-900 mb-0">
+          <i class="bi bi-calendar2-day-fill text-primary me-1.5"></i> Cập Nhật Lịch Ngày
+        </h5>
+        <div class="text-muted small mt-0.5">
+          {{ cleanRoomName(cellForm.room_type_name) }} • <b>{{ cellForm.day_name }}, {{ cellForm.day_label }}</b>
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="closeCellModal()"></button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body p-4 text-slate-800">
+      <!-- Info banner -->
+      <div class="p-3 bg-slate-50 border rounded-3 mb-3 d-flex justify-content-between align-items-center">
+        <div>
+          <span class="text-muted small">Giá gốc mặc định:</span>
+          <div class="fw-bold text-slate-700">{{ formatPrice(cellForm.base_price) }}</div>
+        </div>
+        <div>
+          <span class="text-muted small">Tổng phòng vật lý:</span>
+          <div class="fw-bold text-slate-700 text-end">{{ cellForm.total_rooms }} phòng</div>
+        </div>
+      </div>
+
+      <!-- Price Input -->
+      <div class="mb-3">
+        <label class="form-label fw-bold text-slate-800 d-flex justify-content-between align-items-center">
+          <span>Giá bán cho ngày này (VND):</span>
+          <span class="text-primary fw-semibold small" *ngIf="cellForm.price !== cellForm.base_price">
+            {{ cellForm.price > cellForm.base_price ? '↗ Tăng' : '↘ Giảm' }}
+            {{ formatPrice(cellForm.price - cellForm.base_price) }}
+          </span>
+        </label>
+        <div class="input-group">
+          <input type="number" class="form-control form-control-lg fw-bold text-primary" 
+            [(ngModel)]="cellForm.price" min="0" step="10000" placeholder="Nhập giá phòng...">
+          <span class="input-group-text bg-white fw-bold text-muted">VND / đêm</span>
+        </div>
+        <!-- Quick adjustment pills -->
+        <div class="d-flex flex-wrap gap-1.5 mt-2">
+          <button type="button" class="btn btn-xs btn-outline-secondary" (click)="cellForm.price = cellForm.base_price">
+            Giá gốc ({{ formatPrice(cellForm.base_price) }})
+          </button>
+          <button type="button" class="btn btn-xs btn-outline-success" (click)="adjustPricePercent(10)">
+            +10%
+          </button>
+          <button type="button" class="btn btn-xs btn-outline-success" (click)="adjustPricePercent(20)">
+            +20%
+          </button>
+          <button type="button" class="btn btn-xs btn-outline-danger" (click)="adjustPricePercent(-10)">
+            -10%
+          </button>
+        </div>
+      </div>
+
+      <!-- Room Availability (Allotment) Override -->
+      <div class="card p-3 border rounded-3 mb-3 bg-light">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="changeAllotmentCell" [(ngModel)]="cellForm.change_allotment">
+          <label class="form-check-label fw-bold text-slate-800" for="changeAllotmentCell">
+            Điều chỉnh số phòng mở bán (Allotment)
+          </label>
+        </div>
+        <div *ngIf="cellForm.change_allotment" class="mt-2">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white fw-semibold">Số phòng trống:</span>
+            <input type="number" class="form-control" [(ngModel)]="cellForm.available_allotment" min="0" [max]="cellForm.total_rooms">
+            <span class="input-group-text bg-white text-muted">/ {{ cellForm.total_rooms }} phòng</span>
+          </div>
+          <small class="text-muted mt-1 d-block">Đặt bằng 0 nếu muốn tạm ngừng nhận đặt phòng mà không cần khóa ngày.</small>
+        </div>
+      </div>
+
+      <!-- Open / Closed Switch -->
+      <div class="p-3 border rounded-3" [ngClass]="cellForm.is_closed ? 'bg-rose-50 border-rose-200' : 'bg-emerald-50 border-emerald-200'">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-bold" [ngClass]="cellForm.is_closed ? 'text-rose-800' : 'text-emerald-800'">
+              {{ cellForm.is_closed ? '🔒 Đang ĐÓNG BÁN (Khóa ngày)' : '🟢 Đang MỞ BÁN cho khách đặt' }}
+            </div>
+            <small class="text-muted">
+              {{ cellForm.is_closed ? 'Khách hàng không thể tìm kiếm hoặc đặt phòng trong ngày này.' : 'Phòng sẵn sàng hiển thị trên website khi còn phòng trống.' }}
+            </small>
+          </div>
+          <button type="button" class="btn btn-sm fw-bold px-3"
+            [ngClass]="cellForm.is_closed ? 'btn-success' : 'btn-outline-danger'"
+            (click)="cellForm.is_closed = !cellForm.is_closed">
+            {{ cellForm.is_closed ? '🔓 Mở bán' : '🔒 Khóa bán' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer p-3 px-4 bg-slate-50 border-top d-flex justify-content-between">
+      <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" (click)="resetCellToBasePrice()">
+        <i class="bi bi-arrow-counterclockwise"></i> Khôi phục giá gốc
+      </button>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-secondary px-3" (click)="closeCellModal()">Đóng</button>
+        <button type="button" class="btn btn-sm btn-primary fw-bold px-4 shadow-sm" (click)="saveCellEdit()">
+          <i class="bi bi-check2-circle me-1"></i> Lưu thay đổi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL ĐIỀU CHỈNH HÀNG LOẠT (BULK MODAL)                                   -->
+<!-- ========================================================================= -->
+<div class="custom-modal-overlay" *ngIf="showBulkModal" (click)="showBulkModal = false">
+  <div class="custom-modal-content" (click)="$event.stopPropagation()" style="max-width: 620px;">
+    <!-- Modal Header -->
+    <div class="modal-header p-3 px-4 bg-slate-50 border-bottom d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="modal-title fw-bold text-slate-900 mb-0">
+          <i class="bi bi-sliders text-primary me-1.5"></i> Cài Đặt Giá & Lịch Hàng Loạt
+        </h5>
+        <div class="text-muted small mt-0.5">Áp dụng đồng thời cho nhiều loại phòng và khoảng thời gian tùy chọn.</div>
+      </div>
+      <button type="button" class="btn-close" (click)="showBulkModal = false"></button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body p-4 text-slate-800">
+      <!-- 1. Chọn loại phòng -->
+      <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-1.5">
+          <label class="form-label fw-bold text-slate-800 mb-0">Các loại phòng áp dụng:</label>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-link p-0 text-primary small text-decoration-none fw-semibold" (click)="selectAllRoomTypes()">Chọn tất cả</button>
+            <span class="text-muted">|</span>
+            <button type="button" class="btn btn-link p-0 text-muted small text-decoration-none" (click)="deselectAllRoomTypes()">Bỏ chọn</button>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap gap-1.5">
+          <button *ngFor="let row of gridData" type="button" class="btn btn-sm btn-role-select rounded-pill"
+            [class.active]="bulkForm.room_type_ids.includes(row.room_type_id)"
+            (click)="toggleRoomTypeSelection(row.room_type_id)">
+            <i class="bi" [ngClass]="bulkForm.room_type_ids.includes(row.room_type_id) ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+            {{ cleanRoomName(row.room_type_name) }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Khoảng thời gian -->
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="form-label fw-bold text-slate-700 small">Từ ngày:</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="bulkForm.start_date" [min]="minDate">
+        </div>
+        <div class="col-6">
+          <label class="form-label fw-bold text-slate-700 small">Đến ngày:</label>
+          <input type="date" class="form-control form-control-sm" [(ngModel)]="bulkForm.end_date" [min]="minDate">
+        </div>
+      </div>
+
+      <!-- 3. Hình thức điều chỉnh giá -->
+      <div class="mb-3">
+        <label class="form-label fw-bold text-slate-800">Hình thức điều chỉnh giá:</label>
+        <div class="btn-group d-flex w-100 shadow-2xs" role="group">
+          <button type="button" class="btn btn-sm btn-outline-primary fw-bold w-100 py-2"
+            [class.active]="bulkForm.update_type === 'percent'" (click)="bulkForm.update_type = 'percent'">
+            <i class="bi bi-percent"></i> Phần trăm
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary fw-bold w-100 py-2"
+            [class.active]="bulkForm.update_type === 'fixed'" (click)="bulkForm.update_type = 'fixed'">
+            <i class="bi bi-currency-dollar"></i> Giá cố định
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary fw-bold w-100 py-2"
+            [class.active]="bulkForm.update_type === 'reset'" (click)="bulkForm.update_type = 'reset'">
+            <i class="bi bi-arrow-counterclockwise"></i> Khôi phục gốc
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. Nhập giá trị theo chế độ -->
+      <div class="card p-3 mb-3 bg-light border-0" *ngIf="bulkForm.update_type !== 'reset'">
+        <div *ngIf="bulkForm.update_type === 'percent'">
+          <label class="form-label fw-bold small">Nhập tỷ lệ tăng/giảm (VD: <code>10</code> để tăng 10%, <code>-15</code> để giảm 15%):</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white fw-bold">%</span>
+            <input type="number" class="form-control" [(ngModel)]="bulkForm.price_value" placeholder="Ví dụ: 10 hoặc -10">
+          </div>
+        </div>
+
+        <div *ngIf="bulkForm.update_type === 'fixed'">
+          <label class="form-label fw-bold small">Đặt mức giá bán cố định mới cho các ngày đã chọn (VND):</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white fw-bold">VND</span>
+            <input type="number" class="form-control" [(ngModel)]="bulkForm.price_value" placeholder="Ví dụ: 2000000">
+          </div>
+        </div>
+      </div>
+
+      <!-- Warning if Reset -->
+      <div class="alert alert-warning border-0 p-2.5 mb-3 small d-flex gap-2" *ngIf="bulkForm.update_type === 'reset'"
+        style="background-color: #fff7ed; color: #c2410c;">
+        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+        <div>
+          <b>Lưu ý:</b> Mọi thiết lập giá tùy chỉnh trong dải ngày này sẽ được xóa bỏ và đưa về mức giá cơ bản gốc của khách sạn.
+        </div>
+      </div>
+
+      <!-- 5. Tùy chọn trạng thái Đóng / Mở -->
+      <div class="card p-3 border-0 bg-light mb-2">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="changeStatusCheckBulk" [(ngModel)]="bulkForm.change_status">
+          <label class="form-check-label fw-bold small" for="changeStatusCheckBulk">
+            Điều chỉnh đồng thời trạng thái Đóng/Mở phòng
+          </label>
+        </div>
+        <select class="form-select form-select-sm" [disabled]="!bulkForm.change_status" [(ngModel)]="bulkForm.is_closed">
+          <option [ngValue]="false">🟢 Mở bán bình thường</option>
+          <option [ngValue]="true">🔴 Đóng phòng hoàn toàn (🔒 KHÓA BÁN)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer p-3 px-4 bg-slate-50 border-top d-flex justify-content-between">
+      <button type="button" class="btn btn-sm btn-secondary px-3" (click)="showBulkModal = false">Hủy bỏ</button>
+      <button type="button" class="btn btn-sm btn-primary px-4 fw-bold shadow-sm" (click)="saveBulkUpdate()">
+        <i class="bi bi-save me-1"></i> Lưu cấu hình lịch
+      </button>
+    </div>
+  </div>
+</div>

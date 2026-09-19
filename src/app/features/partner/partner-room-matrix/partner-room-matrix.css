@@ -1,113 +1,171 @@
 .matrix-container {
-    padding: 5px;
+    padding: 6px;
 }
 
-/* Custom Chỉ số màu sắc bảng chỉ dẫn */
+/* --- KPI Thẻ thống kê thời gian thực --- */
+.kpi-card {
+    transition: all 0.2s ease-in-out;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.08) !important;
+}
+
+.kpi-ready {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(255, 255, 255, 0.95));
+    border-color: #a7f3d0 !important;
+}
+
+.kpi-occupied {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(255, 255, 255, 0.95));
+    border-color: #bfdbfe !important;
+}
+
+.kpi-cleaning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(255, 255, 255, 0.95));
+    border-color: #fde68a !important;
+}
+
+.kpi-maintenance {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(255, 255, 255, 0.95));
+    border-color: #fecaca !important;
+}
+
+.kpi-card.kpi-active {
+    outline: 2px solid #4f46e5;
+    outline-offset: 1px;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
+}
+
+.kpi-icon-pill {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Bảng chỉ dẫn màu sắc (Legend) --- */
 .color-indicator {
     display: inline-block;
-    width: 25px;
-    height: 15px;
+    width: 22px;
+    height: 13px;
     border-radius: 4px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     vertical-align: middle;
 }
 
-.mode-pending {
-    background-color: #f59e0b;
-}
-
-/* Vàng */
 .mode-confirmed {
     background-color: #3b82f6;
 }
 
-/* Xanh biển */
 .mode-staying {
     background-color: #10b981;
 }
 
-/* Xanh lá cây */
 .mode-done {
     background-color: #94a3b8;
 }
 
-/* Xám bạc */
+/* --- Bảng Ma Trận Buồng Phòng --- */
+.matrix-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
 
 .matrix-table th,
 .matrix-table td {
     text-align: center;
     vertical-align: middle;
-    min-width: 100px;
+    min-width: 110px;
     font-size: 12px;
     border: 1px solid #e2e8f0;
-    height: 60px;
+    height: 64px;
 }
 
-/* Cố định cột trục dọc số phòng */
+/* Cố định cột trục dọc tên & số phòng */
 .matrix-table .sticky-side {
     position: sticky;
     left: 0;
-    background-color: #fff;
+    background-color: #ffffff;
     text-align: left;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-    z-index: 2;
-    padding-left: 15px;
+    box-shadow: 3px 0 8px rgba(0, 0, 0, 0.05);
+    z-index: 4;
 }
 
+/* Cột cuối tuần */
 .cell-header.is-weekend {
-    background-color: #ffe4e6 !important;
+    background-color: #fff1f2 !important;
 }
 
 .cell-header .hdr-name {
     font-weight: 800;
     color: #1e293b;
+    font-size: 13px;
 }
 
-/* Các dải khối màu của Đơn hàng đè lên lưới ô lịch */
+/* Nổi bật cột Hôm nay */
+.cell-header.is-today {
+    background-color: #eef2ff !important;
+    border-bottom: 2px solid #4f46e5 !important;
+}
+
+.today-badge {
+    display: inline-block;
+    background-color: #4f46e5;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+}
+
+/* Ô ma trận hôm nay */
+td.col-today:not(.clickable-occupied) {
+    background-color: #f8faff;
+}
+
+/* --- Các khối dải màu trạng thái đặt phòng --- */
 .matrix-cell-box {
     position: relative;
 }
 
 .clickable-occupied {
     cursor: pointer;
-    transition: all 0.2s;
+    transition: filter 0.15s ease, transform 0.15s ease;
 }
 
 .clickable-occupied:hover {
-    filter: brightness(90%);
-    box-shadow: inset 0 0 0 2px #1e1b4b;
+    filter: brightness(92%);
+    box-shadow: inset 0 0 0 2px rgba(30, 27, 75, 0.4);
 }
 
-.status-0 {
-    background-color: #f59e0b !important;
-    color: white !important;
-}
-
-/* Chờ XN */
 .status-1 {
     background-color: #3b82f6 !important;
-    color: white !important;
+    color: #ffffff !important;
 }
 
-/* Đã XN */
 .status-2 {
     background-color: #10b981 !important;
-    color: white !important;
+    color: #ffffff !important;
 }
 
-/* Đang ở */
 .status-3 {
     background-color: #94a3b8 !important;
-    color: white !important;
+    color: #ffffff !important;
 }
-
-/* Đã đi */
 
 .occupied-block {
     display: flex;
     flex-direction: column;
     justify-content: center;
     height: 100%;
+    padding: 4px;
 }
 
 .guest-title {
@@ -119,9 +177,10 @@
 }
 
 .code-subtitle {
-    font-size: 9px;
-    font-weight: bold;
-    opacity: 0.8;
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.9;
+    letter-spacing: 0.3px;
 }
 
 .empty-block {
@@ -130,37 +189,48 @@
     background-color: transparent;
 }
 
-/* Tùy chỉnh màu sắc trực quan cho Dropdown trạng thái phòng quầy lễ tân */
+/* --- Dropdown trạng thái phòng quầy lễ tân --- */
 .status-dropdown-pms {
-    font-size: 11px !important;
-    font-weight: bold;
+    font-size: 12px !important;
+    font-weight: 600;
     padding: 3px 8px !important;
     border-radius: 6px;
     cursor: pointer;
-    background-color: #fff;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .status-dropdown-pms.status-empty {
-    border-color: #10b981;
-    color: #10b981;
+    background-color: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #065f46;
 }
 
-/* Màu xanh lá */
 .status-dropdown-pms.status-dirty {
-    border-color: #f59e0b;
-    color: #b45309;
+    background-color: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
 }
 
-/* Màu cam dọn dẹp */
 .status-dropdown-pms.status-occupied {
-    border-color: #3b82f6;
-    color: #1d4ed8;
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e40af;
 }
 
-/* Màu xanh biển có khách */
 .status-dropdown-pms.status-repair {
-    border-color: #ef4444;
-    color: #b91c1c;
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
 }
 
-/* Màu đỏ bảo trì */
+/* Hộp icon biểu tượng phòng */
+.room-icon-box {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e0e7ff;
+    border-radius: 8px;
+    color: #4338ca;
+}

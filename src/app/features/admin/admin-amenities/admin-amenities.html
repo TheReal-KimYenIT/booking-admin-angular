@@ -1,79 +1,480 @@
-<div class="admin-container">
-    <div class="header-action">
-        <div>
-            <h2>Quản Lý Tiện Ích Chung</h2>
-            <p>Thiết lập danh mục tiện ích cho khách sạn và phòng.</p>
-        </div>
-        <button class="btn btn-primary" (click)="openModal()">+ Thêm Tiện Ích</button>
+<div class="amenities-container p-2 p-md-3 fade-in-up">
+  <!-- 1. HEADER -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-stars me-1"></i> Quản Trị Dữ Liệu Master &bull; Tiện Ích Chung
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Quản Lý Tiện Ích Chung</h2>
+      <p class="text-muted mb-0 small">Thiết lập danh mục tiện ích chuẩn cho toàn khách sạn và từng loại phòng lưu trú trên sàn StayHub.</p>
     </div>
 
-    <div *ngIf="isLoading" class="loading">Đang tải danh sách...</div>
+    <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end">
+      <button class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 shadow-2xs d-inline-flex align-items-center gap-1.5 text-nowrap" (click)="loadData()" [disabled]="isLoading">
+        <i class="bi bi-arrow-clockwise" [class.spin-icon]="isLoading"></i>
+        <span>Làm Mới</span>
+      </button>
+      <button class="btn btn-primary btn-sm px-3 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-1.5 text-nowrap fw-semibold" (click)="openModal()">
+        <i class="bi bi-plus-circle-fill"></i>
+        <span>Thêm Tiện Ích</span>
+      </button>
+    </div>
+  </div>
 
-    <table class="table" *ngIf="!isLoading && amenityList.length > 0">
+  <!-- 2. KPI SUMMARY CARDS (4 CARDS) -->
+  <div class="row g-2 mb-3">
+    <!-- Card 1: Tổng Tiện Ích -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-stars"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Tổng Tiện Ích</div>
+            <div class="fs-6 fw-bold text-indigo-600 text-truncate">{{ totalAmenities }} <span class="text-muted small fw-normal">danh mục</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Master data hệ thống</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Tiện Ích Khách Sạn -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-building"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Tiện Ích Khách Sạn</div>
+            <div class="fs-6 fw-bold text-emerald-600 text-truncate">{{ hotelAmenitiesCount }} <span class="text-muted small fw-normal">tiện ích</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Toàn khuôn viên khách sạn</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Tiện Ích Phòng -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-blue-50 text-blue-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-door-open"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Tiện Ích Buồng Phòng</div>
+            <div class="fs-6 fw-bold text-blue-600 text-truncate">{{ roomAmenitiesCount }} <span class="text-muted small fw-normal">tiện ích</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Trang bị theo loại phòng</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Đang Được Sử Dụng -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-amber-50 text-amber-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Đang Được Dùng</div>
+            <div class="fs-6 fw-bold text-amber-600 text-truncate">{{ usedAmenitiesCount }} <span class="text-muted small fw-normal">tiện ích</span></div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Đã liên kết KS / Phòng</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TOOLBAR & FILTERS -->
+  <div class="card border-0 shadow-xs mb-3">
+    <div class="card-body p-3">
+      <div class="row g-2 align-items-center">
+        <!-- Search input -->
+        <div class="col-12 col-md-4 col-lg-3">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white border-end-0 text-muted">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control border-start-0 ps-0"
+              placeholder="Tìm theo tên tiện ích, icon..."
+              [(ngModel)]="searchKeyword"
+              (input)="applyFilter()"
+            />
+            <button *ngIf="searchKeyword" class="btn btn-outline-secondary border-start-0 border-end" (click)="searchKeyword=''; applyFilter()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter by Type -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="typeFilter" (change)="applyFilter()">
+            <option value="ALL">Tất cả phân loại</option>
+            <option value="1">Tiện ích Khách sạn</option>
+            <option value="2">Tiện ích Phòng</option>
+          </select>
+        </div>
+
+        <!-- Filter by Usage -->
+        <div class="col-6 col-md-3 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="usageFilter" (change)="applyFilter()">
+            <option value="ALL">Tất cả mức sử dụng</option>
+            <option value="USED">Đang được sử dụng</option>
+            <option value="UNUSED">Chưa liên kết (An toàn xóa)</option>
+          </select>
+        </div>
+
+        <!-- Sort By -->
+        <div class="col-6 col-md-2 col-lg-2">
+          <select class="form-select form-select-sm" [(ngModel)]="sortBy" (change)="applyFilter()">
+            <option value="NEWEST">Mới nhất trước</option>
+            <option value="OLDEST">Cũ nhất trước</option>
+            <option value="NAME_ASC">Tên: A &rarr; Z</option>
+            <option value="USAGE_DESC">Sử dụng nhiều nhất</option>
+          </select>
+        </div>
+
+        <!-- Right Side: Count & Clear -->
+        <div class="col-6 col-md-12 col-lg-3 d-flex justify-content-end align-items-center gap-2">
+          <span class="badge bg-slate-100 text-slate-700 border fw-normal" style="font-size: 11.5px;">
+            {{ filteredList.length }} / {{ totalAmenities }} tiện ích
+          </span>
+          <button
+            *ngIf="searchKeyword || typeFilter !== 'ALL' || usageFilter !== 'ALL' || sortBy !== 'NEWEST'"
+            class="btn btn-link btn-sm text-decoration-none text-muted p-0 small"
+            (click)="resetFilters()"
+            title="Đặt lại toàn bộ bộ lọc"
+          >
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. LOADING STATE -->
+  <div *ngIf="isLoading" class="card border-0 shadow-xs text-center py-5">
+    <div class="spinner-border text-primary mx-auto mb-2" role="status">
+      <span class="visually-hidden">Đang tải...</span>
+    </div>
+    <div class="text-muted small">Đang tải danh mục tiện ích chung...</div>
+  </div>
+
+  <!-- 5. EMPTY STATE: NO AMENITIES AT ALL -->
+  <div *ngIf="!isLoading && amenityList.length === 0" class="card border-0 shadow-xs text-center py-5 px-3">
+    <div class="empty-icon-wrapper mx-auto mb-3 bg-slate-100 text-slate-500 rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 28px;">
+      <i class="bi bi-stars"></i>
+    </div>
+    <h5 class="fw-bold text-slate-800 mb-1">Chưa có tiện ích nào được tạo!</h5>
+    <p class="text-muted small mb-3 mx-auto" style="max-width: 480px;">
+      Hãy thêm các tiện ích dùng chung để đối tác khách sạn có thể lựa chọn khi cấu hình phòng và dịch vụ.
+    </p>
+    <button class="btn btn-primary btn-sm px-3 rounded-3" (click)="openModal()">
+      <i class="bi bi-plus-circle me-1"></i>Thêm Tiện Ích Đầu Tiên
+    </button>
+  </div>
+
+  <!-- 6. EMPTY STATE: NO FILTER MATCH -->
+  <div *ngIf="!isLoading && amenityList.length > 0 && filteredList.length === 0" class="card border-0 shadow-xs text-center py-5 px-3">
+    <div class="empty-icon-wrapper mx-auto mb-3 bg-slate-100 text-slate-500 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; font-size: 24px;">
+      <i class="bi bi-search"></i>
+    </div>
+    <h6 class="fw-bold text-slate-800 mb-1">Không tìm thấy tiện ích phù hợp</h6>
+    <p class="text-muted small mb-3">Không có mục nào khớp với từ khóa tìm kiếm hoặc bộ lọc hiện tại.</p>
+    <div>
+      <button class="btn btn-outline-secondary btn-sm px-3 rounded-3" (click)="resetFilters()">
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Xóa bộ lọc tìm kiếm
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. DESKTOP TABLE VIEW (>= 992px) -->
+  <div *ngIf="!isLoading && filteredList.length > 0" class="card border-0 shadow-xs d-none d-lg-block">
+    <div class="table-responsive">
+      <table class="table modern-table mb-0 align-middle">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Tên Tiện Ích</th>
-                <th>Icon (Ký hiệu)</th>
-                <th>Phân Loại</th>
-                <th>Thao Tác</th>
-            </tr>
+          <tr>
+            <th style="width: 75px;" class="text-center">ID</th>
+            <th style="width: 90px;" class="text-center">Icon</th>
+            <th style="min-width: 250px;">Tên Tiện Ích</th>
+            <th style="min-width: 170px;">Phân Loại</th>
+            <th style="min-width: 180px;">Liên Kết Sử Dụng</th>
+            <th style="min-width: 160px;" class="text-center">Thao Tác</th>
+          </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let item of amenityList">
-                <td>{{ item.id }}</td>
-                <td><strong>{{ item.name }}</strong></td>
-                <td>{{ item.icon || '---' }}</td>
-                <td>
-                    <span class="badge" [class.bg-hotel]="item.type == 1" [class.bg-room]="item.type == 2">
-                        {{ item.type == 1 ? 'Tiện ích Khách sạn' : 'Tiện ích Phòng' }}
-                    </span>
-                </td>
-                <td>
-                    <button class="btn btn-warning" (click)="openModal(item)">Sửa</button>
-                    <button class="btn btn-danger" (click)="deleteAmenity(item.id)">Xóa</button>
-                </td>
-            </tr>
+          <tr *ngFor="let item of filteredList" class="amenity-row">
+            <!-- ID -->
+            <td class="text-center">
+              <span class="badge bg-slate-100 text-slate-800 border fw-bold px-2 py-1">
+                #{{ item.id }}
+              </span>
+            </td>
+
+            <!-- Icon Box -->
+            <td class="text-center">
+              <div class="amenity-icon-box mx-auto shadow-2xs">
+                <span *ngIf="item.icon" class="fs-5">{{ item.icon }}</span>
+                <i *ngIf="!item.icon" class="bi bi-stars text-muted fs-6"></i>
+              </div>
+            </td>
+
+            <!-- Amenity Name -->
+            <td>
+              <div class="fw-bold text-slate-900 amenity-name">
+                {{ item.name }}
+              </div>
+            </td>
+
+            <!-- Type Badge -->
+            <td>
+              <span *ngIf="item.type == 1" class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 py-1 px-2.5">
+                <i class="bi bi-building me-1"></i>Tiện ích Khách sạn
+              </span>
+              <span *ngIf="item.type == 2" class="badge bg-blue-50 text-blue-700 border border-blue-200 py-1 px-2.5">
+                <i class="bi bi-door-open me-1"></i>Tiện ích Phòng
+              </span>
+            </td>
+
+            <!-- Usage Info -->
+            <td>
+              <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                <span *ngIf="item.hotels_count > 0" class="badge bg-indigo-50 text-indigo-700 border border-indigo-200" style="font-size: 11px;">
+                  <i class="bi bi-building text-indigo-500 me-1"></i>{{ item.hotels_count }} khách sạn
+                </span>
+                <span *ngIf="item.room_types_count > 0" class="badge bg-blue-50 text-blue-700 border border-blue-200" style="font-size: 11px;">
+                  <i class="bi bi-door-closed text-blue-500 me-1"></i>{{ item.room_types_count }} loại phòng
+                </span>
+                <span *ngIf="(!item.hotels_count || item.hotels_count == 0) && (!item.room_types_count || item.room_types_count == 0)" class="badge bg-slate-100 text-slate-500 border" style="font-size: 11px;">
+                  Chưa liên kết
+                </span>
+              </div>
+            </td>
+
+            <!-- Action Buttons -->
+            <td class="text-center">
+              <div class="d-flex align-items-center justify-content-center gap-1.5">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary action-btn"
+                  title="Chỉnh sửa tiện ích"
+                  (click)="openModal(item)"
+                >
+                  <i class="bi bi-pencil-square me-1"></i>Sửa
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger action-btn"
+                  title="Xóa tiện ích"
+                  (click)="deleteAmenity(item)"
+                >
+                  <i class="bi bi-trash3 me-1"></i>Xóa
+                </button>
+              </div>
+            </td>
+          </tr>
         </tbody>
-    </table>
-
-    <div *ngIf="!isLoading && amenityList.length === 0" class="empty-state">
-        Hệ thống chưa có tiện ích nào.
+      </table>
     </div>
+  </div>
 
-    <div class="modal" *ngIf="showModal">
-        <div class="modal-content">
-            <h3>{{ isEditMode ? 'Cập Nhật Tiện Ích' : 'Thêm Tiện Ích Mới' }}</h3>
-
-            <div class="form-group">
-                <label>Tên tiện ích (*):</label>
-                <input type="text" class="form-control" [(ngModel)]="currentAmenity.name"
-                    placeholder="VD: Hồ bơi ngoài trời...">
+  <!-- 8. MOBILE / TABLET CARDS VIEW (< 992px) -->
+  <div *ngIf="!isLoading && filteredList.length > 0" class="d-block d-lg-none">
+    <div class="row g-2.5">
+      <div *ngFor="let item of filteredList" class="col-12 col-md-6">
+        <div class="card border-0 shadow-xs h-100 amenity-mobile-card">
+          <div class="card-body p-3">
+            <!-- Top badge row -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge bg-slate-100 text-slate-800 border fw-bold px-2 py-1">
+                #{{ item.id }}
+              </span>
+              <span *ngIf="item.type == 1" class="badge bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <i class="bi bi-building me-1"></i>Khách sạn
+              </span>
+              <span *ngIf="item.type == 2" class="badge bg-blue-50 text-blue-700 border border-blue-200">
+                <i class="bi bi-door-open me-1"></i>Buồng phòng
+              </span>
             </div>
 
-            <div class="form-group">
-                <label>Icon (Mã Emoji hoặc Text):</label>
-                <input type="text" class="form-control" [(ngModel)]="currentAmenity.icon"
-                    placeholder="VD: 🏊‍♂️, WiFi...">
+            <!-- Icon & Name row -->
+            <div class="d-flex align-items-center gap-2.5 mb-2.5">
+              <div class="amenity-icon-box shadow-2xs flex-shrink-0">
+                <span *ngIf="item.icon" class="fs-5">{{ item.icon }}</span>
+                <i *ngIf="!item.icon" class="bi bi-stars text-muted"></i>
+              </div>
+              <div class="fw-bold text-slate-900 fs-6">
+                {{ item.name }}
+              </div>
             </div>
 
-            <div class="form-group">
-                <label>Phân loại (*):</label>
-                <select class="form-control" [(ngModel)]="currentAmenity.type">
-                    <option [value]="1">Tiện ích Khách sạn</option>
-                    <option [value]="2">Tiện ích Phòng</option>
-                </select>
+            <!-- Usage row -->
+            <div class="bg-slate-50 p-2 rounded-3 mb-2.5 border border-slate-100 small d-flex flex-wrap gap-1.5 align-items-center">
+              <span *ngIf="item.hotels_count > 0" class="badge bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <i class="bi bi-building text-indigo-500 me-1"></i>{{ item.hotels_count }} KS
+              </span>
+              <span *ngIf="item.room_types_count > 0" class="badge bg-blue-50 text-blue-700 border border-blue-200">
+                <i class="bi bi-door-closed text-blue-500 me-1"></i>{{ item.room_types_count }} phòng
+              </span>
+              <span *ngIf="(!item.hotels_count || item.hotels_count == 0) && (!item.room_types_count || item.room_types_count == 0)" class="badge bg-slate-100 text-slate-500 border">
+                Chưa liên kết
+              </span>
             </div>
 
-            <div class="modal-actions">
-                <button class="btn btn-secondary" (click)="closeModal()">Hủy</button>
-                <button class="btn btn-primary" (click)="saveAmenity()">Lưu Lại</button>
+            <!-- Actions row -->
+            <div class="d-flex gap-1.5 pt-2 border-top">
+              <button type="button" class="btn btn-outline-primary btn-sm flex-fill" (click)="openModal(item)">
+                <i class="bi bi-pencil-square me-1"></i>Sửa
+              </button>
+              <button type="button" class="btn btn-outline-danger btn-sm flex-fill" (click)="deleteAmenity(item)">
+                <i class="bi bi-trash3 me-1"></i>Xóa
+              </button>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <div class="toast-notification" [class.toast-error]="toastType === 'error'" *ngIf="showToast">
-        {{ toastMessage }}
+  <!-- 9. ADD / EDIT MODAL -->
+  <div *ngIf="showModal" class="modal-backdrop-custom fade-in">
+    <div class="modal-dialog-custom modal-md">
+      <div class="modal-content-custom">
+        <!-- Modal Header -->
+        <div class="modal-header-custom d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi text-indigo-600 fs-5" [ngClass]="isEditMode ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i>
+            <h5 class="modal-title-custom mb-0">{{ isEditMode ? 'Cập Nhật Tiện Ích' : 'Thêm Tiện Ích Mới' }}</h5>
+          </div>
+          <button type="button" class="btn-close-custom" (click)="closeModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body-custom">
+          <!-- Amenity Name -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-slate-700 mb-1">Tên Tiện Ích (*):</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              [(ngModel)]="currentAmenity.name"
+              placeholder="VD: Hồ bơi vô cực, WiFi tốc độ cao..."
+              maxlength="100"
+            />
+          </div>
+
+          <!-- Amenity Type -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-slate-700 mb-1">Phân Loại Áp Dụng (*):</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <div
+                  class="type-option-card p-2.5 rounded-3 border text-center cursor-pointer"
+                  [class.active]="currentAmenity.type == 1"
+                  [class.disabled-option]="isEditMode && currentAmenityHasUsage"
+                  (click)="selectType(1)"
+                >
+                  <i class="bi bi-building fs-5 d-block mb-1 text-emerald-600"></i>
+                  <div class="fw-semibold small">Tiện ích Khách sạn</div>
+                  <div class="text-muted" style="font-size: 10.5px;">Khuôn viên & dịch vụ chung</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div
+                  class="type-option-card p-2.5 rounded-3 border text-center cursor-pointer"
+                  [class.active]="currentAmenity.type == 2"
+                  [class.disabled-option]="isEditMode && currentAmenityHasUsage"
+                  (click)="selectType(2)"
+                >
+                  <i class="bi bi-door-open fs-5 d-block mb-1 text-blue-600"></i>
+                  <div class="fw-semibold small">Tiện ích Phòng</div>
+                  <div class="text-muted" style="font-size: 10.5px;">Nội thất & trang bị buồng</div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="isEditMode && currentAmenityHasUsage" class="small text-amber-700 bg-amber-50 p-2 rounded-2 mt-2 border border-amber-200 d-flex align-items-center gap-1.5" style="font-size: 11px;">
+              <i class="bi bi-shield-lock-fill text-amber-600"></i>
+              <span>Tiện ích đang được liên kết thực tế, không thể đổi phân loại để tránh làm sai lệch dữ liệu.</span>
+            </div>
+          </div>
+
+          <!-- Icon / Emoji -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-slate-700 mb-1">Icon / Ký Hiệu (Emoji hoặc Text):</label>
+            <div class="input-group input-group-sm mb-2">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="currentAmenity.icon"
+                placeholder="VD: 🏊‍♂️, 🅿️, 📶..."
+                maxlength="50"
+              />
+              <span class="input-group-text bg-white" style="font-size: 18px; width: 44px; justify-content: center;">
+                {{ currentAmenity.icon || '✨' }}
+              </span>
+            </div>
+
+            <!-- Quick Emoji Suggestions -->
+            <div class="small text-muted mb-1" style="font-size: 11px;">Chọn nhanh biểu tượng gợi ý:</div>
+            <div class="d-flex flex-wrap gap-1">
+              <button
+                *ngFor="let emoji of popularIcons"
+                type="button"
+                class="btn btn-sm btn-light border p-1 rounded-2 emoji-btn"
+                (click)="selectEmoji(emoji)"
+              >
+                {{ emoji }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Preview Badge -->
+          <div class="p-2.5 bg-slate-50 rounded-3 border border-slate-100">
+            <div class="small text-muted mb-1" style="font-size: 11px;">Xem trước hiển thị:</div>
+            <div class="d-flex align-items-center gap-2">
+              <div class="amenity-icon-box shadow-2xs flex-shrink-0" style="width: 34px; height: 34px;">
+                <span>{{ currentAmenity.icon || '✨' }}</span>
+              </div>
+              <div>
+                <strong class="text-slate-900 small d-block">{{ currentAmenity.name || 'Tên tiện ích' }}</strong>
+                <span *ngIf="currentAmenity.type == 1" class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 py-0.5 px-2" style="font-size: 10px;">
+                  Tiện ích Khách sạn
+                </span>
+                <span *ngIf="currentAmenity.type == 2" class="badge bg-blue-50 text-blue-700 border border-blue-200 py-0.5 px-2" style="font-size: 10px;">
+                  Tiện ích Phòng
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer-custom d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3 rounded-3" (click)="closeModal()">
+            Hủy Bỏ
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm px-4 rounded-3 fw-semibold"
+            [disabled]="!currentAmenity.name.trim() || isSubmitting"
+            (click)="saveAmenity()"
+          >
+            <i class="bi bi-check-lg me-1" *ngIf="!isSubmitting"></i>
+            <i class="bi bi-arrow-clockwise spin-icon me-1" *ngIf="isSubmitting"></i>
+            <span *ngIf="!isSubmitting">{{ isEditMode ? 'Lưu Thay Đổi' : 'Thêm Tiện Ích' }}</span>
+            <span *ngIf="isSubmitting">Đang Lưu...</span>
+          </button>
+        </div>
+      </div>
     </div>
-
+  </div>
 </div>

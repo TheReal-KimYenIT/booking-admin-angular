@@ -1,118 +1,331 @@
 <div class="dashboard-container">
 
-    <div class="sidebar">
-        <div class="brand">Partner Portal</div>
+    <div class="sidebar" [class.collapsed]="isCollapsed">
+        <!-- BRAND & TOGGLE -->
+        <div class="brand">
+            <div class="brand-info" *ngIf="!isCollapsed">
+                <svg class="svg-icon brand-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9h1M9 13h1M9 17h1M15 13h1M15 17h1"/>
+                </svg>
+                <span class="brand-text">Partner Portal</span>
+            </div>
+            <div class="brand-info-mini" *ngIf="isCollapsed" title="Partner Portal">
+                <svg class="svg-icon brand-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9h1M9 13h1M9 17h1M15 13h1M15 17h1"/>
+                </svg>
+            </div>
+            <button type="button" class="sidebar-toggle-btn" (click)="toggleSidebar()" [title]="isCollapsed ? 'Mở rộng thanh menu' : 'Thu gọn thanh menu'">
+                <span class="toggle-icon">{{ isCollapsed ? '❯' : '❮' }}</span>
+            </button>
+        </div>
 
         <ul class="menu-list">
-            <li *ngIf="hasPermission('overview')">
-                <a routerLink="/dashboard/overview" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">📊</span> Tổng quan
-                </a>
+            <!-- 1. BÁO CÁO & THỐNG KÊ -->
+            <li class="menu-section-header" *ngIf="!isCollapsed" (click)="toggleSection('reports')" [title]="expandedSections['reports'] ? 'Thu gọn nhóm Báo cáo & Thống kê' : 'Mở rộng nhóm Báo cáo & Thống kê'">
+                <span class="section-title-text">BÁO CÁO & THỐNG KÊ</span>
+                <svg class="section-chevron" [class.collapsed-chevron]="!expandedSections['reports']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
             </li>
+            <li class="menu-divider" *ngIf="isCollapsed" title="Báo cáo & Thống kê"></li>
 
-            <li *ngIf="hasPermission('hotel')">
-                <a routerLink="/dashboard/hotel" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">🏨</span> Hồ sơ Khách sạn
-                </a>
-            </li>
+            <ng-container *ngIf="isCollapsed || expandedSections['reports']">
+                <li *ngIf="hasPermission('overview')">
+                    <a routerLink="/dashboard/overview" routerLinkActive="active-menu" class="menu-item" [title]="'Tổng quan'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Tổng quan</span>
+                    </a>
+                </li>
+                <li>
+                    <a routerLink="/dashboard/transactions" routerLinkActive="active-menu" class="menu-item" [title]="'Thống kê doanh thu'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Thống kê doanh thu</span>
+                    </a>
+                </li>
+            </ng-container>
 
-            <li *ngIf="hasPermission('room_types')">
-                <a routerLink="/dashboard/room-types" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">🛏️</span> Quản lý Loại phòng
-                </a>
+            <!-- 2. ĐIỀU PHỐI & LỄ TÂN -->
+            <li class="menu-section-header" *ngIf="!isCollapsed" (click)="toggleSection('operations')" [title]="expandedSections['operations'] ? 'Thu gọn nhóm Điều phối & Lễ tân' : 'Mở rộng nhóm Điều phối & Lễ tân'">
+                <span class="section-title-text">ĐIỀU PHỐI & LỄ TÂN</span>
+                <svg class="section-chevron" [class.collapsed-chevron]="!expandedSections['operations']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
             </li>
-            <li *ngIf="hasPermission('room_types')">
-                <a routerLink="/dashboard/inventory" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">📅</span> Lịch Giá & Đóng phòng
-                </a>
-            </li>
-            <li *ngIf="hasPermission('room_matrix')">
-                <a routerLink="/dashboard/room-matrix" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">🔢</span> Sơ đồ & Số phòng
-                </a>
-            </li>
-            <li *ngIf="hasPermission('support')">
-                <a routerLink="/dashboard/support" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">💬</span> Hỗ trợ
-                    <span *ngIf="newContactCount > 0" class="notification-badge">{{ newContactCount }}</span>
-                </a>
-            </li>
-            <li *ngIf="hasPermission('customers')">
-                <a routerLink="/dashboard/customers" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">📝</span> Quản lý khách hàng
-                </a>
-            </li>
+            <li class="menu-divider" *ngIf="isCollapsed" title="Điều phối & Lễ tân"></li>
 
-            <li *ngIf="hasPermission('bookings')">
-                <a routerLink="/dashboard/bookings" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">📝</span> Quản lý Đơn hàng
-                </a>
-            </li>
+            <ng-container *ngIf="isCollapsed || expandedSections['operations']">
+                <li *ngIf="hasPermission('room_matrix')">
+                    <a routerLink="/dashboard/room-matrix" routerLinkActive="active-menu" class="menu-item" [title]="'Ma trận điều phối phòng'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Ma trận điều phối phòng</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('bookings')">
+                    <a routerLink="/dashboard/bookings" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Đơn đặt phòng'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                <path d="M9 12l2 2 4-4"></path>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Đơn đặt phòng</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('refunds')">
+                    <a routerLink="/dashboard/refunds" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Hoàn tiền'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="1 4 1 10 7 10"></polyline>
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Hoàn tiền</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('customers')">
+                    <a routerLink="/dashboard/customers" routerLinkActive="active-menu" class="menu-item" [title]="'Xử lý Hồ sơ khách'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                                <circle cx="9" cy="10" r="2"></circle>
+                                <path d="M15 8h2M15 12h2M7 16h10"></path>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Xử lý Hồ sơ khách</span>
+                    </a>
+                </li>
+            </ng-container>
 
-            <li *ngIf="hasPermission('hotel_amenities')">
-                <a routerLink="/dashboard/hotel-amenities" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">✨</span> Tiện ích khách sạn
-                </a>
+            <!-- 3. CƠ SỞ LƯU TRÚ -->
+            <li class="menu-section-header" *ngIf="!isCollapsed" (click)="toggleSection('accommodation')" [title]="expandedSections['accommodation'] ? 'Thu gọn nhóm Cơ sở lưu trú' : 'Mở rộng nhóm Cơ sở lưu trú'">
+                <span class="section-title-text">CƠ SỞ LƯU TRÚ</span>
+                <svg class="section-chevron" [class.collapsed-chevron]="!expandedSections['accommodation']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
             </li>
+            <li class="menu-divider" *ngIf="isCollapsed" title="Cơ sở lưu trú"></li>
 
-            <li *ngIf="hasPermission('services')">
-                <a routerLink="/dashboard/services" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">💆‍♀️</span> Dịch vụ đi kèm
-                </a>
-            </li>
+            <ng-container *ngIf="isCollapsed || expandedSections['accommodation']">
+                <li *ngIf="hasPermission('hotel')">
+                    <a routerLink="/dashboard/hotel" routerLinkActive="active-menu" class="menu-item" [title]="'Thiết lập hồ sơ Khách sạn'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+                                <line x1="9" y1="9" x2="10" y2="9"></line>
+                                <line x1="9" y1="13" x2="10" y2="13"></line>
+                                <line x1="14" y1="9" x2="15" y2="9"></line>
+                                <line x1="14" y1="13" x2="15" y2="13"></line>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Thiết lập hồ sơ Khách sạn</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('hotel_amenities')">
+                    <a routerLink="/dashboard/hotel-amenities" routerLinkActive="active-menu" class="menu-item" [title]="'Cập nhật Tiện ích khách sạn'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 18h20M12 4v2M4 18a8 8 0 0 1 16 0"></path>
+                                <circle cx="12" cy="4" r="1.5"></circle>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Cập nhật Tiện ích khách sạn</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('room_types')">
+                    <a routerLink="/dashboard/room-types" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý danh mục phòng'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"></path>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý danh mục phòng</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('room_types')">
+                    <a routerLink="/dashboard/inventory" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý giá phòng và tồn kho'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý giá phòng và tồn kho</span>
+                    </a>
+                </li>
+            </ng-container>
 
-            <li *ngIf="hasPermission('minibar')">
-                <a routerLink="/dashboard/minibar" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">🥤</span> Quản lý Minibar
-                </a>
+            <!-- 4. DỊCH VỤ & KHÁCH HÀNG -->
+            <li class="menu-section-header" *ngIf="!isCollapsed" (click)="toggleSection('services')" [title]="expandedSections['services'] ? 'Thu gọn nhóm Dịch vụ & Khách hàng' : 'Mở rộng nhóm Dịch vụ & Khách hàng'">
+                <span class="section-title-text">DỊCH VỤ & KHÁCH HÀNG</span>
+                <svg class="section-chevron" [class.collapsed-chevron]="!expandedSections['services']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
             </li>
+            <li class="menu-divider" *ngIf="isCollapsed" title="Dịch vụ & Khách hàng"></li>
 
-            <li *ngIf="hasPermission('supplies')">
-                <a routerLink="/dashboard/supplies" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">📺</span> Quản lý Vật tư
-                </a>
-            </li>
+            <ng-container *ngIf="isCollapsed || expandedSections['services']">
+                <li *ngIf="hasPermission('services')">
+                    <a routerLink="/dashboard/services" routerLinkActive="active-menu" class="menu-item" [title]="'Dịch vụ đi kèm'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                                <line x1="6" y1="1" x2="6" y2="4"></line>
+                                <line x1="10" y1="1" x2="10" y2="4"></line>
+                                <line x1="14" y1="1" x2="14" y2="4"></line>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Dịch vụ đi kèm</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('minibar')">
+                    <a routerLink="/dashboard/minibar" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Minibar'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 22h8M12 15v7M12 15a5 5 0 0 0 5-5V2H7v8a5 5 0 0 0 5 5z"></path>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Minibar</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('promotions')">
+                    <a routerLink="/dashboard/promotions" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Khuyến mãi nội bộ'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path>
+                                <line x1="13" y1="9" x2="13" y2="15"></line>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Khuyến mãi nội bộ</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('partner_surcharge')">
+                    <a routerLink="/dashboard/partner-surcharge" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Phụ thu'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Phụ thu</span>
+                    </a>
+                </li>
+            </ng-container>
 
-            <li *ngIf="hasPermission('promotions')">
-                <a routerLink="/dashboard/promotions" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">🎟️</span> Mã Khuyến Mãi
-                </a>
+            <!-- 5. QUẢN TRỊ & NHÂN SỰ -->
+            <li class="menu-section-header" *ngIf="!isCollapsed" (click)="toggleSection('admin')" [title]="expandedSections['admin'] ? 'Thu gọn nhóm Quản trị & Nhân sự' : 'Mở rộng nhóm Quản trị & Nhân sự'">
+                <span class="section-title-text">QUẢN TRỊ & NHÂN SỰ</span>
+                <svg class="section-chevron" [class.collapsed-chevron]="!expandedSections['admin']" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
             </li>
+            <li class="menu-divider" *ngIf="isCollapsed" title="Quản trị & Nhân sự"></li>
 
-            <li *ngIf="hasPermission('partner_surcharge')">
-                <a routerLink="/dashboard/partner-surcharge" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">💸</span> Quản lý Phụ thu
-                </a>
-            </li>
-            <li *ngIf="hasPermission('roles') || userRole === 1">
-                <a routerLink="/dashboard/roles" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">🛡️</span> Quản lý Nhóm Quyền
-                </a>
-            </li>
-            <li *ngIf="hasPermission('staffs')">
-                <a routerLink="/dashboard/staffs" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">👥</span> Quản lý Nhân viên
-                </a>
-            </li>
-
-            <li>
-                <a routerLink="/dashboard/profile" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">👤</span> Tài khoản & Bảo mật
-                </a>
-            </li>
-            <li>
-                <a routerLink="/dashboard/transactions" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">👤</span> Quản lý tài chính
-                </a>
-            </li>
-            <li>
-                <a routerLink="/dashboard/settlements" routerLinkActive="active-menu" class="menu-item">
-                    <span class="icon">👤</span> Quản lý công nợ
-                </a>
-            </li>
+            <ng-container *ngIf="isCollapsed || expandedSections['admin']">
+                <li *ngIf="hasPermission('reviews')">
+                    <a routerLink="/dashboard/reviews" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Đánh giá'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Đánh giá</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('support')">
+                    <a routerLink="/dashboard/support" routerLinkActive="active-menu" class="menu-item" [title]="'Xử lý tin nhắn'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Xử lý tin nhắn</span>
+                        <span *ngIf="newContactCount > 0" class="notification-badge" [class.mini-badge]="isCollapsed">
+                            {{ isCollapsed ? '' : newContactCount }}
+                        </span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('roles') || userRole === 1">
+                    <a routerLink="/dashboard/roles" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Nhóm Quyền'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Nhóm Quyền</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('staffs')">
+                    <a routerLink="/dashboard/staffs" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Nhân viên'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Nhân viên</span>
+                    </a>
+                </li>
+                <li *ngIf="hasPermission('supplies')">
+                    <a routerLink="/dashboard/supplies" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Vật tư'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Vật tư</span>
+                    </a>
+                </li>
+                <li>
+                    <a routerLink="/dashboard/profile" routerLinkActive="active-menu" class="menu-item" [title]="'Quản lý Tài khoản'">
+                        <span class="icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </span>
+                        <span class="menu-label-text" *ngIf="!isCollapsed">Quản lý Tài khoản</span>
+                    </a>
+                </li>
+            </ng-container>
         </ul>
 
-        <button class="logout-btn" (click)="logout()">🚪 Đăng xuất</button>
+        <button class="logout-btn" (click)="logout()" [title]="'Đăng xuất'">
+            <span class="logout-icon">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </span>
+            <span class="logout-text" *ngIf="!isCollapsed">Đăng xuất</span>
+        </button>
     </div>
 
     <div class="main-content">
@@ -122,3 +335,4 @@
     </div>
 
 </div>
+

@@ -1,189 +1,579 @@
-<div class="fade-in-up">
-    <div class="page-header">
-        <h2 class="page-title">Các loại phòng <span class="help-icon">?</span></h2>
-        <button class="btn-add-main" (click)="openTypeModal()">+ Thêm mới</button>
+<div class="partner-room-types-page container-fluid px-0">
+
+  <!-- TOP HEADER & ACTION -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-2 border-bottom">
+    <div>
+      <h4 class="fw-bold text-slate-800 mb-1 d-flex align-items-center gap-2">
+        <i class="bi bi-door-open-fill text-primary"></i> Quản Lý Danh Mục Phòng
+      </h4>
+      <p class="text-muted small mb-0">Thiết lập cấu hình hạng phòng, giá bán, tiện nghi và quản lý sơ đồ mã phòng thực tế</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-primary d-flex align-items-center gap-2 px-3 py-2 fw-semibold shadow-xs" (click)="openTypeModal()">
+        <i class="bi bi-plus-circle-fill"></i> Thêm Loại Phòng
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI SUMMARY CARDS -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-3 d-flex align-items-center gap-3">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-3">
+            <i class="bi bi-grid-fill fs-4"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">Tổng Loại Phòng</div>
+            <div class="fs-4 fw-bold text-slate-800">{{ totalRoomTypes }}</div>
+            <div class="mt-0.5" style="font-size: 11px;">
+              <span class="text-emerald-600 fw-semibold">{{ activeRoomTypesCount }} đang bán</span>
+              <span class="text-muted" *ngIf="inactiveRoomTypesCount"> • {{ inactiveRoomTypesCount }} tạm ngưng</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="room-list-container">
-        <div *ngIf="rooms.length === 0" class="empty-msg">Bạn chưa tạo loại phòng nào.</div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-3 d-flex align-items-center gap-3">
+          <div class="kpi-icon-wrapper bg-sky-50 text-sky-600 rounded-3 p-3">
+            <i class="bi bi-door-closed-fill fs-4"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">Tổng Phòng Thực Tế</div>
+            <div class="fs-4 fw-bold text-slate-800">{{ totalPhysicalRooms }} <span class="text-muted fs-6 fw-normal">phòng</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <div class="custom-room-card" *ngFor="let room of rooms">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-3 d-flex align-items-center gap-3">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-3">
+            <i class="bi bi-check2-circle fs-4"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">Sẵn Sàng Đón Khách</div>
+            <div class="fs-4 fw-bold text-emerald-600">{{ availableRooms }} <span class="text-muted fs-6 fw-normal">phòng</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            <div class="card-left">
-                <div class="card-info-wrapper">
-                    <img [src]="getRoomImage(room)" alt="Room" class="room-img">
-                    <div class="room-details">
-                        <h3 class="room-name">{{ room.name }}</h3>
-                        <p><strong>Khách:</strong> {{ room.max_adults + room.max_children }} (Tối đa {{
-                            room.max_adults }} Người lớn, {{ room.max_children }} Trẻ em)</p>
-                        <p><strong>Diện tích:</strong> {{ room.room_size ? room.room_size + ' m²' : 'Chưa cập nhật' }}
-                        </p>
-                        <p><strong>Giá:</strong> {{ room.base_price | number }} VND / đêm</p>
-                    </div>
-                </div>
-                <div class="card-actions">
-                    <button class="btn-outline" (click)="openTypeModal(room)">Sửa</button>
-                    <button class="btn-outline text-danger" (click)="deleteRoom(room.id)">Xóa</button>
-                </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-3 d-flex align-items-center gap-3">
+          <div class="kpi-icon-wrapper bg-amber-50 text-amber-600 rounded-3 p-3">
+            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+          </div>
+          <div>
+            <div class="text-muted small fw-semibold">Cần Xử Lý / Có Khách</div>
+            <div class="fs-4 fw-bold text-slate-800">
+              <span class="text-amber-600">{{ maintenanceRooms }}</span>
+              <span class="text-muted fs-6 fw-normal"> dọn/bảo trì | </span>
+              <span class="text-blue-600">{{ occupiedRooms }}</span>
+              <span class="text-muted fs-6 fw-normal"> ở</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS & STATUS LEGEND BAR -->
+  <div class="card border-0 shadow-xs mb-3">
+    <div class="card-body p-3 d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-3">
+      <!-- Search input & Status Tabs -->
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="position-relative" style="min-width: 250px;">
+          <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+          <input type="text" class="form-control form-control-sm ps-5 pe-3 py-1.5 rounded-3 border-slate-200" 
+            [(ngModel)]="searchTerm" placeholder="Tìm nhanh theo tên loại phòng...">
+        </div>
+
+        <!-- Filter tabs: Tất cả / Đang bán / Tạm ngưng -->
+        <div class="btn-group btn-group-sm shadow-2xs" role="group">
+          <button type="button" class="btn fw-semibold" 
+            [ngClass]="statusFilter === 'all' ? 'btn-primary' : 'btn-outline-secondary'"
+            (click)="statusFilter = 'all'">
+            Tất cả ({{ rooms.length }})
+          </button>
+          <button type="button" class="btn fw-semibold" 
+            [ngClass]="statusFilter === 'active' ? 'btn-success text-white' : 'btn-outline-success'"
+            (click)="statusFilter = 'active'">
+            🟢 Đang bán ({{ activeRoomTypesCount }})
+          </button>
+          <button type="button" class="btn fw-semibold" 
+            [ngClass]="statusFilter === 'inactive' ? 'btn-secondary text-white' : 'btn-outline-secondary'"
+            (click)="statusFilter = 'inactive'">
+            ⏸️ Tạm ngưng ({{ inactiveRoomTypesCount }})
+          </button>
+        </div>
+      </div>
+
+      <!-- Status Legend -->
+      <div class="d-flex flex-wrap align-items-center gap-2 status-legend">
+        <span class="text-muted small fw-semibold me-1"><i class="bi bi-info-circle me-1"></i>Trạng thái mã phòng:</span>
+        <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 d-inline-flex align-items-center gap-1.5 px-2.5 py-1.5 rounded-pill">
+          <span class="legend-dot bg-emerald-500"></span> Sẵn sàng (Trống)
+        </span>
+        <span class="badge bg-blue-50 text-blue-700 border border-blue-200 d-inline-flex align-items-center gap-1.5 px-2.5 py-1.5 rounded-pill">
+          <span class="legend-dot bg-blue-500"></span> Đang có khách
+        </span>
+        <span class="badge bg-amber-50 text-amber-700 border border-amber-200 d-inline-flex align-items-center gap-1.5 px-2.5 py-1.5 rounded-pill">
+          <span class="legend-dot bg-amber-500"></span> Cần dọn dẹp
+        </span>
+        <span class="badge bg-rose-50 text-rose-700 border border-rose-200 d-inline-flex align-items-center gap-1.5 px-2.5 py-1.5 rounded-pill">
+          <span class="legend-dot bg-rose-500"></span> Đang bảo trì
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOM LIST CONTAINER -->
+  <div class="room-list-container d-flex flex-column gap-3">
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="filteredRooms.length === 0" class="card border-0 shadow-xs text-center py-5">
+      <div class="card-body">
+        <div class="empty-icon-circle bg-light text-muted mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+          <i class="bi bi-door-open fs-2"></i>
+        </div>
+        <h6 class="fw-bold text-slate-800 mb-1">
+          {{ searchTerm ? 'Không tìm thấy loại phòng nào phù hợp' : 'Chưa có loại phòng nào' }}
+        </h6>
+        <p class="text-muted small mb-3">
+          {{ searchTerm ? 'Vui lòng thử lại với từ khóa khác' : 'Bấm nút bên dưới để tạo loại phòng đầu tiên cho khách sạn của bạn.' }}
+        </p>
+        <button *ngIf="!searchTerm" class="btn btn-sm btn-primary fw-semibold px-3 py-2" (click)="openTypeModal()">
+          <i class="bi bi-plus-circle me-1"></i> Tạo Loại Phòng Mới
+        </button>
+      </div>
+    </div>
+
+    <!-- ROOM ITEM CARD -->
+    <div class="card border-0 shadow-xs room-item-card overflow-hidden" 
+      *ngFor="let room of filteredRooms"
+      [class.opacity-75]="room.status == 0">
+      <div class="card-body p-3 p-md-4">
+        <div class="row g-3 g-xl-4 align-items-stretch">
+          
+          <!-- CỘT TRÁI (COL-LG-7): ẢNH THUMBNAIL + THÔNG TIN CHI TIẾT -->
+          <div class="col-12 col-lg-7 d-flex flex-column flex-sm-row gap-3">
+            <!-- Room Thumbnail -->
+            <div class="room-thumb-wrapper rounded-3 overflow-hidden position-relative border flex-shrink-0">
+              <img [src]="getRoomImage(room)" [alt]="room.name" class="w-100 h-100 object-fit-cover">
+              <span class="badge bg-dark bg-opacity-75 text-white position-absolute bottom-0 start-0 m-1 px-2 py-0.5 rounded" style="font-size: 10px;">
+                <i class="bi bi-camera me-1"></i>{{ room.media?.length || 0 }} ảnh
+              </span>
             </div>
 
-            <div class="card-right">
-                <h4 class="phys-title">Phòng ({{ room.physicalRooms?.length || 0 }}):</h4>
-                <div class="phys-tags">
-                    <div class="phys-tag" *ngFor="let pr of room.physicalRooms" (click)="openPhysModal(room.id, pr)">
-                        {{ pr.room_name }}
-                        <span class="status-dot" [class.dot-green]="pr.status === 1" [class.dot-blue]="pr.status === 2"
-                            [class.dot-orange]="pr.status === 0" [class.dot-red]="pr.status === 3">
-                        </span>
-                    </div>
+            <!-- Room Main Information -->
+            <div class="d-flex flex-column justify-content-between flex-grow-1 min-w-0">
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                  <h5 class="fw-bold mb-0 room-title text-truncate" [title]="room.name" [ngClass]="room.status == 0 ? 'text-muted' : 'text-slate-800'">
+                    {{ room.name }}
+                  </h5>
+                  <span *ngIf="room.status == 1" class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 font-normal">
+                    <i class="bi bi-check-circle-fill me-1 text-emerald-600"></i>Đang mở bán
+                  </span>
+                  <span *ngIf="room.status == 0" class="badge bg-secondary text-white font-normal">
+                    <i class="bi bi-pause-circle-fill me-1"></i>Đã tạm ngưng
+                  </span>
                 </div>
-                <button class="btn-add-phys" (click)="openPhysModal(room.id)">🔑 Phòng mới</button>
+
+                <!-- Badges Info List -->
+                <div class="d-flex flex-wrap gap-1.5 mb-2.5">
+                  <span class="badge bg-slate-100 text-slate-700 border font-normal d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-people-fill text-primary"></i> {{ room.max_adults }} NL, {{ room.max_children }} TE
+                  </span>
+                  <span class="badge bg-slate-100 text-slate-700 border font-normal d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-aspect-ratio text-primary"></i> {{ room.room_size ? room.room_size + ' m²' : '--' }}
+                  </span>
+                  <span class="badge bg-slate-100 text-slate-700 border font-normal d-inline-flex align-items-center gap-1" *ngIf="room.room_view?.name || getViewName(room.view_id)">
+                    <i class="bi bi-image text-indigo-500"></i> {{ room.room_view?.name || getViewName(room.view_id) }}
+                  </span>
+                  <span class="badge bg-slate-100 text-slate-700 border font-normal d-inline-flex align-items-center gap-1" *ngIf="room.bed_type_detail?.name || getBedTypeName(room.bed_type_id)">
+                    <i class="bi bi-lamp text-indigo-500"></i> {{ room.bed_type_detail?.name || getBedTypeName(room.bed_type_id) }}
+                  </span>
+                  <span class="badge font-normal d-inline-flex align-items-center gap-1" 
+                    [ngClass]="room.has_breakfast ? 'badge-breakfast-yes' : 'badge-breakfast-no'">
+                    <i class="bi" [ngClass]="room.has_breakfast ? 'bi-cup-hot-fill text-emerald-600' : 'bi-dash-circle text-secondary'"></i>
+                    {{ room.has_breakfast ? 'Có ăn sáng' : 'Không ăn sáng' }}
+                  </span>
+                  <span class="badge font-normal d-inline-flex align-items-center gap-1" 
+                    [ngClass]="room.smoking_policy ? 'badge-smoking-yes' : 'badge-smoking-no'">
+                    <i class="bi" [ngClass]="room.smoking_policy ? 'bi-check-circle text-amber-600' : 'bi-slash-circle text-secondary'"></i>
+                    {{ room.smoking_policy ? 'Cho phép hút thuốc' : 'Cấm hút thuốc' }}
+                  </span>
+                </div>
+
+                <!-- Price & Cancellation Notice -->
+                <div class="d-flex flex-wrap align-items-baseline gap-2 mb-2">
+                  <span class="fs-5 fw-bold text-danger">{{ room.base_price | number:'1.0-0' }} đ</span>
+                  <span class="text-muted small">/ đêm</span>
+                  <span class="text-muted small ms-1" *ngIf="room.free_cancel_hours">
+                    • <i class="bi bi-shield-check text-success"></i> Hủy miễn phí trước {{ room.free_cancel_hours }}h
+                  </span>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-flex align-items-center gap-2 pt-2 border-top mt-auto">
+                <button class="btn btn-sm btn-outline-primary fw-semibold d-inline-flex align-items-center gap-1 px-3 py-1.5" 
+                  (click)="openTypeModal(room)">
+                  <i class="bi bi-pencil-square"></i> Sửa thông tin
+                </button>
+                <button *ngIf="room.status == 1" class="btn btn-sm btn-outline-danger fw-semibold d-inline-flex align-items-center gap-1 px-3 py-1.5" 
+                  (click)="toggleRoomStatus(room)">
+                  <i class="bi bi-pause-circle"></i> Tạm ngưng bán
+                </button>
+                <button *ngIf="room.status == 0" class="btn btn-sm btn-success fw-semibold d-inline-flex align-items-center gap-1 px-3 py-1.5" 
+                  (click)="toggleRoomStatus(room)">
+                  <i class="bi bi-play-circle-fill"></i> Mở bán lại
+                </button>
+              </div>
             </div>
+          </div>
+
+          <!-- CỘT PHẢI (COL-LG-5): KHUNG MÃ PHÒNG THỰC TẾ -->
+          <div class="col-12 col-lg-5">
+            <div class="bg-slate-50 rounded-3 border p-3 h-100 d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-center mb-1 pb-2 border-bottom">
+                <div class="fw-bold text-slate-700 small text-uppercase d-flex align-items-center gap-1.5">
+                  <i class="bi bi-key-fill text-primary"></i> Mã Phòng Thực Tế ({{ room.physicalRooms?.length || 0 }})
+                </div>
+                <button class="btn btn-sm btn-primary-soft text-primary fw-bold d-inline-flex align-items-center gap-1 px-2.5 py-1 rounded" 
+                  (click)="openPhysModal(room.id)" title="Thêm mã phòng mới cho loại phòng này">
+                  <i class="bi bi-plus-lg"></i> Thêm phòng
+                </button>
+              </div>
+
+              <!-- Quick Status Summary -->
+              <div class="d-flex flex-wrap align-items-center gap-1 mb-2" *ngIf="room.physicalRooms?.length">
+                <span class="text-muted" style="font-size: 11px;">
+                  <span class="text-emerald-700 fw-semibold">🟢 {{ getRoomStatusCount(room, 1) }}</span> sẵn sàng
+                  <span *ngIf="getRoomStatusCount(room, 2)"> • <span class="text-blue-700 fw-semibold">🔵 {{ getRoomStatusCount(room, 2) }}</span> đang ở</span>
+                  <span *ngIf="getRoomStatusCount(room, 0)"> • <span class="text-amber-700 fw-semibold">🟠 {{ getRoomStatusCount(room, 0) }}</span> cần dọn</span>
+                  <span *ngIf="getRoomStatusCount(room, 3)"> • <span class="text-rose-700 fw-semibold">🔴 {{ getRoomStatusCount(room, 3) }}</span> bảo trì</span>
+                </span>
+              </div>
+
+              <!-- Chips Container -->
+              <div class="phys-chips-container d-flex flex-wrap gap-2 overflow-y-auto flex-grow-1" style="max-height: 120px;">
+                <div *ngIf="!room.physicalRooms || room.physicalRooms.length === 0" class="text-muted small py-3 w-100 text-center fst-italic">
+                  Chưa có mã phòng thực tế. Bấm "+ Thêm phòng" để thêm số phòng (VD: 101, 102...).
+                </div>
+
+                <div *ngFor="let pr of room.physicalRooms" 
+                  class="phys-chip d-inline-flex align-items-center gap-1.5 px-2.5 py-1 bg-white border rounded-2 shadow-2xs"
+                  [title]="'Phòng ' + pr.room_name + ' - ' + getStatusInfo(pr.status).text + ' (Bấm để sửa)'"
+                  (click)="openPhysModal(room.id, pr)">
+                  <span class="fw-bold text-slate-800 small">{{ pr.room_name }}</span>
+                  <span class="chip-status-dot rounded-circle" [ngClass]="getStatusInfo(pr.status).dotClass"></span>
+                  <span class="fw-semibold" style="font-size: 11px;" [ngClass]="getStatusInfo(pr.status).textClass">
+                    {{ getStatusInfo(pr.status).text }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
+      </div>
     </div>
+  </div>
+
 </div>
 
-<div class="modal-overlay" *ngIf="showTypeModal">
-    <div class="modal-content large-modal">
-        <div class="modal-header">
-            <h3>{{ editingRoomId ? 'Sửa Loại Phòng' : 'Thêm Loại Phòng' }}</h3>
-            <span class="close-btn" (click)="closeTypeModal()">✕</span>
-        </div>
-        <div class="modal-body">
-            <form (ngSubmit)="saveRoom()" class="form-layout">
+<!-- ========================================== -->
+<!-- MODAL THÊM / SỬA LOẠI PHÒNG                -->
+<!-- ========================================== -->
+<div class="modal-backdrop-custom" *ngIf="showTypeModal">
+  <div class="modal-dialog-custom modal-lg animate-in">
+    <div class="modal-content bg-white border-0 shadow-lg rounded-4 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="modal-header bg-slate-50 border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+        <h5 class="modal-title fw-bold text-slate-800 d-flex align-items-center gap-2 mb-0">
+          <i class="bi" [ngClass]="editingRoomId ? 'bi-pencil-square text-primary' : 'bi-plus-circle-fill text-success'"></i>
+          {{ editingRoomId ? 'Cập Nhật Loại Phòng' : 'Tạo Mới Loại Phòng' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeTypeModal()" aria-label="Close"></button>
+      </div>
 
-                <div class="input-row">
-                    <div class="input-group large"><label>Tên phòng *</label><input type="text"
-                            [(ngModel)]="roomForm.name" name="name" required class="form-control"></div>
-                    <div class="input-group"><label>Giá/Đêm (VND) *</label><input type="number"
-                            [(ngModel)]="roomForm.base_price" name="price" required class="form-control"></div>
-                </div>
+      <!-- Modal Body -->
+      <div class="modal-body bg-white p-4" style="max-height: 80vh; overflow-y: auto;">
+        <form (ngSubmit)="saveRoom()">
 
-                <div class="input-row mt-3">
-                    <div class="input-group"><label>Người lớn *</label><input type="number"
-                            [(ngModel)]="roomForm.max_adults" name="adults" required class="form-control"></div>
-                    <div class="input-group"><label>Trẻ em</label><input type="number"
-                            [(ngModel)]="roomForm.max_children" name="children" required class="form-control"></div>
-                    <div class="input-group"><label>Diện tích (m²)</label><input type="number"
-                            [(ngModel)]="roomForm.room_size" name="room_size" class="form-control" placeholder="VD: 35">
-                    </div>
-                </div>
+          <!-- Row 0: Trạng thái kinh doanh (Khi sửa) -->
+          <div class="mb-3" *ngIf="editingRoomId">
+            <label class="form-label fw-bold text-slate-700 small">Trạng thái kinh doanh (*)</label>
+            <select [(ngModel)]="roomForm.status" name="status" class="form-select">
+              <option [ngValue]="1">🟢 Đang mở bán trên website</option>
+              <option [ngValue]="0">⏸️ Tạm ngưng mở bán (Vô hiệu hóa)</option>
+            </select>
+          </div>
 
-                <div class="input-row mt-3">
-                    <div class="input-group">
-                        <label>Hướng nhìn</label>
-                        <select [(ngModel)]="roomForm.view_id" name="view_id" class="form-control">
-                            <option [ngValue]="null">-- Chọn hướng nhìn --</option>
-                            <option *ngFor="let view of allRoomViews" [ngValue]="view.id">{{ view.name }}</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Loại giường</label>
-                        <select [(ngModel)]="roomForm.bed_type_id" name="bed_type_id" class="form-control">
-                            <option [ngValue]="null">-- Chọn loại giường --</option>
-                            <option *ngFor="let bed of allBedTypes" [ngValue]="bed.id">{{ bed.name }}</option>
-                        </select>
-                    </div>
-                </div>
+          <!-- Row 1: Tên & Giá -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-8">
+              <label class="form-label fw-bold text-slate-700 small">Tên loại phòng (*)</label>
+              <input type="text" [(ngModel)]="roomForm.name" name="name" required maxlength="100" 
+                class="form-control" placeholder="Ví dụ: Phòng Deluxe Hướng Biển">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold text-slate-700 small">Giá / đêm (VND) (*)</label>
+              <input type="number" [(ngModel)]="roomForm.base_price" name="price" required min="1" max="500000000" 
+                class="form-control fw-bold text-danger" placeholder="500000">
+            </div>
+          </div>
 
-                <div class="input-row mt-3">
-                    <div class="input-group">
-                        <label>Bao gồm bữa sáng?</label>
-                        <select [(ngModel)]="roomForm.has_breakfast" name="has_breakfast" class="form-control">
-                            <option [ngValue]="0">Không</option>
-                            <option [ngValue]="1">Có</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Chính sách hút thuốc</label>
-                        <select [(ngModel)]="roomForm.smoking_policy" name="smoking_policy" class="form-control">
-                            <option [ngValue]="0">Cấm hút thuốc</option>
-                            <option [ngValue]="1">Cho phép hút thuốc</option>
-                        </select>
-                    </div>
-                </div>
+          <!-- Row 2: Người lớn, Trẻ em, Diện tích -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold text-slate-700 small">Người lớn (*)</label>
+              <input type="number" [(ngModel)]="roomForm.max_adults" name="adults" required min="1" max="20" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold text-slate-700 small">Trẻ em</label>
+              <input type="number" [(ngModel)]="roomForm.max_children" name="children" required min="0" max="20" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-bold text-slate-700 small">Diện tích (m²)</label>
+              <input type="number" [(ngModel)]="roomForm.room_size" name="room_size" class="form-control" placeholder="Ví dụ: 35" min="1" max="2000">
+            </div>
+          </div>
 
-                <div class="input-row mt-3">
-                    <div class="input-group" style="width: 100%;">
-                        <label>Chính sách hủy phòng (Ngắn gọn)</label>
-                        <input type="text" [(ngModel)]="roomForm.cancellation_policy" name="cancellation_policy"
-                            class="form-control" placeholder="VD: Miễn phí hủy trước 24h">
-                    </div>
-                </div>
+          <!-- Row 3: Hướng nhìn & Loại giường -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-slate-700 small">Hướng nhìn</label>
+              <select [(ngModel)]="roomForm.view_id" name="view_id" class="form-select">
+                <option [ngValue]="null">-- Chọn hướng nhìn --</option>
+                <option *ngFor="let view of allRoomViews" [ngValue]="view.id">{{ view.name }}</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-slate-700 small">Loại giường</label>
+              <select [(ngModel)]="roomForm.bed_type_id" name="bed_type_id" class="form-select">
+                <option [ngValue]="null">-- Chọn loại giường --</option>
+                <option *ngFor="let bed of allBedTypes" [ngValue]="bed.id">{{ bed.name }}</option>
+              </select>
+            </div>
+          </div>
 
-                <div class="input-row mt-3">
-                    <div class="input-group" style="width: 100%;">
-                        <label>Mô tả chi tiết phòng</label>
-                        <textarea [(ngModel)]="roomForm.description" name="description" class="form-control" rows="3"
-                            placeholder="Nhập mô tả chi tiết về phòng..."></textarea>
-                    </div>
-                </div>
+          <!-- Row 4: Ăn sáng & Hút thuốc -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-slate-700 small">Bao gồm bữa sáng?</label>
+              <select [(ngModel)]="roomForm.has_breakfast" name="has_breakfast" class="form-select">
+                <option [ngValue]="0">Không bao gồm</option>
+                <option [ngValue]="1">Có bao gồm</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-slate-700 small">Chính sách hút thuốc</label>
+              <select [(ngModel)]="roomForm.smoking_policy" name="smoking_policy" class="form-select">
+                <option [ngValue]="0">Cấm hút thuốc</option>
+                <option [ngValue]="1">Cho phép hút thuốc</option>
+              </select>
+            </div>
+          </div>
 
-                <div class="media-upload-section mt-3">
-                    <div class="upload-area">
-                        <label class="upload-label">Tải lên Ảnh (Có thể chọn nhiều)</label>
-                        <input type="file" multiple (change)="onFileSelected($event)" accept="image/*"
-                            class="file-input">
-                        <div *ngIf="imagePreviews.length > 0" class="image-preview-container">
-                            <div *ngFor="let preview of imagePreviews" class="preview-box"><img [src]="preview"
-                                    class="preview-img"></div>
-                        </div>
-                    </div>
-                </div>
+          <!-- Row 5: Chính sách hoàn hủy -->
+          <div class="p-3 bg-amber-50 rounded-3 border border-amber-200 mb-3">
+            <div class="fw-bold text-amber-800 small mb-2 d-flex align-items-center gap-1">
+              <i class="bi bi-shield-check"></i> Thiết lập chính sách hoàn hủy linh hoạt
+            </div>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label text-slate-700 small fw-semibold">Hủy miễn phí trước (Giờ)</label>
+                <input type="number" [(ngModel)]="roomForm.free_cancel_hours" name="free_cancel_hours" class="form-control bg-white" placeholder="48" min="0" max="720">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-slate-700 small fw-semibold">Hoàn 1 phần trước (Giờ)</label>
+                <input type="number" [(ngModel)]="roomForm.partial_refund_hours" name="partial_refund_hours" class="form-control bg-white" placeholder="24" min="0" max="720">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-slate-700 small fw-semibold">Tỷ lệ hoàn 1 phần (%)</label>
+                <input type="number" [(ngModel)]="roomForm.partial_refund_percent" name="partial_refund_percent" class="form-control bg-white" placeholder="50" min="0" max="100">
+              </div>
+            </div>
+            <div class="text-amber-700 mt-2" style="font-size: 11px;">
+              * Quy tắc: Khách hủy trước <strong>{{ roomForm.free_cancel_hours || 48 }}h</strong> được hoàn 100%. Hủy trước <strong>{{ roomForm.partial_refund_hours || 24 }}h</strong> được hoàn <strong>{{ roomForm.partial_refund_percent || 50 }}%</strong>. Hủy sát giờ tính phí 100%.
+            </div>
+          </div>
 
-                <div class="amenities-section mt-3">
-                    <label class="amenities-title">Tiện ích:</label>
-                    <div class="amenities-grid">
-                        <label *ngFor="let item of allRoomAmenities" class="amenity-checkbox">
-                            <input type="checkbox" [checked]="selectedAmenityIds.includes(item.id)"
-                                (change)="toggleAmenity(item.id, $event)">
-                            <span>{{ item.icon }} {{ item.name }}</span>
-                        </label>
-                    </div>
-                </div>
+          <!-- Row 6: Mô tả -->
+          <div class="mb-4">
+            <label class="form-label fw-bold text-slate-700 small">Mô tả chi tiết phòng</label>
+            <textarea [(ngModel)]="roomForm.description" name="description" maxlength="2000" class="form-control" rows="3" placeholder="Nhập mô tả về không gian, đặc điểm phòng..."></textarea>
+          </div>
 
-                <div class="modal-footer mt-4">
-                    <button type="button" class="btn-cancel" (click)="closeTypeModal()">Hủy</button>
-                    <button type="submit" class="btn-submit">{{ editingRoomId ? 'Cập nhật' : 'Lưu lại' }}</button>
+          <hr class="my-4">
+
+          <!-- HIỂN THỊ HÌNH ẢNH HIỆN CÓ -->
+          <div class="mb-4" *ngIf="editingRoomId && existingImages.length > 0">
+            <label class="form-label fw-bold text-slate-700 small mb-2 d-flex align-items-center justify-content-between">
+              <span>Hình ảnh hiện tại ({{ existingImages.length }} ảnh)</span>
+              <span class="text-muted fw-normal" style="font-size: 11px;">Bấm biểu tượng ngôi sao để chọn Ảnh Bìa</span>
+            </label>
+            <div class="d-flex flex-wrap gap-3">
+              <div *ngFor="let img of existingImages" 
+                class="existing-img-card position-relative rounded-3 overflow-hidden border shadow-2xs"
+                [class.border-warning]="img.is_primary == 1"
+                [style.border-width]="img.is_primary == 1 ? '2px' : '1px'">
+                
+                <img [src]="getImageUrl(img.file_url)" class="w-100 h-100 object-fit-cover">
+
+                <!-- Badge Ảnh Bìa -->
+                <span *ngIf="img.is_primary == 1" class="badge bg-warning text-dark position-absolute bottom-1 start-1 d-inline-flex align-items-center gap-1 shadow-xs" style="font-size: 10px; z-index: 2;">
+                  <i class="bi bi-star-fill"></i> Ảnh bìa
+                </span>
+
+                <!-- Action Overlay Buttons -->
+                <div class="existing-img-overlay d-flex gap-1.5 position-absolute top-1 end-1">
+                  <!-- Đặt ảnh bìa button -->
+                  <button type="button" class="btn btn-sm btn-light rounded-circle shadow-xs p-0 d-flex align-items-center justify-content-center"
+                    style="width: 28px; height: 28px;"
+                    [class.text-warning]="img.is_primary == 1"
+                    [class.text-muted]="img.is_primary != 1"
+                    (click)="setPrimaryImage(img.id)"
+                    [title]="img.is_primary == 1 ? 'Đang là ảnh bìa chính' : 'Đặt làm ảnh bìa chính'">
+                    <i class="bi" [ngClass]="img.is_primary == 1 ? 'bi-star-fill text-warning' : 'bi-star'"></i>
+                  </button>
+
+                  <!-- Xóa ảnh button -->
+                  <button type="button" class="btn btn-sm btn-light text-danger rounded-circle shadow-xs p-0 d-flex align-items-center justify-content-center"
+                    style="width: 28px; height: 28px;"
+                    (click)="deleteExistingImage(img.id)" title="Xóa ảnh này">
+                    <i class="bi bi-trash3"></i>
+                  </button>
                 </div>
-            </form>
-        </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TẢI THÊM ẢNH MỚI -->
+          <div class="mb-4">
+            <label class="form-label fw-bold text-slate-700 small mb-2">
+              {{ editingRoomId ? 'Tải thêm ảnh mới' : 'Tải lên hình ảnh phòng (*)' }}
+            </label>
+            <div class="upload-dropzone p-3 rounded-3 border-2 border-dashed text-center bg-slate-50 cursor-pointer"
+              (click)="fileInput.click()">
+              <input #fileInput type="file" multiple (change)="onFileSelected($event)" accept="image/*" class="d-none">
+              <i class="bi bi-cloud-arrow-up-fill fs-2 text-primary mb-1 d-block"></i>
+              <div class="fw-semibold text-slate-700 small">Bấm vào đây để chọn ảnh từ máy tính</div>
+              <div class="text-muted" style="font-size: 11px;">Định dạng JPG, PNG, WEBP. Tối thiểu 1 ảnh và tối đa 15 ảnh.</div>
+            </div>
+
+            <!-- Previews của ảnh mới -->
+            <div *ngIf="imagePreviews.length > 0" class="mt-3">
+              <div class="text-muted small mb-2">Ảnh mới chọn chờ tải lên ({{ imagePreviews.length }} ảnh):</div>
+              <div class="d-flex flex-wrap gap-2.5">
+                <div *ngFor="let preview of imagePreviews; let idx = index" class="position-relative rounded-3 overflow-hidden border shadow-2xs" style="width: 100px; height: 75px;">
+                  <img [src]="preview" class="w-100 h-100 object-fit-cover">
+                  <span class="badge bg-success position-absolute top-1 start-1" style="font-size: 9px;">MỚI</span>
+                  <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute top-1 end-1 p-0 d-flex align-items-center justify-content-center"
+                    style="width: 20px; height: 20px;" (click)="removeSelectedFile(idx)" title="Bỏ ảnh này">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TIỆN ÍCH PHÒNG -->
+          <div class="mb-4">
+            <label class="form-label fw-bold text-slate-700 small mb-2">Tiện ích trong phòng:</label>
+            <div class="row g-2">
+              <div class="col-6 col-sm-4 col-md-3" *ngFor="let item of allRoomAmenities">
+                <label class="d-flex align-items-center gap-2 p-2 rounded-3 border bg-white cursor-pointer hover-bg-light amenity-checkbox-card">
+                  <input type="checkbox" class="form-check-input mt-0" 
+                    [checked]="selectedAmenityIds.includes(item.id)" 
+                    (change)="toggleAmenity(item.id, $event)">
+                  <span class="small text-slate-700 text-truncate" [title]="item.name">
+                    {{ item.icon }} {{ item.name }}
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+            <button type="button" class="btn btn-light fw-semibold px-4" (click)="closeTypeModal()">Đóng</button>
+            <button type="submit" class="btn btn-primary fw-semibold px-4">
+              {{ editingRoomId ? 'Lưu Thay Đổi' : 'Tạo Loại Phòng' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+
     </div>
+  </div>
 </div>
 
-<div class="modal-overlay" *ngIf="showPhysModal">
-    <div class="modal-content small-modal">
-        <div class="modal-header">
-            <h3>{{ isEditPhysMode ? 'Cập Nhật Phòng' : 'Khai Báo Phòng Mới' }}</h3>
-            <span class="close-btn" (click)="closePhysModal()">✕</span>
-        </div>
-        <div class="modal-body">
-            <div class="form-group mb-3">
-                <label>Số phòng / Tên phòng (*):</label>
-                <input type="text" class="form-control mt-1" [(ngModel)]="physRoomForm.room_name"
-                    placeholder="VD: 101, P1D, VIP...">
-            </div>
+<!-- ========================================== -->
+<!-- MODAL THÊM / SỬA MÃ PHÒNG THỰC TẾ          -->
+<!-- ========================================== -->
+<div class="modal-backdrop-custom" *ngIf="showPhysModal">
+  <div class="modal-dialog-custom modal-sm animate-in" style="max-width: 440px;">
+    <div class="modal-content bg-white border-0 shadow-lg rounded-4 overflow-hidden">
+      
+      <div class="modal-header bg-slate-50 border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+        <h6 class="modal-title fw-bold text-slate-800 d-flex align-items-center gap-2 mb-0">
+          <i class="bi bi-key-fill text-primary"></i>
+          {{ isEditPhysMode ? 'Cập Nhật Mã Phòng' : 'Thêm Mã Phòng Mới' }}
+        </h6>
+        <button type="button" class="btn-close" (click)="closePhysModal()" aria-label="Close"></button>
+      </div>
 
-            <div class="form-group mb-4" *ngIf="!isEditPhysMode">
-                <label>Trạng thái ban đầu:</label>
-                <select class="form-control mt-1" [(ngModel)]="physRoomForm.status">
-                    <option [ngValue]="1">🟢 Trống (Sẵn sàng)</option>
-                    <option [ngValue]="0">🟠 Cần dọn dẹp</option>
-                    <option [ngValue]="3">🔴 Đang bảo trì</option>
-                </select>
-            </div>
-
-            <div class="modal-footer d-flex justify-content-between">
-                <div>
-                    <button *ngIf="isEditPhysMode" type="button" class="btn-cancel" style="background:#ef4444"
-                        (click)="deletePhysRoom(physRoomForm.id)">Xóa phòng này</button>
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn-cancel" (click)="closePhysModal()">Hủy</button>
-                    <button type="button" class="btn-submit" (click)="savePhysRoom()">Lưu lại</button>
-                </div>
-            </div>
+      <div class="modal-body bg-white p-4">
+        <!-- Room Name Input -->
+        <div class="mb-3">
+          <label class="form-label fw-bold text-slate-700 small">Số phòng / Tên phòng (*):</label>
+          <input type="text" class="form-control" [(ngModel)]="physRoomForm.room_name" placeholder="Ví dụ: 101, 102, VIP1...">
         </div>
+
+        <!-- Room Status Selection (Hiển thị cả khi tạo mới và khi sửa) -->
+        <div class="mb-4">
+          <label class="form-label fw-bold text-slate-700 small">Trạng thái phòng:</label>
+          
+          <!-- Thông báo nếu phòng đang có khách -->
+          <div *ngIf="isEditPhysMode && physRoomForm.status === 2" class="alert alert-info py-2 px-3 small mb-2 d-flex align-items-center gap-2">
+            <i class="bi bi-info-circle-fill"></i>
+            <div>Phòng đang có khách lưu trú theo đơn đặt. Trạng thái sẽ tự động cập nhật khi khách trả phòng.</div>
+          </div>
+
+          <select class="form-select" [(ngModel)]="physRoomForm.status" [disabled]="isEditPhysMode && physRoomForm.status === 2">
+            <option [ngValue]="1">🟢 Trống (Sẵn sàng đón khách)</option>
+            <option [ngValue]="0">🟠 Cần dọn dẹp</option>
+            <option [ngValue]="3">🔴 Đang bảo trì</option>
+            <option *ngIf="physRoomForm.status === 2" [ngValue]="2" disabled>🔵 Đang có khách</option>
+          </select>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+          <div>
+            <button *ngIf="isEditPhysMode" type="button" class="btn btn-sm btn-outline-danger fw-semibold" (click)="deletePhysRoom(physRoomForm.id)">
+              <i class="bi bi-trash3 me-1"></i> Xóa phòng
+            </button>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-light fw-semibold px-3" (click)="closePhysModal()">Hủy</button>
+            <button type="button" class="btn btn-sm btn-primary fw-semibold px-3" (click)="savePhysRoom()">Lưu thông tin</button>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
 </div>

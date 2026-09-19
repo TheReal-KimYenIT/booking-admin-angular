@@ -1,73 +1,438 @@
-<div class="container-fluid p-4 fade-in-up">
-    <div class="mb-4">
-        <h2 class="fw-bold text-dark mb-1">⚙️ Cấu Hình Hệ Thống</h2>
-        <p class="text-muted mb-0">Thiết lập các thông số tài chính, thuế và mức phí cốt lõi của sàn StayBook.</p>
+<div class="system-settings-container p-1 p-md-2 fade-in-up">
+  <!-- 1. HEADER -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="portal-tag">
+          <i class="bi bi-sliders me-1"></i> Quản Trị Hệ Thống &bull; Thiết Lập Thuế & Phí Sàn
+        </span>
+      </div>
+      <h2 class="h4 fw-bold text-slate-900 mb-0.5">Cấu Hình Thuế & Hoa Hồng Toàn Sàn</h2>
+      <p class="text-muted mb-0 small">
+        Sàn StayHub <strong class="text-indigo-700">chỉ thu phí dịch vụ sàn</strong> (hoa hồng). Tiền phòng và thuế VAT do bên <strong class="text-emerald-700">Khách sạn trực tiếp thu</strong> và kê khai nộp thuế.
+      </p>
     </div>
 
-    <div *ngIf="isLoading" class="text-center p-5">
-        <div class="spinner-border text-primary" role="status"></div>
-        <h5 class="text-muted mt-3">Đang tải dữ liệu...</h5>
+    <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end">
+      <button class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 shadow-2xs d-inline-flex align-items-center gap-1.5 text-nowrap" 
+              (click)="loadSettings()" [disabled]="isLoading || isSaving">
+        <i class="bi bi-arrow-clockwise" [class.spin-icon]="isLoading"></i>
+        <span>Làm Mới</span>
+      </button>
+
+      <button *ngIf="isDirty" (click)="resetSettings()" [disabled]="isSaving"
+              class="btn btn-light btn-sm px-3 py-2 rounded-3 border shadow-2xs d-inline-flex align-items-center gap-1.5 text-nowrap text-muted">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        <span>Khôi Phục</span>
+      </button>
+
+      <button (click)="saveSettings()" [disabled]="isSaving || isLoading"
+              class="btn btn-primary btn-sm px-4 py-2 rounded-3 shadow-sm d-inline-flex align-items-center gap-1.5 text-nowrap fw-semibold">
+        <span *ngIf="!isSaving"><i class="bi bi-floppy-fill me-1"></i> Lưu Cấu Hình</span>
+        <span *ngIf="isSaving" class="spinner-border spinner-border-sm"></span>
+        <span *ngIf="isSaving">Đang lưu...</span>
+      </button>
     </div>
+  </div>
 
-    <div class="row" *ngIf="!isLoading">
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-3">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h5 class="fw-bold text-primary mb-0">💰 Cấu hình Tài Chính & Thuế</h5>
-                </div>
-
-                <div class="card-body p-4">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-dark">Thuế Giá trị gia tăng (VAT %)</label>
-                        <div class="input-group mb-1">
-                            <input type="number" [(ngModel)]="settings.vat_rate"
-                                class="form-control form-control-lg fw-bold text-end" min="0" max="100">
-                            <span class="input-group-text bg-light fw-bold">%</span>
-                        </div>
-                        <small class="text-muted fst-italic">Mức thuế này sẽ được tự động cộng vào tổng tiền khi khách
-                            hàng đặt phòng.</small>
-                    </div>
-
-                    <hr class="text-muted opacity-25 my-4">
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-dark">Tỉ lệ hoa hồng mặc định (Commission Rate)</label>
-                        <div class="input-group mb-1">
-                            <input type="number" [(ngModel)]="settings.default_commission_rate"
-                                class="form-control form-control-lg fw-bold text-end" min="0" max="100">
-                            <span class="input-group-text bg-light fw-bold">%</span>
-                        </div>
-                        <small class="text-muted fst-italic">Phí phần trăm Sàn sẽ thu từ Khách sạn trên mỗi đơn hàng
-                            thành công (Có thể cấu hình riêng cho từng Khách sạn sau).</small>
-                    </div>
-
-                    <div class="d-flex justify-content-end mt-4">
-                        <button (click)="saveSettings()" [disabled]="isSaving"
-                            class="btn btn-primary btn-lg fw-bold px-5 shadow-sm d-flex align-items-center gap-2">
-                            <span *ngIf="!isSaving">💾 Lưu Cấu Hình</span>
-                            <span *ngIf="isSaving" class="spinner-border spinner-border-sm"></span>
-                            <span *ngIf="isSaving">Đang lưu...</span>
-                        </button>
-                    </div>
-                </div>
+  <!-- 2. KPI METRICS CARDS (4 CARDS) -->
+  <div class="row g-2 mb-3">
+    <!-- Card 1: Thuế VAT (Khách sạn thu & nộp) -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-indigo-50 text-indigo-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-receipt-cutoff"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Thuế VAT (Khách sạn thu)</div>
+            <div class="fs-6 fw-bold text-indigo-600 text-truncate font-monospace">
+              {{ settings.vat_rate }}%
             </div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Khách sạn kê khai nộp thuế</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Hoa hồng sàn mặc định (Khoản thu của Sàn) -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-emerald-50 text-emerald-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-percent"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Hoa Hồng Mặc Định</div>
+            <div class="fs-6 fw-bold text-emerald-600 text-truncate font-monospace">
+              {{ settings.default_commission_rate }}%
+            </div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Khoản thu duy nhất của Sàn</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Phí sàn đã thu (StayHub) -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-amber-50 text-amber-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-wallet2"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Phí Sàn Đã Thu (StayHub)</div>
+            <div class="fs-6 fw-bold text-amber-600 text-truncate font-monospace">
+              {{ metaStats.total_platform_fee | number }} <span class="text-muted small fw-normal">đ</span>
+            </div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Doanh thu thực của Sàn ({{ metaStats.total_bookings }} đơn)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Lần cập nhật cuối -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-xs h-100 kpi-card">
+        <div class="card-body p-2.5 px-3 d-flex align-items-center gap-2.5">
+          <div class="kpi-icon-wrapper bg-sky-50 text-sky-600 rounded-3 p-2 fs-5 flex-shrink-0">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div class="overflow-hidden">
+            <div class="text-muted small fw-semibold text-truncate" style="font-size: 11px;">Lần Cập Nhật Gần Nhất</div>
+            <div class="fs-6 fw-bold text-slate-800 text-truncate font-monospace" style="font-size: 13px !important;">
+              {{ metaStats.updated_at || 'Đã lưu' }}
+            </div>
+            <div class="text-muted text-truncate" style="font-size: 10px;">Đồng bộ CSDL StayHub</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. LOADING STATE -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-indigo-600" role="status"></div>
+    <h6 class="text-muted mt-2 small">Đang tải cấu hình tài chính từ máy chủ...</h6>
+  </div>
+
+  <!-- 4. MAIN CONFIGURATION & LIVE SIMULATION (2 COLUMNS) -->
+  <div class="row g-3" *ngIf="!isLoading">
+    <!-- CỘT TRÁI: FORM CẤU HÌNH THIẾT LẬP -->
+    <div class="col-12 col-lg-6">
+      <div class="card border-0 shadow-xs rounded-3 overflow-hidden h-100">
+        <div class="card-header bg-white border-bottom border-slate-100 py-3 px-4 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <div class="header-icon bg-indigo-50 text-indigo-600 rounded-circle p-2 fs-6">
+              <i class="bi bi-coin"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold text-slate-900 mb-0 fs-6">Cấu Hình Tài Chính & Phí Sàn</h5>
+              <p class="text-muted small mb-0" style="font-size: 11px;">Điều chỉnh thuế VAT (Khách sạn thu) và hoa hồng (Sàn thu)</p>
+            </div>
+          </div>
+          <span *ngIf="isDirty" class="badge bg-amber-50 text-amber-700 border border-amber-200 px-2 py-1 rounded-pill small">
+            <i class="bi bi-exclamation-circle me-1"></i> Có thay đổi
+          </span>
         </div>
 
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-3 bg-light h-100">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle text-info"></i> Hướng dẫn & Lưu ý
-                    </h6>
-                    <ul class="text-muted small lh-lg mb-0" style="padding-left: 1.2rem;">
-                        <li><strong>Thuế VAT:</strong> Mức thuế được quy định bởi Nhà nước. Bạn chỉ nên thay đổi khi có
-                            nghị định giảm thuế (Ví dụ: Từ 10% xuống 8%).</li>
-                        <li>Sự thay đổi về Thuế sẽ <strong>áp dụng ngay lập tức</strong> cho các đơn đặt phòng mới. Các
-                            đơn cũ không bị ảnh hưởng.</li>
-                        <li><strong>Tỉ lệ hoa hồng:</strong> Mức 15% là tiêu chuẩn ngành OTA. Con số này dùng làm cơ sở
-                            để đối soát doanh thu cuối tháng ở bảng <em>Quản lý dòng tiền</em>.</li>
-                    </ul>
-                </div>
+        <div class="card-body p-4">
+          <!-- GROUP 1: THUẾ VAT -->
+          <div class="setting-group mb-4 pb-3 border-bottom border-slate-100">
+            <div class="d-flex justify-content-between align-items-center mb-1.5">
+              <label class="form-label fw-bold text-slate-800 mb-0 d-flex align-items-center gap-1.5">
+                <i class="bi bi-receipt text-indigo-600"></i>
+                Thuế Giá Trị Gia Tăng (VAT %)
+              </label>
+              <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-pill" style="font-size: 10.5px;">
+                Khách sạn thu & nộp Nhà nước
+              </span>
             </div>
+
+            <div class="input-group input-group-lg mb-2 shadow-2xs">
+              <span class="input-group-text bg-slate-50 border-slate-200 text-slate-500">
+                <i class="bi bi-calculator"></i>
+              </span>
+              <input type="number" [(ngModel)]="settings.vat_rate"
+                     class="form-control fw-bold text-end border-slate-200 font-monospace text-slate-900 fs-5"
+                     min="0" max="100" step="0.1" placeholder="Nhập mức VAT (0 - 100)">
+              <span class="input-group-text bg-slate-50 border-slate-200 fw-bold text-indigo-600 px-3">%</span>
+            </div>
+
+            <!-- Nút chọn nhanh VAT Preset -->
+            <div class="d-flex align-items-center gap-1.5 flex-wrap mb-2">
+              <span class="text-muted small me-1" style="font-size: 11px;">Chọn nhanh:</span>
+              <button type="button" class="btn btn-sm py-1 px-2 rounded-2 preset-btn"
+                      [class.preset-active]="settings.vat_rate === 10"
+                      (click)="setVatPreset(10)">
+                10% (Chuẩn hiện hành)
+              </button>
+              <button type="button" class="btn btn-sm py-1 px-2 rounded-2 preset-btn"
+                      [class.preset-active]="settings.vat_rate === 8"
+                      (click)="setVatPreset(8)">
+                8% (Nghị định giảm VAT)
+              </button>
+              <button type="button" class="btn btn-sm py-1 px-2 rounded-2 preset-btn"
+                      [class.preset-active]="settings.vat_rate === 0"
+                      (click)="setVatPreset(0)">
+                0% (Miễn thuế)
+              </button>
+            </div>
+
+            <div class="text-muted small d-flex align-items-start gap-1.5" style="font-size: 11.5px;">
+              <i class="bi bi-info-circle text-indigo-500 flex-shrink-0 mt-0.5"></i>
+              <span>Mức thuế này được cộng vào hóa đơn khi khách đặt phòng. <strong>Bên Khách sạn là đơn vị trực tiếp thu khoản thuế này</strong> từ khách để xuất hóa đơn và kê khai nộp thuế (Sàn không thu và không giữ thuế này).</span>
+            </div>
+          </div>
+
+          <!-- GROUP 2: TỈ LỆ HOA HỒNG SÀN -->
+          <div class="setting-group mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-1.5">
+              <label class="form-label fw-bold text-slate-800 mb-0 d-flex align-items-center gap-1.5">
+                <i class="bi bi-pie-chart-fill text-emerald-600"></i>
+                Tỉ Lệ Hoa Hồng Mặc Định (Commission Rate %)
+              </label>
+              <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-pill" style="font-size: 10.5px;">
+                Khoản thu duy nhất của Sàn
+              </span>
+            </div>
+
+            <div class="input-group input-group-lg mb-2 shadow-2xs">
+              <span class="input-group-text bg-slate-50 border-slate-200 text-slate-500">
+                <i class="bi bi-shop-window"></i>
+              </span>
+              <input type="number" [(ngModel)]="settings.default_commission_rate"
+                     class="form-control fw-bold text-end border-slate-200 font-monospace text-slate-900 fs-5"
+                     min="0" max="100" step="0.1" placeholder="Nhập tỉ lệ hoa hồng (0 - 100)">
+              <span class="input-group-text bg-slate-50 border-slate-200 fw-bold text-emerald-600 px-3">%</span>
+            </div>
+
+            <!-- Nút chọn nhanh Commission Preset -->
+            <div class="d-flex align-items-center gap-1.5 flex-wrap mb-2">
+              <span class="text-muted small me-1" style="font-size: 11px;">Chọn nhanh:</span>
+              <button type="button" class="btn btn-sm py-1 px-2 rounded-2 preset-btn"
+                      [class.preset-active]="settings.default_commission_rate === 12"
+                      (click)="setCommissionPreset(12)">
+                12% (Kích cầu)
+              </button>
+              <button type="button" class="btn btn-sm py-1 px-2 rounded-2 preset-btn"
+                      [class.preset-active]="settings.default_commission_rate === 14"
+                      (click)="setCommissionPreset(14)">
+                14% (Mức sàn hiện tại)
+              </button>
+              <button type="button" class="btn btn-sm py-1 px-2 rounded-2 preset-btn"
+                      [class.preset-active]="settings.default_commission_rate === 15"
+                      (click)="setCommissionPreset(15)">
+                15% (Chuẩn OTA Đông Nam Á)
+              </button>
+              <button type="button" class="btn btn-sm py-1 px-2 rounded-2 preset-btn"
+                      [class.preset-active]="settings.default_commission_rate === 18"
+                      (click)="setCommissionPreset(18)">
+                18% (Gói Premium)
+              </button>
+            </div>
+
+            <div class="text-muted small d-flex align-items-start gap-1.5" style="font-size: 11.5px;">
+              <i class="bi bi-info-circle text-emerald-500 flex-shrink-0 mt-0.5"></i>
+              <span>Phí phần trăm Sàn StayHub thu từ Khách sạn trên mỗi đơn thành công. <strong>Đây là khoản thu duy nhất của Admin Sàn</strong> (áp dụng mặc định cho đối tác mới; 26 khách sạn hiện hành có thể điều chỉnh riêng tại Quản lý Đối tác).</span>
+            </div>
+          </div>
+
+          <!-- SUBMIT ACTIONS -->
+          <div class="d-flex align-items-center justify-content-between pt-3 border-top border-slate-100 flex-wrap gap-2">
+            <div class="text-muted small" style="font-size: 11.5px;">
+              <span *ngIf="isDirty" class="text-amber-700 fw-semibold">
+                <i class="bi bi-pencil-square me-1"></i> Có thông số vừa chỉnh sửa
+              </span>
+              <span *ngIf="!isDirty" class="text-muted">
+                <i class="bi bi-check2-circle text-success me-1"></i> Đang khớp với cấu hình hệ thống
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <button *ngIf="isDirty" (click)="resetSettings()" type="button" [disabled]="isSaving"
+                      class="btn btn-light btn-sm px-3 py-2 rounded-3 border text-muted">
+                Khôi phục
+              </button>
+
+              <button (click)="saveSettings()" [disabled]="isSaving"
+                      class="btn btn-primary px-4 py-2.5 rounded-3 fw-bold shadow-sm d-flex align-items-center gap-2">
+                <span *ngIf="!isSaving"><i class="bi bi-floppy-fill"></i> Lưu Cấu Hình Mới</span>
+                <span *ngIf="isSaving" class="spinner-border spinner-border-sm"></span>
+                <span *ngIf="isSaving">Đang lưu thay đổi...</span>
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+
+    <!-- CỘT PHẢI: BẢNG TÍNH MÔ PHỎNG DÒNG TIỀN TRỰC QUAN + QUY ĐỊNH PHÁP LÝ -->
+    <div class="col-12 col-lg-6 d-flex flex-column gap-3">
+      <!-- 1. LIVE FINANCIAL SIMULATOR CARD -->
+      <div class="card border-0 shadow-xs rounded-3 overflow-hidden simulation-card">
+        <div class="card-header bg-white border-bottom border-slate-100 py-3 px-4 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <div class="header-icon bg-emerald-50 text-emerald-600 rounded-circle p-2 fs-6">
+              <i class="bi bi-calculator-fill"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold text-slate-900 mb-0 fs-6">Mô Phỏng Dòng Tiền Đơn Hàng Mẫu</h5>
+              <p class="text-muted small mb-0" style="font-size: 11px;">Phân định rõ nguồn thu của Sàn và phần của Khách sạn</p>
+            </div>
+          </div>
+          <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-pill small fw-semibold">
+            <i class="bi bi-activity me-1"></i> Trực tiếp
+          </span>
+        </div>
+
+        <div class="card-body p-4">
+          <!-- Chọn số tiền phòng mẫu -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="text-slate-700 small fw-bold">Giả lập tiền phòng gốc:</span>
+              <div class="d-flex gap-1">
+                <button type="button" class="btn btn-xs sample-btn" [class.sample-active]="sampleBookingAmount === 1000000" (click)="setSampleAmount(1000000)">1 Triệu</button>
+                <button type="button" class="btn btn-xs sample-btn" [class.sample-active]="sampleBookingAmount === 2000000" (click)="setSampleAmount(2000000)">2 Triệu</button>
+                <button type="button" class="btn btn-xs sample-btn" [class.sample-active]="sampleBookingAmount === 5000000" (click)="setSampleAmount(5000000)">5 Triệu</button>
+              </div>
+            </div>
+            <div class="input-group input-group-sm shadow-2xs">
+              <span class="input-group-text bg-slate-50 border-slate-200 text-muted">Giá phòng mẫu</span>
+              <input type="number" [(ngModel)]="sampleBookingAmount" step="100000" min="100000"
+                     class="form-control fw-bold text-end border-slate-200 font-monospace text-slate-900">
+              <span class="input-group-text bg-slate-50 border-slate-200 fw-semibold text-muted">đ</span>
+            </div>
+          </div>
+
+          <!-- BẢNG BÓC TÁCH DÒNG TIỀN (FINANCIAL BREAKDOWN) -->
+          <div class="simulation-table bg-slate-50 rounded-3 p-3 border border-slate-200 mb-3">
+            <!-- 1. Tiền phòng gốc -->
+            <div class="d-flex justify-content-between align-items-center py-1.5 border-bottom border-slate-200">
+              <div>
+                <span class="text-slate-700 small fw-semibold">1. Tiền phòng gốc (Net):</span>
+                <span class="d-block text-muted" style="font-size: 10px;">Doanh thu phòng của Khách sạn</span>
+              </div>
+              <span class="fw-bold text-slate-800 font-monospace small">{{ sampleBookingAmount | number }} đ</span>
+            </div>
+
+            <!-- 2. Thuế GTGT (VAT do Khách sạn thu) -->
+            <div class="d-flex justify-content-between align-items-center py-1.5 border-bottom border-slate-200">
+              <div>
+                <span class="text-indigo-700 small fw-semibold d-flex align-items-center gap-1">
+                  <i class="bi bi-plus-circle-fill fs-7"></i>
+                  2. Thuế GTGT (VAT {{ settings.vat_rate || 0 }}%):
+                </span>
+                <span class="d-block text-indigo-500" style="font-size: 10px;">Khách sạn thu hộ Nhà nước để kê khai nộp thuế</span>
+              </div>
+              <span class="fw-bold text-indigo-600 font-monospace small">+{{ simulatedVatAmount | number }} đ</span>
+            </div>
+
+            <!-- 3. Tổng tiền Khách thanh toán cho Khách sạn -->
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-slate-200 bg-white px-2 rounded-2 my-1 shadow-2xs">
+              <div>
+                <span class="text-slate-900 small fw-bold d-flex align-items-center gap-1">
+                  <i class="bi bi-credit-card-2-front-fill text-primary"></i>
+                  3. Tổng tiền Khách thanh toán:
+                </span>
+                <span class="d-block text-muted" style="font-size: 10px;">Khách trả cho bên Khách sạn (gồm phòng + VAT)</span>
+              </div>
+              <span class="fw-bolder text-primary font-monospace fs-6">{{ simulatedTotalAmount | number }} đ</span>
+            </div>
+
+            <!-- 4. Phí sàn StayHub thu (Khoản thu DUY NHẤT của Sàn) -->
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-slate-200 bg-amber-50 px-2 rounded-2 my-1 border border-amber-200">
+              <div>
+                <span class="text-amber-900 small fw-bold d-flex align-items-center gap-1">
+                  <i class="bi bi-cash-coin text-amber-600"></i>
+                  4. Phí sàn StayHub thu (Hoa hồng {{ settings.default_commission_rate || 0 }}%):
+                </span>
+                <span class="d-block text-amber-700" style="font-size: 10.5px; font-weight: 500;">
+                  ⭐ Khoản thu duy nhất của Admin Sàn StayHub
+                </span>
+              </div>
+              <span class="fw-bolder text-amber-700 font-monospace fs-6">{{ simulatedCommissionFee | number }} đ</span>
+            </div>
+
+            <!-- 5. Thực nhận & Quản lý bên Khách sạn -->
+            <div class="pt-2 px-2 bg-emerald-50 rounded-2 border border-emerald-200 pb-2">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                  <span class="text-emerald-900 small fw-bold d-flex align-items-center gap-1">
+                    <i class="bi bi-check-circle-fill text-emerald-600"></i>
+                    5. Tổng tiền bên Khách sạn giữ lại:
+                  </span>
+                  <span class="d-block text-emerald-700" style="font-size: 10px;">Sau khi đã trừ phí dịch vụ sàn StayHub</span>
+                </div>
+                <span class="fw-bolder text-emerald-700 font-monospace fs-6">{{ simulatedHotelPayout | number }} đ</span>
+              </div>
+
+              <!-- Chi tiết cấu thành tiền của Khách sạn -->
+              <div class="bg-white p-2 rounded border border-emerald-100 mt-1.5" style="font-size: 11px;">
+                <div class="d-flex justify-content-between text-muted py-0.5">
+                  <span>&bull; Doanh thu phòng thuần của Khách sạn:</span>
+                  <span class="fw-semibold text-slate-800 font-monospace">{{ simulatedHotelNetRoom | number }} đ</span>
+                </div>
+                <div class="d-flex justify-content-between text-indigo-700 py-0.5">
+                  <span>&bull; Tiền thuế VAT Khách sạn giữ để nộp Chi cục Thuế:</span>
+                  <span class="fw-semibold font-monospace">+{{ simulatedVatAmount | number }} đ</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- THANH PHÂN BỔ DÒNG TIỀN TRỰC QUAN (PROGRESS RATIO) -->
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 11px;">
+              <span class="text-emerald-700 fw-semibold">
+                <i class="bi bi-square-fill text-emerald-500 me-1" style="font-size: 8px;"></i>
+                Khách sạn giữ (Phòng + Thuế): {{ simulatedHotelPercent }}% ({{ simulatedHotelPayout | number }} đ)
+              </span>
+              <span class="text-amber-800 fw-semibold">
+                Sàn thu phí: {{ simulatedPlatformPercent }}% ({{ simulatedCommissionFee | number }} đ)
+                <i class="bi bi-square-fill text-amber-500 ms-1" style="font-size: 8px;"></i>
+              </span>
+            </div>
+            <div class="progress" style="height: 10px; border-radius: 6px; overflow: hidden; background-color: #e2e8f0;">
+              <div class="progress-bar bg-emerald-500" role="progressbar" [style.width.%]="simulatedHotelPercent"></div>
+              <div class="progress-bar bg-amber-500" role="progressbar" [style.width.%]="simulatedPlatformPercent"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. GUIDELINES & LEGAL NOTES -->
+      <div class="card border-0 shadow-xs rounded-3 bg-white">
+        <div class="card-body p-4">
+          <h6 class="fw-bold text-slate-800 mb-2.5 d-flex align-items-center gap-2">
+            <i class="bi bi-shield-check text-indigo-600 fs-5"></i>
+            Quy Định Vận Hành & Phân Định Dòng Tiền
+          </h6>
+
+          <!-- Mục A: Khách sạn thu tiền & thuế -->
+          <div class="guideline-item mb-2.5 pb-2 border-bottom border-slate-100">
+            <div class="fw-semibold text-slate-800 small mb-0.5">
+              <i class="bi bi-dot text-indigo-600 fs-5 align-middle"></i>
+              Tiền Khách Thanh Toán & Thuế VAT (Thuộc về bên Khách sạn):
+            </div>
+            <p class="text-muted small mb-0 ps-3" style="font-size: 12px; line-height: 1.5;">
+              Khách hàng thanh toán toàn bộ chi phí đặt phòng (bao gồm tiền phòng và thuế VAT) cho bên <strong>Khách sạn</strong>. Khách sạn là pháp nhân chịu trách nhiệm xuất hóa đơn đỏ (VAT) cho khách và <strong>kê khai nộp thuế GTGT cho cơ quan Nhà nước</strong>. Sàn StayHub hoàn toàn không thu và không giữ tiền thuế này.
+            </p>
+          </div>
+
+          <!-- Mục B: Khoản thu của Sàn StayHub -->
+          <div class="guideline-item">
+            <div class="fw-semibold text-slate-800 small mb-0.5">
+              <i class="bi bi-dot text-emerald-600 fs-5 align-middle"></i>
+              Phí Dịch Vụ Sàn (Khoản Thu Duy Nhất Của Admin Sàn StayHub):
+            </div>
+            <p class="text-muted small mb-0 ps-3" style="font-size: 12px; line-height: 1.5;">
+              Admin Sàn StayHub <strong>chỉ thu duy nhất Phí dịch vụ sàn (Platform Fee / Hoa hồng môi giới)</strong> từ Khách sạn trên mỗi đơn thành công. Mức tỷ lệ hoa hồng cấu hình tại đây là mức mặc định khi phê duyệt đối tác mới. Với 26 đối tác khách sạn hiện hữu, hệ thống áp dụng theo hợp đồng riêng (có thể điều chỉnh tại mục <em>Quản lý Đối tác</em>).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
